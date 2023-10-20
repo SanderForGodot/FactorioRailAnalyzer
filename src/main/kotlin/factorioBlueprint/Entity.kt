@@ -12,9 +12,9 @@ data class Entity (
 
 ){
 
-  var leftNextRail: ArrayList<Entity>? =null
+  var leftNextRail: ArrayList<Entity>? =null // also reused for signals to reference a conected rail
   var rightNextRail:ArrayList<Entity>? = null
-  lateinit var railThatBelongsToSignal: Entity
+
 
   override fun equals(other: Any?): Boolean {
     if(other !is Entity)

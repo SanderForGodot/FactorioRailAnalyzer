@@ -73,6 +73,8 @@ fun main(args: Array<String>) {
         }
     }
 
+    var signals : ArrayList<Entity> = arrayListOf();
+
     //endregion
     //region insert entity's into 2D Array for essayer look up in the next step
     resultBP.blueprint.entities.forEach { entity ->
@@ -89,7 +91,13 @@ fun main(args: Array<String>) {
     }
     //endregion
     //region
+    var listOfSignals: ArrayList<Entity> = arrayListOf();
     resultBP.blueprint.entities.forEach { entity ->
+        if(entity.name =="rail-signal"||entity.name =="rail-chain-signal")
+        {
+            listOfSignals.add(entity)
+            return@forEach
+        }
         fact[entity.name]?.get(entity.direction)?.forEach { possibleRail ->
             var possiblePosition = entity.position + possibleRail.position
             val x = floor(possiblePosition.x / 2).toInt()
@@ -98,22 +106,43 @@ fun main(args: Array<String>) {
                 return@forEach
             }
             matrix[x][y]?.forEach { foundRail ->
-                if (foundRail.name == possibleRail.name
+                if (foundRail.name.contains(possibleRail.name)
                     && foundRail.direction == possibleRail.direction) {
-                    if (possibleRail.entityNumber == 1) {//right
-                        if (entity.rightNextRail == null)
-                            entity.rightNextRail = arrayListOf(foundRail)
+                    if (possibleRail.name == "signal")
+                    {
+
+                        if (foundRail.rightNextRail == null)
+                            foundRail.rightNextRail = arrayListOf(entity)
                         else
-                            entity.rightNextRail!!.add(foundRail)
-                    } else {
-                        if (entity.leftNextRail == null)
-                            entity.leftNextRail = arrayListOf(foundRail)
-                        else
-                            entity.leftNextRail!!.add(foundRail)
+                            foundRail.rightNextRail!!.add(entity)
+                    }else {
+                        if (possibleRail.entityNumber == 1) {//right
+                            if (entity.rightNextRail == null)
+                                entity.rightNextRail = arrayListOf(foundRail)
+                            else
+                                entity.rightNextRail!!.add(foundRail)
+                        } else {
+                            if (entity.leftNextRail == null)
+                                entity.leftNextRail = arrayListOf(foundRail)
+                            else
+                                entity.leftNextRail!!.add(foundRail)
+                        }
                     }
                 }
             }
         }
+    }
+
+    listOfSignals.forEach{startPoint->
+        startPoint.rightNextRail?.forEach {
+            var edge: Edge= Edge(startPoint.name)
+                edge.railList.add(it)
+                 if (it.rightNextRail!=null && !it.rightNextRail?.contains(startPoint)!!)
+                 {
+                     // call recusion funcion  
+                 }
+        }
+
     }
 
     println(resultBP.blueprint.entities[0])
