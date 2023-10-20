@@ -1,3 +1,4 @@
+
 class Item(
     var name: String,
     var x: Double,
@@ -7,4 +8,6 @@ class Item(
     var connectedTo: List<Item> = ArrayList()
 
 
+    var signalOntheLeft : List<Item> = ArrayList()
+    var signalOntheRight : List<Item> = ArrayList()
 }
