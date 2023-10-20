@@ -1,16 +1,20 @@
 import java.util.*
 
 class Edge
-    ( var ItemList : ArrayList<Item>)
+    ( )
 {
-    constructor(edge: Edge){
+    constructor(edge: Edge) : this() {
         ItemList = edge.ItemList
         totalLength= edge.totalLength
         ColisionShape = edge.ColisionShape
         belongsToBlock = edge.belongsToBlock
     }
+    constructor(item: Item):this(){
+        ItemList.add(item)
+    }
 
-    var totalLength : Int
-    var ColisionShape : ArrayList<(Int,Int)>
-    var belongsToBlock : Block
+    lateinit var ItemList : ArrayList<Item>
+    var totalLength : Int = 0
+    lateinit var ColisionShape : ArrayList<Pair< Int, Int>>;
+    lateinit var belongsToBlock : Block
 }
