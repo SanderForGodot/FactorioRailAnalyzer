@@ -1,11 +1,16 @@
-import factorioBlueprint.Entity
+import java.util.*
 
 class Edge
-    (
-    var signal: String
-) {
+    ( var ItemList : ArrayList<Item>)
+{
+    constructor(edge: Edge){
+        ItemList = edge.ItemList
+        totalLength= edge.totalLength
+        ColisionShape = edge.ColisionShape
+        belongsToBlock = edge.belongsToBlock
+    }
 
-    var railList: ArrayList<Entity> = arrayListOf()
-
-
+    var totalLength : Int
+    var ColisionShape : ArrayList<(Int,Int)>
+    var belongsToBlock : Block
 }

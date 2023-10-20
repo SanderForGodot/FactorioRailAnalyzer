@@ -17,6 +17,9 @@ fun main(args: Array<String>) {
     var resultBP = gson.fromJson(jsonString, ResultBP::class.java)
     println(resultBP)
 
+    //todo: add signals to rail on l or r side
+    //todo: have railssignals point with l or r to a rail
+    //todo: update fact db for signals depending on l r cases
 
     //region filter relevant items and determinant min and max of BP
     val relevantEntity = arrayOf(
