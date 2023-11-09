@@ -14,7 +14,8 @@ data class Entity (
 
   var leftNextRail: ArrayList<Entity>? =null // also reused for signals to reference a conected rail
   var rightNextRail:ArrayList<Entity>? = null
-
+  var signalOntheLeft : List<Entity>? = null
+  var signalOntheRight : List<Entity>? = null
 
   override fun equals(other: Any?): Boolean {
     if(other !is Entity)

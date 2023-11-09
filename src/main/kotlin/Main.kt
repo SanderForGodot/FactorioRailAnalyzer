@@ -1,5 +1,7 @@
 import com.google.gson.Gson
 import factorioBlueprint.Entity
+
+im port factorioBlueprint.Entity
 import factorioBlueprint.Position
 import factorioBlueprint.ResultBP
 import java.io.File
@@ -12,14 +14,20 @@ fun main(args: Array<String>) {
     println("Program arguments: ${args.joinToString()}")
 
 
+
+    println("test start")
+    var intList: ArrayList<Int>? = null
+    createOrAdd(intList, 1)
+    println(intList)
+    intList = createOrAdd(intList, 2)
+    println(intList)
+
+
     val jsonString: String = File("bp.json").readText(Charsets.UTF_8)
     val gson = Gson()
     var resultBP = gson.fromJson(jsonString, ResultBP::class.java)
     println(resultBP)
 
-    //todo: add signals to rail on l or r side
-    //todo: have railssignals point with l or r to a rail
-    //todo: update fact db for signals depending on l r cases
 
     //region filter relevant items and determinant min and max of BP
     val relevantEntity = arrayOf(
@@ -70,13 +78,13 @@ fun main(args: Array<String>) {
     //  println(resultBP.blueprint.entities)
 
     var matrix: Array<Array<ArrayList<Entity>?>>
-    matrix = Array(ceil(max.x/ 2).toInt()) { row ->
+    matrix = Array(ceil(max.x / 2).toInt()) { row ->
         Array(ceil(max.y / 2).toInt()) { col ->
             null
         }
     }
 
-    var signals : ArrayList<Entity> = arrayListOf();
+    var signals: ArrayList<Entity> = arrayListOf();
 
     //endregion
     //region insert entity's into 2D Array for essayer look up in the next step
@@ -93,11 +101,10 @@ fun main(args: Array<String>) {
 
     }
     //endregion
-    //region
+    //region rail Linker: connected rails point to each other with pointer list does the same with signals
     var listOfSignals: ArrayList<Entity> = arrayListOf();
     resultBP.blueprint.entities.forEach { entity ->
-        if(entity.name =="rail-signal"||entity.name =="rail-chain-signal")
-        {
+        if (entity.name == "rail-signal" || entity.name == "rail-chain-signal") {
             listOfSignals.add(entity)
             return@forEach
         }
@@ -105,30 +112,29 @@ fun main(args: Array<String>) {
             var possiblePosition = entity.position + possibleRail.position
             val x = floor(possiblePosition.x / 2).toInt()
             val y = floor(possiblePosition.y / 2).toInt()
-            if (x < 0 || y < 0) {
+            if (x < 0 || y < 0 || matrix.size <= x || matrix[0].size <= y) {
                 return@forEach
             }
             matrix[x][y]?.forEach { foundRail ->
                 if (foundRail.name.contains(possibleRail.name)
-                    && foundRail.direction == possibleRail.direction) {
-                    if (possibleRail.name == "signal")
-                    {
-
-                        if (foundRail.rightNextRail == null)
-                            foundRail.rightNextRail = arrayListOf(entity)
-                        else
-                            foundRail.rightNextRail!!.add(entity)
-                    }else {
-                        if (possibleRail.entityNumber == 1) {//right
-                            if (entity.rightNextRail == null)
-                                entity.rightNextRail = arrayListOf(foundRail)
-                            else
-                                entity.rightNextRail!!.add(foundRail)
+                    && foundRail.direction == possibleRail.direction
+                ) {
+                    if (possibleRail.name == "signal") {
+                        if (possibleRail.entityNumber == 1) {
+                            foundRail.rightNextRail = createOrAdd(entity.rightNextRail, entity)
+                            entity.signalOntheRight = createOrAdd(entity.rightNextRail, foundRail)
                         } else {
-                            if (entity.leftNextRail == null)
-                                entity.leftNextRail = arrayListOf(foundRail)
-                            else
-                                entity.leftNextRail!!.add(foundRail)
+                            foundRail.leftNextRail = createOrAdd(entity.rightNextRail, entity)
+                            entity.signalOntheLeft = createOrAdd(entity.rightNextRail, foundRail)
+                        }
+                    } else {
+                        if (possibleRail.entityNumber == 1) {//right
+
+                            entity.rightNextRail = createOrAdd(entity.rightNextRail, foundRail)
+
+                        } else {
+
+                            entity.leftNextRail = createOrAdd(entity.leftNextRail, foundRail)
                         }
                     }
                 }
@@ -136,23 +142,17 @@ fun main(args: Array<String>) {
         }
     }
 
-    listOfSignals.forEach{startPoint->
-        startPoint.rightNextRail?.forEach {
-            var edge: Edge= Edge(startPoint.name)
-                edge.railList.add(it)
-                 if (it.rightNextRail!=null && !it.rightNextRail?.contains(startPoint)!!)
-                 {
-                     // call recusion funcion  
-                 }
-        }
 
+    //endregion
+
+    listOfSignals.forEach { startPoint ->
+        startPoint.rightNextRail?.forEach {
+            if (it.rightNextRail != null && !it.rightNextRail?.contains(startPoint)!!) {
+                recusion(Edge(startPoint))
+            }
+        }
     }
 
-    println(resultBP.blueprint.entities[0])
-    println(resultBP.blueprint.entities[0].leftNextRail?.first())
-    println(resultBP.blueprint.entities[0].leftNextRail?.first()?.leftNextRail?.first())
-    println(resultBP.blueprint.entities[0].leftNextRail?.first()?.leftNextRail?.first()?.leftNextRail?.first())
-    println(resultBP.blueprint.entities[0].leftNextRail?.first()?.leftNextRail?.first()?.leftNextRail?.first()?.leftNextRail?.first())
 
     /*
     "straight-rail",
@@ -281,11 +281,68 @@ fun main(args: Array<String>) {
 
     * */
 
-    //endregion
+
+}
+
+fun recusion(edge: Edge) {
+    var item = edge.EntityList.last()
+
+    //  var corectdirection =
+
+    leftBranch(item,edge)
+    item.rightNextRail?.forEach { rightNext ->
+        if (rightNext.leftNextRail!!.contains(item)) {
+            //wrong way go oposite
+        }
+    }
+
+
+}
+fun leftBranch(item:Entity, edge: Edge){
+    if(item.signalOntheRight != null)
+    {
+        //if rail on oposide left
+            //end edge sucsesfuly
+        //else
+            //invalid edge
+    }
+    if(item.signalOntheLeft != null) {
+    if (item.signalOntheLeft!!.size ==1)
+    {
+        // end edge sucsesfuly
+    }else{
+        // get closes 
+    }
+
+    }
+
+
+    item.leftNextRail?.forEach { leftNext ->
+        if (leftNext.rightNextRail!!.contains(item)) {
+            var newEdge = Edge(edge)
+            newEdge.EntityList.add(leftNext)
+            recusion(newEdge)
+        } else {
+
+            //wenn das if einmal scheitert kann die ganze liste gespipt werden
+            return;
+        }
+    }
+}
+fun rightBranch(){
 
 }
 
 
+fun <E> createOrAdd(_list: ArrayList<E>?, item: E): ArrayList<E> {
+    var list = _list
+    if (list == null)
+        list = arrayListOf(item)
+    else
+        list.add(item)
+    list.add(item)
+    return list;
+}
 
 
 

@@ -2,5 +2,5 @@ import java.util.*
 
 class Block {
 
-    var edgeList : ArrayList<Edge>
+    lateinit var edgeList : ArrayList<Edge>
 }
