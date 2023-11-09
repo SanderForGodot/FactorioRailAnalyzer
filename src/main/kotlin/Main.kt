@@ -1,13 +1,47 @@
 import com.google.gson.Gson
 import factorioBlueprint.Entity
+import java.util.*
+import kotlin.collections.ArrayList
 
-im port factorioBlueprint.Entity
-import factorioBlueprint.Position
-import factorioBlueprint.ResultBP
+import factorioBlueprint.*
+import java.io.ByteArrayOutputStream
+
 import java.io.File
-import kotlin.contracts.contract
+
+import java.util.zip.Inflater
 import kotlin.math.ceil
 import kotlin.math.floor
+
+
+// no idea how this code works
+//Made by @marcouberti on github
+//Source: https://gist.github.com/marcouberti/40dbbd836562b35ace7fb2c627b0f34f
+fun ByteArray.zlibDecompress(): String {
+    val inflater = Inflater()
+    val outputStream = ByteArrayOutputStream()
+
+    return outputStream.use {
+        val buffer = ByteArray(1024)
+
+        inflater.setInput(this)
+
+        var count = -1
+        while (count != 0) {
+            count = inflater.inflate(buffer)
+            outputStream.write(buffer, 0, count)
+        }
+
+        inflater.end()
+        outputStream.toString("UTF-8")
+    }
+}
+fun decodeBpSting(filename:String):String{
+    val base64String: String = File(filename).readText(Charsets.UTF_8)
+    val decoded = Base64.getDecoder().decode(base64String.substring(1))
+    val str : String = decoded.zlibDecompress()
+    println(str)
+    return str
+}
 
 fun main(args: Array<String>) {
 
@@ -15,15 +49,8 @@ fun main(args: Array<String>) {
 
 
 
-    println("test start")
-    var intList: ArrayList<Int>? = null
-    createOrAdd(intList, 1)
-    println(intList)
-    intList = createOrAdd(intList, 2)
-    println(intList)
 
-
-    val jsonString: String = File("bp.json").readText(Charsets.UTF_8)
+    val jsonString: String =  decodeBpSting("decodeTest.txt")
     val gson = Gson()
     var resultBP = gson.fromJson(jsonString, ResultBP::class.java)
     println(resultBP)
