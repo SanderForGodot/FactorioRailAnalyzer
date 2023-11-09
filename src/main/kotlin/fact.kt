@@ -74,13 +74,21 @@ val fact: Map<String, Map<Int, List<Entity>>> = mapOf(
             Entity(-1, "straight-rail", Position(-3.0, -3.0), 1),
             Entity(-1, "curved-rail", Position(-4.0, -6.0), 4),
 
-
+            Entity(0, "signal", Position(-0.5, -3.5), 3),
+            Entity(0, "signal", Position(-2.5, -1.5), 7),
+            Entity(0, "signal", Position(2.5, 3.5), 4),
+            Entity(0, "signal", Position(-0.5, 3.5), 0),
         ), 1 to listOf(
             Entity(1, "straight-rail", Position(3.0, -3.0), 7),
             Entity(1, "curved-rail", Position(4.0, -6.0), 5),
             Entity(-1, "straight-rail", Position(1.0, 5.0), 0),
             Entity(-1, "curved-rail", Position(2.0, 8.0), 4),
             Entity(-1, "curved-rail", Position(0.0, 8.0), 5),
+
+            Entity(0, "signal", Position(0.5, -3.5), 1),
+            Entity(0, "signal", Position(2.5, -2.5), 5),
+            Entity(0, "signal", Position(-3.5, 3.5), 0),
+            Entity(0, "signal", Position(0.5, 3.5), 4),
         ), 2 to listOf(
             Entity(1, "straight-rail", Position(3.0, -3.0), 3),
             Entity(1, "curved-rail", Position(6.0, -4.0), 6),
@@ -88,24 +96,44 @@ val fact: Map<String, Map<Int, List<Entity>>> = mapOf(
             Entity(-1, "straight-rail", Position(-5.0, 1.0), 2),
             Entity(-1, "curved-rail", Position(-8.0, 2.0), 6),
             Entity(-1, "curved-rail", Position(-8.0, 0.0), 7),
+
+            Entity(0, "signal", Position(-3.5, -0.5), 2),
+            Entity(0, "signal", Position(-3.5, 2.5), 6),
+            Entity(0, "signal", Position(1.5, -2.5), 1),
+            Entity(0, "signal", Position(3.5, -0.5), 5),
         ), 3 to listOf(
             Entity(1, "straight-rail", Position(3.0, 1.0), 1),
             Entity(1, "curved-rail", Position(6.0, 1.0), 7),
             Entity(-1, "straight-rail", Position(-5.0, -1.0), 2),
             Entity(-1, "curved-rail", Position(-8.0, 0.0), 6),
             Entity(-1, "curved-rail", Position(-8.0, -2.0), 7),
+
+            Entity(0, "signal", Position(-3.5, -2.5), 2),
+            Entity(0, "signal", Position(-3.5, 0.5), 6),
+            Entity(0, "signal", Position(1.5, 0.5), 7),
+            Entity(0, "signal", Position(3.5, 2.5), 3),
         ), 4 to listOf(
             Entity(1, "straight-rail", Position(3.0, 3.0), 5),
             Entity(1, "curved-rail", Position(4.0, 6.0), 0),
             Entity(1, "straight-rail", Position(-1.0, -5.0), 0),
             Entity(1, "curved-rail", Position(-2.0, -8.0), 0),
             Entity(1, "curved-rail", Position(0.0, -8.0), 1),
+
+            Entity(0, "signal", Position(-2.5, -3.5), 0),
+            Entity(0, "signal", Position(0.5, -3.5), 7),
+            Entity(0, "signal", Position(0.5, 3.5), 4),
+            Entity(0, "signal", Position(2.5, 1.5), 3),
         ), 5 to listOf(
             Entity(1, "straight-rail", Position(1.0, -5.0), 0),
             Entity(1, "curved-rail", Position(0.0, -8.0), 0),
             Entity(1, "curved-rail", Position(2.0, -8.0), 1),
             Entity(-1, "straight-rail", Position(-3.0, 3.0), 3),
             Entity(-1, "curved-rail", Position(-4.0, 6.0), 1),
+
+            Entity(0, "signal", Position(-0.5, -3.5), 0),
+            Entity(0, "signal", Position(2.5, -3.5), 7),
+            Entity(0, "signal", Position(-2.5, 1.5), 1),
+            Entity(0, "signal", Position(-0.5, 3.5), 5),
         ), 6 to listOf(
             Entity(1, "straight-rail", Position(5.0, -1.0), 2),
             Entity(1, "curved-rail", Position(8.0, -2.0), 2),
@@ -113,12 +141,22 @@ val fact: Map<String, Map<Int, List<Entity>>> = mapOf(
 
             Entity(-1, "straight-rail", Position(3.0, 3.0), 7),
             Entity(-1, "curved-rail", Position(-6.0, 4.0), 2),
+
+            Entity(0, "signal", Position(3.5, -2.5), 6),
+            Entity(0, "signal", Position(3.5, 0.5), 2),
+            Entity(0, "signal", Position(-3.5, 0.5), 1),
+            Entity(0, "signal", Position(-3.5, 2.5), 5),
         ), 7 to listOf(
             Entity(1, "straight-rail", Position(5.0, 1.0), 2),
             Entity(1, "curved-rail", Position(8.0, 0.0), 2),
             Entity(1, "curved-rail", Position(8.0, 2.0), 3),
             Entity(-1, "straight-rail", Position(-3.0, -3.0), 5),
             Entity(-1, "curved-rail", Position(-6.0, -4.0), 3),
+
+            Entity(0, "signal", Position(-1.5, -2.5), 3),
+            Entity(0, "signal", Position(-3.5, -0.5), 7),
+            Entity(0, "signal", Position(3.5, -0.5), 2),
+            Entity(0, "signal", Position(3.5, 2.5), 6),
         )
     )
 )
