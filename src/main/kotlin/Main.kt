@@ -13,7 +13,7 @@ import kotlin.math.ceil
 import kotlin.math.floor
 
 
-// no idea how this code works
+//some idea what this code does, but we didn't write it
 //Made by @marcouberti on github
 //Source: https://gist.github.com/marcouberti/40dbbd836562b35ace7fb2c627b0f34f
 fun ByteArray.zlibDecompress(): String {
