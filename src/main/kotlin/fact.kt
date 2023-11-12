@@ -1,6 +1,7 @@
 import factorioBlueprint.Entity
 import factorioBlueprint.Position
 
+//The Number in entityNumber represents into which List the Rail or Signal should be added. -1 stands for left and 1 stands for right. Meaning a
 val fact: Map<String, Map<Int, List<Entity>>> = mapOf(
     "straight-rail" to mapOf(
         0 to listOf(
@@ -108,7 +109,7 @@ val fact: Map<String, Map<Int, List<Entity>>> = mapOf(
             Entity(-1, "curved-rail", Position(-8.0, 0.0), 6),
             Entity(-1, "curved-rail", Position(-8.0, -2.0), 7),
 
-            Entity(-1, "signal", Position(-3.5, -2.5), 2),
+            Entity(-1, "signal", Position(-1.5, -2.5), 2),
             Entity(1, "signal", Position(-3.5, 0.5), 6),
             Entity(1, "signal", Position(1.5, 0.5), 7),
             Entity(-1, "signal", Position(3.5, 2.5), 3),
@@ -145,7 +146,7 @@ val fact: Map<String, Map<Int, List<Entity>>> = mapOf(
             Entity(1, "signal", Position(3.5, -2.5), 6),
             Entity(-1, "signal", Position(3.5, 0.5), 2),
             Entity(-1, "signal", Position(-3.5, 0.5), 1),
-            Entity(1, "signal", Position(-3.5, 2.5), 5),
+            Entity(1, "signal", Position(-1.5, 2.5), 5),
         ), 7 to listOf(
             Entity(1, "straight-rail", Position(5.0, 1.0), 2),
             Entity(1, "curved-rail", Position(8.0, 0.0), 2),
