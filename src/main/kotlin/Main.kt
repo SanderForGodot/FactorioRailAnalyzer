@@ -35,10 +35,11 @@ fun ByteArray.zlibDecompress(): String {
         outputStream.toString("UTF-8")
     }
 }
-fun decodeBpSting(filename:String):String{
+
+fun decodeBpSting(filename: String): String {
     val base64String: String = File(filename).readText(Charsets.UTF_8)
     val decoded = Base64.getDecoder().decode(base64String.substring(1))
-    val str : String = decoded.zlibDecompress()
+    val str: String = decoded.zlibDecompress()
     println(str)
     return str
 }
@@ -48,9 +49,7 @@ fun main(args: Array<String>) {
     println("Program arguments: ${args.joinToString()}")
 
 
-
-
-    val jsonString: String =  decodeBpSting("decodeTest.txt")
+    val jsonString: String = decodeBpSting("decodeTest.txt")
     val gson = Gson()
     var resultBP = gson.fromJson(jsonString, ResultBP::class.java)
     println(resultBP)
@@ -148,20 +147,21 @@ fun main(args: Array<String>) {
                 ) {
                     if (possibleRail.name == "signal") {
                         if (possibleRail.entityNumber == 1) {
-                            foundRail.rightNextRail = createOrAdd(entity.rightNextRail, entity)
-                            entity.signalOntheRight = createOrAdd(entity.rightNextRail, foundRail)
+                            foundRail.rightNextRail.createOrAdd(entity)
+                            entity.signalOntheRight.createOrAdd(foundRail)
                         } else {
-                            foundRail.leftNextRail = createOrAdd(entity.rightNextRail, entity)
-                            entity.signalOntheLeft = createOrAdd(entity.rightNextRail, foundRail)
+                            foundRail.leftNextRail.createOrAdd(entity)
+                            entity.signalOntheLeft.createOrAdd(foundRail)
                         }
                     } else {
                         if (possibleRail.entityNumber == 1) {//right
 
-                            entity.rightNextRail = createOrAdd(entity.rightNextRail, foundRail)
+                            entity.rightNextRail.createOrAdd(foundRail)
 
                         } else {
 
-                            entity.leftNextRail = createOrAdd(entity.leftNextRail, foundRail)
+                            entity.leftNextRail.createOrAdd(foundRail)
+
                         }
                     }
                 }
@@ -173,150 +173,112 @@ fun main(args: Array<String>) {
     //endregion
 
     listOfSignals.forEach { startPoint ->
-        startPoint.rightNextRail?.forEach {
-            if (it.rightNextRail != null && !it.rightNextRail?.contains(startPoint)!!) {
-                recusion(Edge(startPoint))
-            }
+        startPoint.rightNextRail?.forEach { signal: Entity ->
+
+            buildEdge(Edge(signal), if (signal.direction < 4) -1 else 1)
         }
     }
+}
 
 
-    /*
-    "straight-rail",
-        Direction
-            0
-              Top (Right)
-                Entity(1,"straight-rail",Position(0.0,-2.0),0)
-                Entity(1,"curved-rail", Position(-1.0,-5.0),0)
-                Entity(1,"curved-rail", Position(1.0,-5.0),1)
-              Bottum (left)
-                Entity(-1,"straight-rail",Position(0.0, 2.0),0)
-                Entity(-1,"curved-rail", Position(1.0,5.0),4)
-                Entity(-1,"curved-rail", Position(-1.0,5.0),5)
-            2
-              Right
-                Entity(1,"straight-rail",Position(2.0,0.0),2)
-                Entity(1,"curved-rail", Position(5.0,-1.0),2)
-                Entity(1,"curved-rail", Position(5.0,1.0),3)
-              Left
-                Entity(-1,"straight-rail",Position(-2.0,0.0),2)
-                Entity(-1,"curved-rail", Position(-5.0,1.0),6)
-                Entity(-1,"curved-rail", Position(-5.0,-1.0),7)
-            1
-              Right
-                Entity(1,"straight-rail", Position(2.0,0.0),5)
-                Entity(1,"curved-rail", Position(3.0,3.0),0)
-              Left
-                Entity(-1,"straight-rail", Position(0.0,-2.0),5)
-                Entity(-1,"curved-rail", Position(-3.0,-3.0),3)
+/*
+entity  = the curent entity we are in to build an edge
+direction  =  -1 curently moving levt
+               +1 curently moving right
+               filps at strait up rails
+ */
+fun buildEdge(edge: Edge, direction: Int): Edge? {
 
-            5
-              Right
-                Entity(1,"straight-rail", Position(0.0, 2.0),1)
-                Entity(1,"curved-rail", Position(3.0,3.0),7)
-              Left
-                Entity(-1,"straight-rail", Position(-2.0,0.0),1)
-                Entity(-1,"curved-rail", Position(-3.0,-3.0),4)
+    if (edge.last().hasSignal()) {
+        val goodSide = edge.last().getDirectionalSignalList(direction)
+        val wrongSide = edge.last().getDirectionalSignalList(-direction)
 
-            3
-              Right
-                Entity(1,"straight-rail", Position(2.0,0.0),7)
-                Entity(1,"curved-rail", Position(3.0,-3.0),5)
-              Left
-                Entity(-1,"straight-rail", Position(0.0,2.0),7)
-                Entity(-1,"curved-rail", Position(-3.0,3.0),2)
-
-            7
-              Right
-                Entity(1,"straight-rail", Position(0.0,-2.0),3)
-                Entity(1,"curved-rail", Position(3.0,-3.0),6)
-              Left
-                Entity(-1,"straight-rail", Position(-2.0,0.0),3)
-                Entity(-1,"curved-rail", Position(-3.0,3.0),1)
-
-    "rail-chain-signal",
-    "rail-signal",
-    "curved-rail"
-        Direction
-            0
-              Right
-                Entity(1,"straight-rail",Position(0.0, 2.0),0)
-                Entity(1,"curved-rail", Position(1.0,5.0),4)
-                Entity(1,"curved-rail", Position(-1.0,5.0),5)
-              Left
-                Entity(-1,"straight-rail", Position(-3.0,-3.0),1)
-                Entity(-1,"curved-rail", Position(-4.0,-6.0),4)
-            1
-              Right
-                Entity(1,"straight-rail", Position(3.0,-3.0),7)
-                Entity(1,"curved-rail", Position(4.0,-6.0),5)
-              Left
-                Entity(-1,"straight-rail",Position(1.0, 5.0),0)
-                Entity(-1,"curved-rail", Position(2.0,8.0),4)
-                Entity(-1,"curved-rail", Position(0.0,8.0),5)
-            2
-              Right
-                Entity(1,"straight-rail", Position(3.0,-3.0),3)
-                Entity(1,"curved-rail", Position(6.0,-4.0),6)
-              Left
-                Entity(-1,"straight-rail",Position(-5.0,1.0),2)
-                Entity(-1,"curved-rail", Position(-8.0,2.0),6)
-                Entity(-1,"curved-rail", Position(-8.0,0.0),7)
-            3
-              Right
-                Entity(1,"straight-rail", Position(3.0, 1.0),1)
-                Entity(1,"curved-rail", Position(6.0,1.0),7)
-              Left
-                Entity(-1,"straight-rail",Position(-5.0,-1.0),2)
-                Entity(-1,"curved-rail", Position(-8.0,0.0),6)
-                Entity(-1,"curved-rail", Position(-8.0,-2.0),7)
-            4
-              Right
-                Entity(1,"straight-rail", Position(3.0,3.0),5)
-                Entity(1,"curved-rail", Position(4.0,6.0),0)
-              Left
-                Entity(1,"straight-rail",Position(-1.0,-5.0),0)
-                Entity(1,"curved-rail", Position(-2.0,-8.0),0)
-                Entity(1,"curved-rail", Position(0.0,-8.0),1)
-            5
-              Right
-                Entity(1,"straight-rail",Position(1.0,-5.0),0)
-                Entity(1,"curved-rail", Position(0.0,-8.0),0)
-                Entity(1,"curved-rail", Position(2.0,-8.0),1)
-              Left
-                Entity(-1,"straight-rail", Position(-3.0,3.0),3)
-                Entity(-1,"curved-rail", Position(-4.0,6.0),1)
-            6
-              Right
-                Entity(1,"straight-rail",Position(5.0,-1.0),2)
-                Entity(1,"curved-rail", Position(8.0,-2.0),2)
-                Entity(1,"curved-rail", Position(8.0,0.0),3)
-              Left
-                Entity(-1,"straight-rail", Position(3.0,3.0),7)
-                Entity(-1,"curved-rail", Position(-6.0,4.0),2)
-            7
-              Right
-                Entity(1,"straight-rail",Position(5.0,1.0),2)
-                Entity(1,"curved-rail", Position(8.0,0.0),2)
-                Entity(1,"curved-rail", Position(8.0,2.0),3)
-              Left
-                Entity(-1,"straight-rail", Position(-3.0,-3.0),5)
-                Entity(-1,"curved-rail", Position(-6.0,-4.0),3)
+        if (wrongSide != null) {
+            if (goodSide != null) {
+                if (gehörenDieSignaleZusammen()) {
+                    //found edge successfully
+                    return Edge(edge, goodSide[0])
+                } else {
+                    //illegal rail discard
+                    return null;
+                }
+            } else {
+                //illegal rail discard
+                return null;
+            }
+        } else if (goodSide!!.size > 1) {
+            // figue out welches signal das erste signal iost und das beendet da nm unsere edge
+        } else {
+            //found edge successfully
+            return Edge(edge, goodSide[0])
+        }
 
 
+    }
 
+    edge.last().getDirectionalRailList(direction)?.forEach { entity ->
+        val modifier = isSpecialCase(edge.last(), entity)
+        return buildEdge(Edge(edge, entity), direction * modifier)
+    }
 
-    * */
+return null;
+}
 
+fun isSpecialCase(current: Entity, next: Entity): Int {
+    val candidates = intArrayOf(0, 1, 4, 5)
+    // sorts outs most cases to improve efficiency
+    if (!candidates.contains(current.direction)|| ! candidates.contains(next.direction))
+        return 1;
+
+    if (current.name =="curved-rail"&& current.direction ==0)
+        if(next.name=="straight-rail" && next.direction ==0||
+            next.name =="curved-rail"&& next.direction ==5 )
+            return -1;
+    if (current.name=="straight-rail" && current.direction ==0)
+        if(next.name =="curved-rail"&& next.direction ==0)
+            return -1;
+    if (current.name =="curved-rail"&& current.direction ==5)
+        if(next.name =="curved-rail"&& next.direction ==0)
+            return -1;
+
+    if (current.name =="curved-rail"&& current.direction ==4)
+        if(next.name=="straight-rail" && next.direction ==0||
+            next.name =="curved-rail"&& next.direction ==1 )
+            return -1;
+    if (current.name=="straight-rail" && current.direction ==0)
+        if(next.name =="curved-rail"&& next.direction ==4)
+            return -1;
+    if (current.name =="curved-rail"&& current.direction ==1)
+        if(next.name =="curved-rail"&& next.direction ==4)
+            return -1;
+
+    return 1;
 
 }
 
-fun recusion(edge: Edge) {
+fun gehörenDieSignaleZusammen(): Boolean {
+    //jesusfuckedo
+
+    return true;
+
+}
+
+
+/*
+
+        if (it.rightNextRail != null && !it.rightNextRail?.contains(startPoint)!!) {
+                recusion(Edge(startPoint))
+            }
+
+* */
+/*
+
+fun recusion_alt(edge: Edge) {
     var item = edge.EntityList.last()
 
     //  var corectdirection =
 
-    leftBranch(item,edge)
+    leftBranch(item, edge)
     item.rightNextRail?.forEach { rightNext ->
         if (rightNext.leftNextRail!!.contains(item)) {
             //wrong way go oposite
@@ -325,21 +287,20 @@ fun recusion(edge: Edge) {
 
 
 }
-fun leftBranch(item:Entity, edge: Edge){
-    if(item.signalOntheRight != null)
-    {
+
+fun leftBranch(item: Entity, edge: Edge) {
+    if (item.signalOntheRight != null) {
         //if rail on oposide left
-            //end edge sucsesfuly
+        //end edge sucsesfuly
         //else
-            //invalid edge
+        //invalid edge
     }
-    if(item.signalOntheLeft != null) {
-    if (item.signalOntheLeft!!.size ==1)
-    {
-        // end edge sucsesfuly
-    }else{
-        // get closes 
-    }
+    if (item.signalOntheLeft != null) {
+        if (item.signalOntheLeft!!.size == 1) {
+            // end edge sucsesfuly
+        } else {
+            // get closes
+        }
 
     }
 
@@ -348,7 +309,7 @@ fun leftBranch(item:Entity, edge: Edge){
         if (leftNext.rightNextRail!!.contains(item)) {
             var newEdge = Edge(edge)
             newEdge.EntityList.add(leftNext)
-            recusion(newEdge)
+            recusion_alt(newEdge)
         } else {
 
             //wenn das if einmal scheitert kann die ganze liste gespipt werden
@@ -356,13 +317,14 @@ fun leftBranch(item:Entity, edge: Edge){
         }
     }
 }
-fun rightBranch(){
+
+fun rightBranch() {
 
 }
+*/
 
-
-fun <E> createOrAdd(_list: ArrayList<E>?, item: E): ArrayList<E> {
-    var list = _list
+fun <E> ArrayList<E>?.createOrAdd(item: E): ArrayList<E> {
+    var list = this
     if (list == null)
         list = arrayListOf(item)
     else
