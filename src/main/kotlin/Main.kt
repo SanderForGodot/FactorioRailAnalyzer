@@ -131,17 +131,17 @@ fun main(args: Array<String>) {
     //endregion
     //region rail Linker: connected rails point to each other with pointer list does the same with signals
     var listOfSignals: ArrayList<Entity> = arrayListOf();
-    resultBP.blueprint.entities.forEach { entity ->
+    resultBP.blueprint.entities.forEach outer@{ entity ->
         if (entity.name == "rail-signal" || entity.name == "rail-chain-signal") {
             listOfSignals.add(entity)
-            return@forEach
+            return@outer
         }
-        fact[entity.name]?.get(entity.direction)?.forEach { possibleRail ->
+        fact[entity.name]?.get(entity.direction)?.forEach inner@{ possibleRail ->
             var possiblePosition = entity.position + possibleRail.position
             val x = floor(possiblePosition.x / 2).toInt()
             val y = floor(possiblePosition.y / 2).toInt()
             if (x < 0 || y < 0 || matrix.size <= x || matrix[0].size <= y) {
-                return@forEach
+                return@inner
             }
             matrix[x][y]?.forEach { foundRail ->
                 if (foundRail.name.contains(possibleRail.name)
@@ -189,7 +189,7 @@ direction  =  -1 curently moving levt
                +1 curently moving right
                filps at strait up rails
  */
-fun buildEdge(edge: Edge, direction: Int): Edge? {
+fun buildEdge(edge: Edge, direction: Int): ArrayList<Edge>? {
 
     if (edge.last().hasSignal()) {
         val goodSide = edge.last().getDirectionalSignalList(direction)
@@ -204,7 +204,7 @@ fun buildEdge(edge: Edge, direction: Int): Edge? {
                     2 -> {
                         if (isSignalOpposite(goodSide[0], wrongSide[0])) {
                             //found edge successfully
-                            return Edge(edge, goodSide[0])
+                            return arrayListOf(Edge(edge, goodSide[0]))
                         } else {
                             //illegal rail discard
                             return null;
@@ -213,13 +213,13 @@ fun buildEdge(edge: Edge, direction: Int): Edge? {
 
                     3 -> {
                         if (goodSide.size == 2) {//found edge successfully
-                            return Edge(edge, signal_is_closer(edge.last(), goodSide[0], goodSide[1]))
+                            return arrayListOf(Edge(edge, signal_is_closer(edge.last(), goodSide[0], goodSide[1])))
                         } else {
                             //illegal rail discard
                             return null;
                         }
                     }
-                    4->return Edge(edge, signal_is_closer(edge.last(), goodSide[0], goodSide[1]))      // TODO: Check if this works, or if you need the rail BEFORE edge.last()
+                    4->return arrayListOf( Edge(edge, signal_is_closer(edge.last(), goodSide[0], goodSide[1]))  )    // TODO: Check if this works, or if you need the rail BEFORE edge.last()
                 }
 
             } else {
@@ -229,21 +229,22 @@ fun buildEdge(edge: Edge, direction: Int): Edge? {
         } else if (goodSide!!.size > 1) {
             // There are two signals on the rail, we need to find the first signal and close the edge on that signal
             // TODO: Check if this works, or if you need the rail BEFORE edge.last()
-            return Edge(edge, signal_is_closer(edge.last(), goodSide[0], goodSide[1]))
+            return arrayListOf( Edge(edge, signal_is_closer(edge.last(), goodSide[0], goodSide[1])))
         } else {
             //found edge successfully
-            return Edge(edge, goodSide[0])
+            return arrayListOf(Edge(edge, goodSide[0]))
         }
 
 
     }
-
+    val arr: ArrayList<Edge> = arrayListOf<Edge>()
     edge.last().getDirectionalRailList(direction)?.forEach { entity ->
         val modifier = isSpecialCase(edge.last(), entity)
-        return buildEdge(Edge(edge, entity), direction * modifier)
+        buildEdge(Edge(edge, entity), direction * modifier)?.let { arr.addAll(it) }
     }
 
-    return null;
+    //TODO: add thing for rails ending without signal
+    return arr;
 }
 
 fun isSpecialCase(current: Entity, next: Entity): Int {
