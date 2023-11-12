@@ -11,6 +11,8 @@ import java.io.File
 import java.util.zip.Inflater
 import kotlin.math.ceil
 import kotlin.math.floor
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 
 //some idea what this code does, but we didn't write it
@@ -192,22 +194,42 @@ fun buildEdge(edge: Edge, direction: Int): Edge? {
     if (edge.last().hasSignal()) {
         val goodSide = edge.last().getDirectionalSignalList(direction)
         val wrongSide = edge.last().getDirectionalSignalList(-direction)
-
+        if (goodSide?.contains(edge.EntityList.first()) == true){
+            goodSide.remove(edge.EntityList.first())
+        }
         if (wrongSide != null) {
             if (goodSide != null) {
-                if (gehörenDieSignaleZusammen()) {
-                    //found edge successfully
-                    return Edge(edge, goodSide[0])
-                } else {
-                    //illegal rail discard
-                    return null;
+                val signalCount = goodSide.size + wrongSide.size
+                when (signalCount) {//1 impossible since there is one signal in each list good and wrong side
+                    2 -> {
+                        if (isSignalOpposite(goodSide[0], wrongSide[0])) {
+                            //found edge successfully
+                            return Edge(edge, goodSide[0])
+                        } else {
+                            //illegal rail discard
+                            return null;
+                        }
+                    }
+
+                    3 -> {
+                        if (goodSide.size == 2) {//found edge successfully
+                            return Edge(edge, signal_is_closer(edge.last(), goodSide[0], goodSide[1]))
+                        } else {
+                            //illegal rail discard
+                            return null;
+                        }
+                    }
+                    4->return Edge(edge, signal_is_closer(edge.last(), goodSide[0], goodSide[1]))      // TODO: Check if this works, or if you need the rail BEFORE edge.last()
                 }
+
             } else {
                 //illegal rail discard
                 return null;
             }
         } else if (goodSide!!.size > 1) {
-            // figue out welches signal das erste signal iost und das beendet da nm unsere edge
+            // There are two signals on the rail, we need to find the first signal and close the edge on that signal
+            // TODO: Check if this works, or if you need the rail BEFORE edge.last()
+            return Edge(edge, signal_is_closer(edge.last(), goodSide[0], goodSide[1]))
         } else {
             //found edge successfully
             return Edge(edge, goodSide[0])
@@ -221,47 +243,43 @@ fun buildEdge(edge: Edge, direction: Int): Edge? {
         return buildEdge(Edge(edge, entity), direction * modifier)
     }
 
-return null;
+    return null;
 }
 
 fun isSpecialCase(current: Entity, next: Entity): Int {
     val candidates = intArrayOf(0, 1, 4, 5)
     // sorts outs most cases to improve efficiency
-    if (!candidates.contains(current.direction)|| ! candidates.contains(next.direction))
+    if (!candidates.contains(current.direction) || !candidates.contains(next.direction))
         return 1;
 
-    if (current.name =="curved-rail"&& current.direction ==0)
-        if(next.name=="straight-rail" && next.direction ==0||
-            next.name =="curved-rail"&& next.direction ==5 )
+    if (current.name == "curved-rail" && current.direction == 0)
+        if (next.name == "straight-rail" && next.direction == 0 ||
+            next.name == "curved-rail" && next.direction == 5
+        )
             return -1;
-    if (current.name=="straight-rail" && current.direction ==0)
-        if(next.name =="curved-rail"&& next.direction ==0)
+    if (current.name == "straight-rail" && current.direction == 0)
+        if (next.name == "curved-rail" && next.direction == 0)
             return -1;
-    if (current.name =="curved-rail"&& current.direction ==5)
-        if(next.name =="curved-rail"&& next.direction ==0)
+    if (current.name == "curved-rail" && current.direction == 5)
+        if (next.name == "curved-rail" && next.direction == 0)
             return -1;
 
-    if (current.name =="curved-rail"&& current.direction ==4)
-        if(next.name=="straight-rail" && next.direction ==0||
-            next.name =="curved-rail"&& next.direction ==1 )
+    if (current.name == "curved-rail" && current.direction == 4)
+        if (next.name == "straight-rail" && next.direction == 0 ||
+            next.name == "curved-rail" && next.direction == 1
+        )
             return -1;
-    if (current.name=="straight-rail" && current.direction ==0)
-        if(next.name =="curved-rail"&& next.direction ==4)
+    if (current.name == "straight-rail" && current.direction == 0)
+        if (next.name == "curved-rail" && next.direction == 4)
             return -1;
-    if (current.name =="curved-rail"&& current.direction ==1)
-        if(next.name =="curved-rail"&& next.direction ==4)
+    if (current.name == "curved-rail" && current.direction == 1)
+        if (next.name == "curved-rail" && next.direction == 4)
             return -1;
 
     return 1;
 
 }
 
-fun gehörenDieSignaleZusammen(): Boolean {
-    //jesusfuckedo
-
-    return true;
-
-}
 
 
 /*
@@ -333,7 +351,22 @@ fun <E> ArrayList<E>?.createOrAdd(item: E): ArrayList<E> {
     return list;
 }
 
+fun isSignalOpposite(signal1: Entity, signal2: Entity): Boolean {
+    val distanceSignal = distanceOfEntitys(signal1, signal2)
+    return (distanceSignal <= 3) //TODO: Check the minimum distance so that the signal is opposite, maybe different distances for straight and curved
+}
 
+fun signal_is_closer(rail: Entity, signal1: Entity, signal2: Entity): Entity {
+    val distanceSignal1 = distanceOfEntitys(rail, signal1)
+    val distanceSignal2 = distanceOfEntitys(rail, signal2)
+    return if (distanceSignal1 < distanceSignal2) signal1 else signal2;
+}
+
+fun distanceOfEntitys(entity1: Entity, entity2: Entity): Double {
+    val yDifference = (entity1.position.y - entity2.position.y).pow(2)
+    val xDifference = (entity1.position.x - entity2.position.x).pow(2)
+    return sqrt((yDifference + xDifference))
+}
 
 
 

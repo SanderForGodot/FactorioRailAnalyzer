@@ -32,4 +32,12 @@ class Edge
     fun last(): Entity {
         return EntityList.last();
     }
+
+    fun secondLast(): Entity {
+        if (EntityList.size > 1) {
+            return EntityList[EntityList.size - 2];
+        } else {
+            return last()
+        }
+    }
 }
