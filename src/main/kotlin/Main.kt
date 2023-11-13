@@ -1,13 +1,10 @@
 import com.google.gson.Gson
 import factorioBlueprint.Entity
-import java.util.*
-import kotlin.collections.ArrayList
-
-import factorioBlueprint.*
+import factorioBlueprint.Position
+import factorioBlueprint.ResultBP
 import java.io.ByteArrayOutputStream
-
 import java.io.File
-
+import java.util.*
 import java.util.zip.Inflater
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -176,7 +173,7 @@ fun main(args: Array<String>) {
     val listOfEdges: ArrayList<Edge> = arrayListOf<Edge>()
 
     listOfSignals.forEach { startPoint ->
-      buildEdge(Edge(startPoint), if (startPoint.direction < 4) -1 else 1)?.let { listOfEdges.addAll(it) }
+        buildEdge(Edge(startPoint), if (startPoint.direction < 4) -1 else 1)?.let { listOfEdges.addAll(it) }
     }
     listOfEdges.forEach {
         println(it)
@@ -193,7 +190,7 @@ direction  =  -1 curently moving levt
 fun buildEdge(edge: Edge, direction: Int): ArrayList<Edge>? {
 
     if (edge.last().hasSignal()) {
-        return determineEnding(edge,direction)
+        return determineEnding(edge, direction)
         /*
                 if (wrongSide != null) {
                     if (goodSide != null) {
@@ -246,16 +243,16 @@ fun buildEdge(edge: Edge, direction: Int): ArrayList<Edge>? {
         buildEdge(Edge(edge, entity), direction * modifier)?.let { arr.addAll(it) }
     } ?: {
         val blankSignal = Entity(0, "blank-Signal")
-        arr.add(edge.finishUpEdge(blankSignal,true))
+        arr.add(edge.finishUpEdge(blankSignal, true))
     }
 
     return arr;
 }
-fun determineEnding(edge: Edge, direction:Int): ArrayList<Edge>
-{
+
+fun determineEnding(edge: Edge, direction: Int): ArrayList<Edge> {
     val goodSide = edge.last().getDirectionalSignalList(direction)
     val wrongSide = edge.last().getDirectionalSignalList(-direction)
-    if (goodSide?.contains(edge.EntityList.first()) == true) { //remove the staring node so that rail signals end themselves
+    if (goodSide?.contains(edge.EntityList.first()) == true) { //remove the starting node so that rail signals end themselves
         goodSide.remove(edge.EntityList.first())
     }
     val isWrong = wrongSide != null; // is there a signal on the oposite side we asume problems
@@ -264,23 +261,19 @@ fun determineEnding(edge: Edge, direction:Int): ArrayList<Edge>
 
     when {
         isWrong && anzRight == 0 -> {
-            val endSignal = getClosetSignal(goodSide)
-            if (endSignal == null) {
-                //impossible case
-                println("VERY BAD ")
-                println("VERY BAD ")
-                println("VERY BAD ")
-                println("idk how to throw debug statements")
-                //wir müsten hier braken zum ende von if das dies ein fals prositf wäre
-                throw Exception()
-            }
+            val endSignal = getClosetSignal(wrongSide) ?: throw Exception()//impossible case
             return arrayListOf(edge.finishUpEdge(endSignal, false))
         }
 
         isWrong && anzRight == 1 -> {
             var isOpposite = isSignalOpposite(goodSide!![0], wrongSide!![0]) //!! ist save
             when (wrongSide.size) {
-                1 -> return arrayListOf(edge.finishUpEdge(goodSide[0], isOpposite))
+                1 -> {
+                    val closestSignal = getClosetSignal(arrayListOf(goodSide[0], wrongSide[0]))
+                        ?: throw Exception()//impossible case
+                    return arrayListOf(edge.finishUpEdge(if(isOpposite)goodSide[0]else closestSignal, isOpposite))
+                }
+
                 2 -> {//one good signal and 2 bad
 
                     val closestWrong: Entity = signal_is_closer(edge.secondLast(),wrongSide[0], wrongSide[1])
@@ -300,7 +293,7 @@ fun determineEnding(edge: Edge, direction:Int): ArrayList<Edge>
             }
         }
 
-        !isWrong && anzRight == 0 -> {}
+        !isWrong && anzRight == 0 -> {}//Start case, first signal was filtered out
         !isWrong && anzRight == 1 -> {
             return arrayListOf(edge.finishUpEdge(goodSide!![0], true))
         }
@@ -424,7 +417,7 @@ fun isSignalOpposite(signal1: Entity, signal2: Entity): Boolean {
 }
 
 
-fun getClosetSignal(signals: ArrayList<Entity>?): Entity? {
+fun getClosetSignal(signals: ArrayList<Entity>?): Entity? { //TODO: Change function, so that the rail BEFORE this rail is used
     if (signals == null) return null;
     when (signals.size) {
         0 -> return null;
@@ -445,7 +438,7 @@ fun getClosetSignal(signals: ArrayList<Entity>?): Entity? {
     return null;
 }
 
-fun signal_is_closer(rail: Entity, signal1: Entity, signal2: Entity): Entity {
+fun signal_is_closer(rail: Entity, signal1: Entity, signal2: Entity): Entity { //Important: This needs the rail BEFORE the rail with the signal otherwise it has undefined behavior
     val distanceSignal1 = distanceOfEntitys(rail, signal1)
     val distanceSignal2 = distanceOfEntitys(rail, signal2)
     return if (distanceSignal1 < distanceSignal2) signal1 else signal2;
