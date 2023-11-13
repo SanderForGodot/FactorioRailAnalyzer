@@ -278,12 +278,15 @@ fun determineEnding(edge: Edge, direction:Int): ArrayList<Edge>
         }
 
         isWrong && anzRight == 1 -> {
-            val isOpposite = isSignalOpposite(goodSide!![0], wrongSide!![0]) //!! ist save
+            var isOpposite = isSignalOpposite(goodSide!![0], wrongSide!![0]) //!! ist save
             when (wrongSide.size) {
                 1 -> return arrayListOf(edge.finishUpEdge(goodSide[0], isOpposite))
-                2 -> {//ein gutes signal und 2 schlechte signale immer problem
-                    val AWD: Entity? = getClosetSignal(wrongSide)
-                    return arrayListOf(edge.finishUpEdge(AWD!!, false))
+                2 -> {//one good signal and 2 bad
+
+                    val closestWrong: Entity = signal_is_closer(edge.secondLast(),wrongSide[0], wrongSide[1])
+                    isOpposite = isSignalOpposite(goodSide[0], closestWrong)
+
+                    return arrayListOf(edge.finishUpEdge(if (isOpposite)goodSide[0]else closestWrong, isOpposite))
                 }
 
                 else -> {
@@ -419,6 +422,7 @@ fun isSignalOpposite(signal1: Entity, signal2: Entity): Boolean {
     val distanceSignal = distanceOfEntitys(signal1, signal2)
     return (distanceSignal <= 3) //TODO: Check the minimum distance so that the signal is opposite, maybe different distances for straight and curved
 }
+
 
 fun getClosetSignal(signals: ArrayList<Entity>?): Entity? {
     if (signals == null) return null;
