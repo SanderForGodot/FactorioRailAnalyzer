@@ -1,5 +1,6 @@
 package factorioBlueprint
 
+import Edge
 import com.google.gson.annotations.SerializedName
 
 
@@ -49,5 +50,14 @@ data class Entity (
   {
     return signalOntheLeft!= null || signalOntheRight != null
   }
+
+  fun getTheSingleRail(): ArrayList<Entity> {
+    val arr: ArrayList<Entity> = arrayListOf<Entity>()
+    rightNextRail?.let { arr.addAll(it) }
+    leftNextRail?.let { arr.addAll(it) }
+    assert(arr.size ==1)
+    return arr;
+  }
+
 
 }

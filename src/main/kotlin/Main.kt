@@ -173,12 +173,13 @@ fun main(args: Array<String>) {
 
 
     //endregion
+    val listOfEdges: ArrayList<Edge> = arrayListOf<Edge>()
 
     listOfSignals.forEach { startPoint ->
-        startPoint.rightNextRail?.forEach { signal: Entity ->
-
-            buildEdge(Edge(signal), if (signal.direction < 4) -1 else 1)
-        }
+      buildEdge(Edge(startPoint), if (startPoint.direction < 4) -1 else 1)?.let { listOfEdges.addAll(it) }
+    }
+    listOfEdges.forEach {
+        println(it)
     }
 }
 
@@ -192,59 +193,122 @@ direction  =  -1 curently moving levt
 fun buildEdge(edge: Edge, direction: Int): ArrayList<Edge>? {
 
     if (edge.last().hasSignal()) {
-        val goodSide = edge.last().getDirectionalSignalList(direction)
-        val wrongSide = edge.last().getDirectionalSignalList(-direction)
-        if (goodSide?.contains(edge.EntityList.first()) == true){
-            goodSide.remove(edge.EntityList.first())
-        }
-        if (wrongSide != null) {
-            if (goodSide != null) {
-                val signalCount = goodSide.size + wrongSide.size
-                when (signalCount) {//1 impossible since there is one signal in each list good and wrong side
-                    2 -> {
-                        if (isSignalOpposite(goodSide[0], wrongSide[0])) {
-                            //found edge successfully
-                            return arrayListOf(Edge(edge, goodSide[0]))
-                        } else {
-                            //illegal rail discard
-                            return null;
-                        }
-                    }
+        return determineEnding(edge,direction)
+        /*
+                if (wrongSide != null) {
+                    if (goodSide != null) {
+                        val signalCount = goodSide.size + wrongSide.size
+                        when (signalCount) {//1 impossible since there is one signal in each list good and wrong side
+                            2 -> {
+                                if (isSignalOpposite(goodSide[0], wrongSide[0])) {
+                                    //found edge successfully
+                                    return arrayListOf(Edge(edge, goodSide[0]))
+                                } else {
+                                    //illegal rail discard
+                                    return null;
+                                }
+                            }
 
-                    3 -> {
-                        if (goodSide.size == 2) {//found edge successfully
-                            return arrayListOf(Edge(edge, signal_is_closer(edge.last(), goodSide[0], goodSide[1])))
-                        } else {
-                            //illegal rail discard
-                            return null;
+                            3 -> {
+                                if (goodSide.size == 2) {//found edge successfully
+                                    return arrayListOf(Edge(edge, signal_is_closer(edge.last(), goodSide[0], goodSide[1])))
+                                } else {
+                                    //illegal rail discard
+                                    return null;
+                                }
+                            }
+
+                            4 -> return arrayListOf(
+                                Edge(
+                                    edge,
+                                    signal_is_closer(edge.last(), goodSide[0], goodSide[1])
+                                )
+                            )    // TODO: Check if this works, or if you need the rail BEFORE edge.last()
                         }
+
+                    } else {
+                        //illegal rail discard
+                        return null;
                     }
-                    4->return arrayListOf( Edge(edge, signal_is_closer(edge.last(), goodSide[0], goodSide[1]))  )    // TODO: Check if this works, or if you need the rail BEFORE edge.last()
+                } else if (goodSide!!.size > 1) {
+                    // There are two signals on the rail, we need to find the first signal and close the edge on that signal
+                    // TODO: Check if this works, or if you need the rail BEFORE edge.last()
+                    return arrayListOf(Edge(edge, signal_is_closer(edge.last(), goodSide[0], goodSide[1])))
+                } else {
+                    //found edge successfully
+                    return arrayListOf(Edge(edge, goodSide[0]))
                 }
-
-            } else {
-                //illegal rail discard
-                return null;
-            }
-        } else if (goodSide!!.size > 1) {
-            // There are two signals on the rail, we need to find the first signal and close the edge on that signal
-            // TODO: Check if this works, or if you need the rail BEFORE edge.last()
-            return arrayListOf( Edge(edge, signal_is_closer(edge.last(), goodSide[0], goodSide[1])))
-        } else {
-            //found edge successfully
-            return arrayListOf(Edge(edge, goodSide[0]))
-        }
-
-
+                */
     }
     val arr: ArrayList<Edge> = arrayListOf<Edge>()
     edge.last().getDirectionalRailList(direction)?.forEach { entity ->
         val modifier = isSpecialCase(edge.last(), entity)
         buildEdge(Edge(edge, entity), direction * modifier)?.let { arr.addAll(it) }
+    } ?: {
+        val blankSignal = Entity(0, "blank-Signal")
+        arr.add(edge.finishUpEdge(blankSignal,true))
     }
 
-    //TODO: add thing for rails ending without signal
     return arr;
+}
+fun determineEnding(edge: Edge, direction:Int): ArrayList<Edge>
+{
+    val goodSide = edge.last().getDirectionalSignalList(direction)
+    val wrongSide = edge.last().getDirectionalSignalList(-direction)
+    if (goodSide?.contains(edge.EntityList.first()) == true) { //remove the staring node so that rail signals end themselves
+        goodSide.remove(edge.EntityList.first())
+    }
+    val isWrong = wrongSide != null; // is there a signal on the oposite side we asume problems
+    val anzRight = if (goodSide?.size == null) 0 else goodSide.size // I am proud of this line
+
+
+    when {
+        isWrong && anzRight == 0 -> {
+            val endSignal = getClosetSignal(goodSide)
+            if (endSignal == null) {
+                //impossible case
+                println("VERY BAD ")
+                println("VERY BAD ")
+                println("VERY BAD ")
+                println("idk how to throw debug statements")
+                //wir müsten hier braken zum ende von if das dies ein fals prositf wäre
+                throw Exception()
+            }
+            return arrayListOf(edge.finishUpEdge(endSignal, false))
+        }
+
+        isWrong && anzRight == 1 -> {
+            val isOpposite = isSignalOpposite(goodSide!![0], wrongSide!![0]) //!! ist save
+            when (wrongSide.size) {
+                1 -> return arrayListOf(edge.finishUpEdge(goodSide[0], isOpposite))
+                2 -> {//ein gutes signal und 2 schlechte signale immer problem
+                    val AWD: Entity? = getClosetSignal(wrongSide)
+                    return arrayListOf(edge.finishUpEdge(AWD!!, false))
+                }
+
+                else -> {
+                    //should be impossible
+                    /*bc:
+                    * isWrong== true -> isWrong.size>0 -> 0 in impossible
+                    * a rail can only have 2 signals on one side -> more than 3 is impossible
+                    * */
+                    throw Exception("Impossible ")
+                }
+            }
+        }
+
+        !isWrong && anzRight == 0 -> {}
+        !isWrong && anzRight == 1 -> {
+            return arrayListOf(edge.finishUpEdge(goodSide!![0], true))
+        }
+
+        anzRight == 2 -> {
+            return arrayListOf(edge.finishUpEdge(getClosetSignal(goodSide)!!, true))
+        }
+
+        else -> throw Exception()
+    }
+    throw Exception()
 }
 
 fun isSpecialCase(current: Entity, next: Entity): Int {
@@ -280,7 +344,6 @@ fun isSpecialCase(current: Entity, next: Entity): Int {
     return 1;
 
 }
-
 
 
 /*
@@ -355,6 +418,27 @@ fun <E> ArrayList<E>?.createOrAdd(item: E): ArrayList<E> {
 fun isSignalOpposite(signal1: Entity, signal2: Entity): Boolean {
     val distanceSignal = distanceOfEntitys(signal1, signal2)
     return (distanceSignal <= 3) //TODO: Check the minimum distance so that the signal is opposite, maybe different distances for straight and curved
+}
+
+fun getClosetSignal(signals: ArrayList<Entity>?): Entity? {
+    if (signals == null) return null;
+    when (signals.size) {
+        0 -> return null;
+        1 -> return signals[0]
+        2 -> {
+            val rail1 =
+                if ((signals[0].rightNextRail?.get(0)) == null) signals[0].leftNextRail?.get(0) else signals[0].rightNextRail?.get(
+                    0
+                )
+            val rail2 =
+                if ((signals[1].rightNextRail?.get(0)) == null) signals[1].leftNextRail?.get(0) else signals[1].rightNextRail?.get(
+                    0
+                )
+            assert(rail1 == rail2)
+            return signal_is_closer(rail1!!, signals[0], signals[1])
+        }
+    }
+    return null;
 }
 
 fun signal_is_closer(rail: Entity, signal1: Entity, signal2: Entity): Entity {
