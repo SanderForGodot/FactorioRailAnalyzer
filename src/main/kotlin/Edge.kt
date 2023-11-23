@@ -1,6 +1,4 @@
 import factorioBlueprint.Entity
-import factorioBlueprint.Signal
-import java.util.*
 
 class Edge
     () {
@@ -14,15 +12,19 @@ class Edge
 
     constructor(edge: Edge, entity: Entity) : this() {
         clone(edge)
+        if (done) {
+            var aaaahhhh = 1123
+        }
         EntityList.add(entity)
 
     }
 
     lateinit var EntityList: ArrayList<Entity>
     var totalLength: Int = 0
-    lateinit var ColisionShape: ArrayList<Pair<Int, Int>>;
-    lateinit var belongsToBlock: Block
-    private var validRail: Boolean?  =null
+    var ColisionShape: ArrayList<Pair<Int, Int>> = arrayListOf();
+    var belongsToBlock: Block = Block()
+    private var validRail: Boolean? = null
+    var done = false
 
     fun clone(edge: Edge) {
         EntityList = edge.EntityList
@@ -43,9 +45,20 @@ class Edge
             return last()
         }
     }
-    fun finishUpEdge(signal: Entity, validRail: Boolean) :Edge{
+
+    fun finishUpEdge(signal: Entity, validRail: Boolean): Edge {
         EntityList.add(signal)
         this.validRail = validRail
+        done = true
         return this
     }
+
+    override fun toString(): String {
+        var str = "EdgeStart------------------\n"
+        EntityList.forEach {
+            str += it.name + "|" + it.position.toString() + "\n"
+        }
+        return str
+    }
+
 }
