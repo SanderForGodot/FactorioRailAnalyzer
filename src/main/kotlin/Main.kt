@@ -418,7 +418,9 @@ fun <E> ArrayList<E>?.createOrAdd(item: E) {
 
 fun isSignalOpposite(signal1: Entity, signal2: Entity): Boolean {
     val distanceSignal = distanceOfEntitys(signal1, signal2)
-    return (distanceSignal <= 3) //TODO: Check the minimum distance so that the signal is opposite, maybe different distances for straight and curved
+    assert(distanceSignal <= 8)
+    assert(!(distanceSignal >3 && distanceSignal <3.1) )
+    return (distanceSignal <= 3)
 }
 
 
@@ -462,7 +464,14 @@ fun distanceOfEntitys(entity1: Entity, entity2: Entity): Double {
     return sqrt((yDifference + xDifference))
 }
 
+fun printEdge(edge: Edge){
+    val graphviz = Graphviz()
+    val stringBuilder = StringBuilder()
 
+    graphviz.format(stringBuilder,edge)
+    println(stringBuilder.toString())
+
+}
 
 
 
