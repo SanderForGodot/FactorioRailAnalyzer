@@ -36,8 +36,8 @@ val fact: Map<String, Map<Int, List<Entity>>> = mapOf(
             Entity(-1, "straight-rail", Position(0.0, -2.0), 5),
             Entity(-1, "curved-rail", Position(-3.0, -3.0), 3),
 
-            Entity(-1, "signal", Position(-1.5, -1.5), 1),
-            Entity(1, "signal", Position(0.5, 0.5), 5),
+            Entity(-1, "signal", Position(1.5, -1.5), 3),
+            Entity(1, "signal", Position(-0.5, 0.5), 7),
         ),
         5 to listOf(
             Entity(1, "straight-rail", Position(0.0, 2.0), 1),
@@ -64,8 +64,8 @@ val fact: Map<String, Map<Int, List<Entity>>> = mapOf(
             Entity(-1, "straight-rail", Position(-2.0, 0.0), 3),
             Entity(-1, "curved-rail", Position(-3.0, 3.0), 1),
 
-            Entity(-1, "signal", Position(-0.5, 0.5), 3),
-            Entity(1, "signal", Position(1.5, -1.5), 7),
+            Entity(-1, "signal", Position(-1.5, -1.5), 1),
+            Entity(1, "signal", Position(0.5, 0.5), 5),
         ),
     ),
     "curved-rail" to mapOf(
