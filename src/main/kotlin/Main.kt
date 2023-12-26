@@ -189,7 +189,7 @@ direction  =  -1 curently moving levt
                filps at strait up rails
  */
 
-private fun <E> ArrayList<E>.addUnique(element: E) {
+fun <E> ArrayList<E>.addUnique(element: E) {
     if(!this.contains(element))
         this.add(element)
     else

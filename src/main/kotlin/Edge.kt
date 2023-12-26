@@ -16,7 +16,7 @@ class Edge
         //    println(this)
             var aaaahhhh = 1123
         }
-        EntityList.add(entity)
+        EntityList.addUnique(entity)
 
     }
 
