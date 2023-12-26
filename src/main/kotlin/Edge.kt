@@ -12,7 +12,8 @@ class Edge
 
     constructor(edge: Edge, entity: Entity) : this() {
         clone(edge)
-        if (done) {
+        if (done || EntityList.contains(entity)) {
+        //    println(this)
             var aaaahhhh = 1123
         }
         EntityList.add(entity)
@@ -34,15 +35,12 @@ class Edge
         validRail = edge.validRail
     }
 
-    fun last(): Entity {
-        return EntityList.last();
-    }
-
-    fun secondLast(): Entity {
-        if (EntityList.size > 1) {
-            return EntityList[EntityList.size - 2];
+    fun last(n: Int): Entity {
+        // return EntityList.last();
+        if (EntityList.size > n - 1) {
+            return EntityList[EntityList.size - n ];
         } else {
-            return last()
+            return last(n - 1)
         }
     }
 
