@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.*
 import java.util.zip.Inflater
+import kotlin.collections.ArrayList
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.pow
@@ -143,20 +144,20 @@ fun main(args: Array<String>) {
                 ) {
                     if (possibleRail.name == "signal") {
                         if (possibleRail.entityNumber == 1) {
-                            foundRail.rightNextRail.add(entity)
-                            entity.signalOntheRight.add(foundRail)
+                            foundRail.rightNextRail.addUnique(entity)
+                            entity.signalOntheRight.addUnique(foundRail)
                         } else {
-                            foundRail.leftNextRail.add(entity)
-                            entity.signalOntheLeft.add(foundRail)
+                            foundRail.leftNextRail.addUnique(entity)
+                            entity.signalOntheLeft.addUnique(foundRail)
                         }
                     } else {
                         if (possibleRail.entityNumber == 1) {//right
 
-                            entity.rightNextRail.add(foundRail)
+                            entity.rightNextRail.addUnique(foundRail)
 
                         } else {
 
-                            entity.leftNextRail.add(foundRail)
+                            entity.leftNextRail.addUnique(foundRail)
 
                         }
                     }
@@ -180,15 +181,26 @@ fun main(args: Array<String>) {
 }
 
 
+
 /*
 entity  = the curent entity we are in to build an edge
 direction  =  -1 curently moving levt
                +1 curently moving right
                filps at strait up rails
  */
+
+private fun <E> ArrayList<E>.addUnique(element: E) {
+    if(!this.contains(element))
+        this.add(element)
+    else
+        //throw Exception("Item already in list")
+        println("irgnored error")
+}
+
+
 fun buildEdge(edge: Edge, direction: Int): ArrayList<Edge> {
 
-    if (edge.last().hasSignal()) {
+    if (edge.last(1).hasSignal()) {
         val end = determineEnding(edge, direction)
         if (end != null)
             return end
@@ -240,8 +252,8 @@ fun buildEdge(edge: Edge, direction: Int): ArrayList<Edge> {
                 */
     }
     val arr: ArrayList<Edge> = arrayListOf()
-    edge.last().getDirectionalRailList(direction)?.forEach { entity ->
-        val modifier = isSpecialCase(edge.last(), entity)
+    edge.last(1).getDirectionalRailList(direction)?.forEach { entity ->
+        val modifier = isSpecialCase(edge.last(1), entity)
         val result = buildEdge(Edge(edge, entity), direction * modifier)
         arr.addAll(result)
     } ?: {
@@ -254,14 +266,14 @@ fun buildEdge(edge: Edge, direction: Int): ArrayList<Edge> {
 
 fun determineEnding(edge: Edge, direction: Int): ArrayList<Edge>? {
     //this is an edge case fest
-    //we need to check if the signals are relevant and if so is they are on the correct side or latest have a partner
+    //we need to check if the signals are relevant and if so is they are on the correct side or at least have a partner
 
-    val goodSide = edge.last().getDirectionalSignalList(direction)
-    val wrongSide = edge.last().getDirectionalSignalList(-direction)
+    val goodSide = edge.last(2).getDirectionalSignalList(direction)
+    val wrongSide = edge.last(2).getDirectionalSignalList(-direction)
     while (goodSide?.contains(edge.EntityList.first()) == true) { //remove the starting node so that rail signals end themselves
         goodSide.remove(edge.EntityList.first())
     }
-    val isWrong: Boolean =wrongSide?.isNotEmpty() ?: false // if there a signal on the opposite side we asume problems
+    val isWrong: Boolean = wrongSide?.isNotEmpty() ?: false // if there a signal on the opposite side we asume problems
     val anzRight = if (goodSide?.size == null) 0 else goodSide.size // I am proud of this line
 
 
@@ -275,13 +287,13 @@ fun determineEnding(edge: Edge, direction: Int): ArrayList<Edge>? {
             var isOpposite = isSignalOpposite(goodSide!![0], wrongSide!![0]) //!! ist save
             when (wrongSide.size) {
                 1 -> {
-                    val closestSignal = getClosesdSignal(edge.secondLast(), goodSide[0], wrongSide[0])
+                    val closestSignal = getClosesdSignal(edge.last(2), goodSide[0], wrongSide[0])
                     return arrayListOf(edge.finishUpEdge(if (isOpposite) goodSide[0] else closestSignal, isOpposite))
                 }
 
                 2 -> {//one good signal and 2 bad
 
-                    val closestWrong: Entity = getClosesdSignal(edge.secondLast(), wrongSide[0], wrongSide[1])
+                    val closestWrong: Entity = getClosesdSignal(edge.last(2), wrongSide[0], wrongSide[1])
                     isOpposite = isSignalOpposite(goodSide[0], closestWrong)
 
                     return arrayListOf(edge.finishUpEdge(if (isOpposite) goodSide[0] else closestWrong, isOpposite))
@@ -407,14 +419,6 @@ fun rightBranch() {
 }
 */
 
-fun <E> ArrayList<E>?.createOrAdd(item: E) {
-    var list = this
-    if (list == null)
-        list = arrayListOf(item)
-    list.add(item)
-
-}
-
 fun isSignalOpposite(signal1: Entity, signal2: Entity): Boolean {
     val distanceSignal = distanceOfEntitys(signal1, signal2)
     return (distanceSignal <= 3) //TODO: Check the minimum distance so that the signal is opposite, maybe different distances for straight and curved
@@ -440,7 +444,7 @@ fun getClosetSignal(
                     signals[1].leftNextRail[0]
                 else signals[1].rightNextRail[0]
             assert(rail1 == rail2)
-            return getClosesdSignal(edge.secondLast(), signals[0], signals[1])
+            return getClosesdSignal(edge.last(1), signals[0], signals[1])
         }
     }
     return null
