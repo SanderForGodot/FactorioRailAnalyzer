@@ -13,7 +13,7 @@ class Edge
     constructor(edge: Edge, entity: Entity) : this() {
         clone(edge)
         if (done || EntityList.contains(entity)) {
-        //    println(this)
+            //    println(this)
             var aaaahhhh = 1123
         }
         EntityList.addUnique(entity)
@@ -35,10 +35,11 @@ class Edge
         validRail = edge.validRail
     }
 
+
     fun last(n: Int): Entity {
         // return EntityList.last();
         if (EntityList.size > n - 1) {
-            return EntityList[EntityList.size - n ];
+            return EntityList[EntityList.size - n];
         } else {
             return last(n - 1)
         }
