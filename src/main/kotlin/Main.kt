@@ -176,7 +176,7 @@ fun main(args: Array<String>) {
         listOfEdges.addAll(test)
     }
     listOfEdges.forEach {
-        println(it)
+        printEdge(it)
     }
 }
 
@@ -460,7 +460,14 @@ fun distanceOfEntitys(entity1: Entity, entity2: Entity): Double {
     return sqrt((yDifference + xDifference))
 }
 
+fun printEdge(edge: Edge){
+    val graphviz = Graphviz()
+    val stringBuilder = StringBuilder()
 
+    graphviz.format(stringBuilder,edge)
+    println(stringBuilder.toString())
+
+}
 
 
 
