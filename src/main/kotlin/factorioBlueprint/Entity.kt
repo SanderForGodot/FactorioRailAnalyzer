@@ -53,7 +53,7 @@ data class Entity(
     }
 
     fun hasSignal(): Boolean {
-        return signalOntheLeft != null || signalOntheRight != null
+        return signalOntheLeft.size + signalOntheRight.size > 0
     }
 
     fun getTheSingleRail(): ArrayList<Entity> {
