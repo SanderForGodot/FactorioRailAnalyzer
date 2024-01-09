@@ -21,7 +21,11 @@ class Graphviz {
     }
 }
 
-
+/* How to use:
+have graphviz installed, possible by downloading the installer from here:
+https://graphviz.org/download/
+it will produce one output.svg per edge
+ */
 
 
 

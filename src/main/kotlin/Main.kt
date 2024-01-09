@@ -175,8 +175,10 @@ fun main(args: Array<String>) {
         val test = buildEdge(Edge(startPoint), if (startPoint.direction < 4) -1 else 1)
         listOfEdges.addAll(test)
     }
+    var i =0;
     listOfEdges.forEach {
-        printEdge(it)
+        printEdge(it,i)
+        i++
     }
 }
 
@@ -460,13 +462,18 @@ fun distanceOfEntitys(entity1: Entity, entity2: Entity): Double {
     return sqrt((yDifference + xDifference))
 }
 
-fun printEdge(edge: Edge){
+fun printEdge(edge: Edge,i:Int){
     val graphviz = Graphviz()
     val stringBuilder = StringBuilder()
 
     graphviz.format(stringBuilder,edge)
     println(stringBuilder.toString())
-
+    File("input.dot").writeText(stringBuilder.toString())
+    val result = ProcessBuilder("dot","-Tsvg","input.dot", "-o output$i.svg")
+        .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+        .redirectError(ProcessBuilder.Redirect.INHERIT)
+        .start()
+        .waitFor()
 }
 
 
