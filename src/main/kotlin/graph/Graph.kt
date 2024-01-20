@@ -4,12 +4,11 @@ package graph
 class Graph {
     private val adjVertices: MutableMap<GraphNode, MutableList<GraphNode>> = mutableMapOf()
     private val Path: MutableList<Int> = ArrayList()
-    private val testGraph: MutableMap<Int, MutableList<Int>> = mutableMapOf()
-    private val closedVertices: MutableMap<Int,IntArray> =  mutableMapOf()
+    private var testGraph: MutableMap<Int, MutableList<Int>> = mutableMapOf()
+    private var closedVertices: MutableMap<Int,MutableList<Int>> =  mutableMapOf()
 
     fun addNode(id: Int) {
         adjVertices.putIfAbsent(GraphNode(id), ArrayList<GraphNode>())
-
     }
 
     fun removeNode(id: Int) {
@@ -25,26 +24,32 @@ class Graph {
     }
 
     fun tiernan() {// important Map must be sorted or the Tiernan will not work
-        testGraph.toSortedMap()
+        testGraph=testGraph.toSortedMap()
+        println(testGraph)
         testGraph.iterator().forEach {
             println("Startet Path: ${it.key}")
             expandPath(it.key)
+            closedVertices =  mutableMapOf()
         }
     }
 
     fun expandPath(node: Int) {
         Path.add(node)
-        closedVertices[node] = intArrayOf()
-        //println(closedVertices.size)
+        if(closedVertices[node]==null){
+            closedVertices[node] = mutableListOf()
+        }
+
 
         if (testGraph[node] != null) {
             for (neighbor in testGraph[node]!!) {
+                closedVertices[node]?.let { println(it.size) }
                 if (!Path.contains(neighbor)
                     and (neighbor > Path.first())
                     and ( (closedVertices[node]?.contains(neighbor) == false))
                 ) {
-                    println("Visited node: $node")
+                    println("Expanding to: $neighbor")
                     expandPath(neighbor)
+                    closedVertices[node]?.add(neighbor)
                 } else {
                     if(Path.first()==neighbor){
                         println("found deadlock ending in node: $node")
@@ -59,18 +64,26 @@ class Graph {
         } else {
             println("No neighbours: $node")
         }
+        closedVertices[node]=mutableListOf()
+        println("removing node:"+ Path.last())
         Path.removeLast()
     }
 
     fun gentestgraph(){
         testGraph[1] = mutableListOf(2)
-        testGraph[2] = mutableListOf(2,3,4)
-        testGraph[3] = mutableListOf(5)
-        testGraph[4] = mutableListOf(3)
-        testGraph[5] = mutableListOf(1)
-
-        println(testGraph)
+        testGraph[2] = mutableListOf(3,4)
+        testGraph[3] = mutableListOf(1)
+        testGraph[4] = mutableListOf(5)
+        testGraph[5] = mutableListOf(2)
     }
+
+    /* Graph from the Tiernan Paper
+     testGraph[1] = mutableListOf(2)
+     testGraph[2] = mutableListOf(2,3,4)
+     testGraph[3] = mutableListOf(5)
+     testGraph[4] = mutableListOf(3)
+     testGraph[5] = mutableListOf(1)
+     */
 
     fun dfs(node: Int, visited: BooleanArray, graph: Array<List<Int>>) {
         //possible algo Depth-First Search
