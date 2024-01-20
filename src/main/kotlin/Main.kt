@@ -124,6 +124,8 @@ fun main(args: Array<String>) {
     }
     //endregion
     //region rail Linker: connected rails point to each other with pointer list does the same with signals
+    val graphviz = Graphviz() //for the grafikal output in graphviz
+    graphviz.startGraph()
     val listOfSignals: ArrayList<Entity> = arrayListOf()
     resultBP.blueprint.entities.forEach outer@{ entity ->
         assert(entity.leftNextRail != null)
@@ -165,8 +167,10 @@ fun main(args: Array<String>) {
             }
         }
         println(entity.relevantShit())
+        graphviz.appendEntity(entity)
     }
-
+    graphviz.endGraph()
+    graphviz.createoutput()
 
     //endregion
     val listOfEdges: ArrayList<Edge> = arrayListOf()
@@ -177,6 +181,7 @@ fun main(args: Array<String>) {
     }
     var i =0;
     listOfEdges.forEach {
+        println(it)
         printEdge(it,i)
         i++
     }
@@ -467,7 +472,7 @@ fun printEdge(edge: Edge,i:Int){
     val stringBuilder = StringBuilder()
 
     graphviz.format(stringBuilder,edge)
-    println(stringBuilder.toString())
+    //println(stringBuilder.toString())
     File("input.dot").writeText(stringBuilder.toString())
     val result = ProcessBuilder("dot","-Tsvg","input.dot", "-o output$i.svg")
         .redirectOutput(ProcessBuilder.Redirect.INHERIT)
@@ -475,6 +480,7 @@ fun printEdge(edge: Edge,i:Int){
         .start()
         .waitFor()
 }
+
 
 
 
