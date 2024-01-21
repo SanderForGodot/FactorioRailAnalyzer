@@ -124,6 +124,8 @@ fun main(args: Array<String>) {
     }
     //endregion
     //region rail Linker: connected rails point to each other with pointer list does the same with signals
+    val graphviz = Graphviz() //for the grafikal output in graphviz
+    graphviz.startGraph()
     val listOfSignals: ArrayList<Entity> = arrayListOf()
     resultBP.blueprint.entities.forEach outer@{ entity ->
         if (entity.name == "rail-signal" || entity.name == "rail-chain-signal") {
@@ -164,32 +166,10 @@ fun main(args: Array<String>) {
             }
         }
         println(entity.relevantShit())
+        graphviz.appendEntity(entity)
     }
-
-    var countsOfRR = 0
-    var countsOfRS = 0
-    var countsOfSR = 0
-    var countsOfSS = 0
-    resultBP.blueprint.entities.forEach{
-        if(it.name.contains("rail"))
-        {
-            countsOfRR+= it.leftNextRail.size +it.rightNextRail.size
-            countsOfRS+= it.signalOntheRight.size +it.signalOntheLeft.size
-        }else
-        {
-            println("yrdadawdawd")
-            countsOfSR+= it.leftNextRail.size +it.rightNextRail.size
-            countsOfSS+= it.signalOntheRight.size +it.signalOntheLeft.size
-        }
-        if (it.entityNumber ==1 )
-            println(it.relevantShit())
-    }
-    println("Rail -> Rail:"+ countsOfRR)
-    println("Rail -> Signal:"+ countsOfRS)
-    println("Signal -> Rail:"+ countsOfSR)
-    println("Signal -> Signal:"+ countsOfSS)
-
-
+    graphviz.endGraph()
+    graphviz.createoutput()
 
     //endregion
     val listOfEdges: ArrayList<Edge> = arrayListOf()
@@ -198,8 +178,11 @@ fun main(args: Array<String>) {
         val test = buildEdge(Edge(startPoint), if (startPoint.direction < 4) -1 else 1)
         listOfEdges.addAll(test)
     }
+    var i =0;
     listOfEdges.forEach {
         println(it)
+        printEdge(it,i)
+        i++
     }
 }
 
@@ -485,6 +468,19 @@ fun distanceOfEntitys(entity1: Entity, entity2: Entity): Double {
     return sqrt((yDifference + xDifference))
 }
 
+fun printEdge(edge: Edge,i:Int){
+    val graphviz = Graphviz()
+    val stringBuilder = StringBuilder()
+
+    graphviz.format(stringBuilder,edge)
+    //println(stringBuilder.toString())
+    File("input.dot").writeText(stringBuilder.toString())
+    val result = ProcessBuilder("dot","-Tsvg","input.dot", "-o output$i.svg")
+        .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+        .redirectError(ProcessBuilder.Redirect.INHERIT)
+        .start()
+        .waitFor()
+}
 
 
 
