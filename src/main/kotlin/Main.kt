@@ -1,3 +1,4 @@
+
 import com.google.gson.Gson
 import factorioBlueprint.Entity
 import factorioBlueprint.Position
@@ -6,7 +7,6 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.*
 import java.util.zip.Inflater
-import kotlin.collections.ArrayList
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.pow
@@ -126,7 +126,6 @@ fun main(args: Array<String>) {
     //region rail Linker: connected rails point to each other with pointer list does the same with signals
     val listOfSignals: ArrayList<Entity> = arrayListOf()
     resultBP.blueprint.entities.forEach outer@{ entity ->
-        assert(entity.leftNextRail != null)
         if (entity.name == "rail-signal" || entity.name == "rail-chain-signal") {
             listOfSignals.add(entity)
             return@outer
@@ -166,6 +165,30 @@ fun main(args: Array<String>) {
         }
         println(entity.relevantShit())
     }
+
+    var countsOfRR = 0
+    var countsOfRS = 0
+    var countsOfSR = 0
+    var countsOfSS = 0
+    resultBP.blueprint.entities.forEach{
+        if(it.name.contains("rail"))
+        {
+            countsOfRR+= it.leftNextRail.size +it.rightNextRail.size
+            countsOfRS+= it.signalOntheRight.size +it.signalOntheLeft.size
+        }else
+        {
+            println("yrdadawdawd")
+            countsOfSR+= it.leftNextRail.size +it.rightNextRail.size
+            countsOfSS+= it.signalOntheRight.size +it.signalOntheLeft.size
+        }
+        if (it.entityNumber ==1 )
+            println(it.relevantShit())
+    }
+    println("Rail -> Rail:"+ countsOfRR)
+    println("Rail -> Signal:"+ countsOfRS)
+    println("Signal -> Rail:"+ countsOfSR)
+    println("Signal -> Signal:"+ countsOfSS)
+
 
 
     //endregion
@@ -251,11 +274,13 @@ fun buildEdge(edge: Edge, direction: Int): ArrayList<Edge> {
                 */
     }
     val arr: ArrayList<Edge> = arrayListOf()
-    edge.last(1).getDirectionalRailList(direction)?.forEach { entity ->
+    val nextRails = edge.last(1).getDirectionalRailList(direction)
+    if (nextRails.size>0)
+    nextRails.forEach { entity ->
         val modifier = isSpecialCase(edge.last(1), entity)
         val result = buildEdge(Edge(edge, entity), direction * modifier)
         arr.addAll(result)
-    } ?: {
+    } else {
         val blankSignal = Entity(0, "blank-Signal")
         arr.add(edge.finishUpEdge(blankSignal, true))
     }
@@ -267,10 +292,10 @@ fun determineEnding(edge: Edge, direction: Int): Edge? {
     //this is an edge case fest
     //we need to check if the signals are relevant and if so is they are on the correct side or at least have a partner
 
-    val goodSide = edge.last(1).getDirectionalSignalList(direction)
-    val wrongSide = edge.last(1).getDirectionalSignalList(-direction)
+    val goodSide = edge.last(1).getDirectionalSignalList(direction)?.clone() as ArrayList<Entity>?
+    val wrongSide = edge.last(1).getDirectionalSignalList(-direction)?.clone() as ArrayList<Entity>?
     while (goodSide?.contains(edge.EntityList.first()) == true) { //remove the starting node so that rail signals end themselves
-        goodSide.remove(edge.EntityList.first())
+        goodSide.remove(edge.EntityList.first()) //todo re write this funkktion
     }
     val hasWrong: Boolean = wrongSide?.isNotEmpty() ?: false // if there a signal on the opposite side we asume problems
     val anzRight = if (goodSide?.size == null) 0 else goodSide.size // I am proud of this line

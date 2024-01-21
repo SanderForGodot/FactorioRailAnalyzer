@@ -54,9 +54,13 @@ class Edge
 
     override fun toString(): String {
         var str = "EdgeStart------------------\n"
+
         EntityList.forEach {
-            str += it.name + "|" + it.position.toString() + "\n"
+            val int:String = (it.entityNumber?:0).toString();
+           str +=int + "|" +it.name + "|" + it.position.toString() + "\n"
+
         }
+
         return str
     }
 

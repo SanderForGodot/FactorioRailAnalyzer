@@ -34,13 +34,11 @@ data class Entity(
                 && direction == other.direction
     }
 
-    fun getDirectionalRailList(direction: Int): ArrayList<Entity>? {
-        if (direction == -1)
-            return leftNextRail;
-        else if (direction == 1)
-            return rightNextRail
+    fun getDirectionalRailList(direction: Int): ArrayList<Entity> {
+        return if (direction == -1)
+            leftNextRail;
         else
-            return null
+            rightNextRail
     }
 
     fun getDirectionalSignalList(direction: Int): ArrayList<Entity>? {
