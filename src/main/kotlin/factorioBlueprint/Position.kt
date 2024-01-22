@@ -1,8 +1,8 @@
 package factorioBlueprint
 
 import com.google.gson.annotations.SerializedName
-import java.util.Properties
-import kotlin.math.hypot
+import kotlin.math.pow
+import kotlin.math.sqrt
 
 
 data class Position (
@@ -17,6 +17,12 @@ data class Position (
      y+ position.y
     )
   }
+    fun distanceTo(position:Position ): Double {
+        val yDifference = (position.y - this.y).pow(2)
+        val xDifference = (position.x - this.x).pow(2)
+        return sqrt((yDifference + xDifference))
+    }
+
     override fun equals(other: Any?): Boolean {
         if(other !is Position)
             return false;

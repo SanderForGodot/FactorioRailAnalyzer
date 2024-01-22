@@ -8,10 +8,10 @@ data class Entity(
     @SerializedName("entity_number") var entityNumber: Int? = null,
     @SerializedName("name") var name: String,
     @SerializedName("position") var position: Position = Position(0.0, 0.0),
-    @SerializedName("direction") var direction: Int = 0  // when no direction is provided it is in the default aka 0 direction
+    @SerializedName("direction") var direction: Int = 0,  // when no direction is provided it is in the default aka 0 direction
+    var removeRelatedRail: Boolean?=null
 
 ) {
-
     lateinit var leftNextRail: ArrayList<Entity>  // also reused for signals to reference a conected rail
     lateinit var rightNextRail: ArrayList<Entity>
     lateinit var signalOntheLeft: ArrayList<Entity>
@@ -26,7 +26,7 @@ data class Entity(
 
     override fun equals(other: Any?): Boolean {
         if (other !is Entity)
-            return false;
+            return false
         val other: Entity = other as Entity
 
         return position == other.position
@@ -36,7 +36,7 @@ data class Entity(
 
     fun getDirectionalRailList(direction: Int): ArrayList<Entity> {
         return if (direction == -1)
-            leftNextRail;
+            leftNextRail
         else
             rightNextRail
     }
@@ -56,14 +56,22 @@ data class Entity(
 
     fun getTheSingleRail(): ArrayList<Entity> {
         val arr: ArrayList<Entity> = arrayListOf<Entity>()
-        rightNextRail?.let { arr.addAll(it) }
-        leftNextRail?.let { arr.addAll(it) }
+        rightNextRail.let { arr.addAll(it) }
+        leftNextRail.let { arr.addAll(it) }
         assert(arr.size == 1)
         return arr;
     }
+    fun distanceTo(entity: Entity): Double {
+        return this.position.distanceTo(entity.position);
+    }
 
     fun relevantShit(): String {
+
         return "Entity(entityNumber=$entityNumber, name='$name', position=$position, direction=$direction, leftNextRail=$leftNextRail, rightNextRail=$rightNextRail, signalOntheLeft=$signalOntheLeft, signalOntheRight=$signalOntheRight)"
+    }
+
+    override fun toString(): String {
+        return "Entity(entityNumber=$entityNumber)"
     }
 
 
