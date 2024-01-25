@@ -195,25 +195,25 @@ fun main(args: Array<String>) {
 }
 
 
-/*
-entity  = the curent entity we are in to build an edge
-direction  =  -1 curently moving levt
-               +1 curently moving right
-               filps at strait up rails
- */
-
-//TODO: return bool
+// addes an ellement to a list only if that item isn`t altreddy in the list
 // true == added
 // false == failed
-// let each function handel result
-fun <E> ArrayList<E>.addUnique(element: E) {
-    if (!this.contains(element))
+fun <E> ArrayList<E>.addUnique(element: E):Boolean {
+    if (!this.contains(element)) {
         this.add(element)
-    else
-    //throw Exception("Item already in list")
-        println("irgnored error: array: " + this + "element: " + element)
-}
+        return true
+    }
 
+
+        return false;
+
+}
+fun <E> ArrayList<E>.addUniqueWithDBG(element: E) {
+    if (!this.addUnique(element))
+    {
+        println("addUnique failed: array: " + this + "element: " + element)
+    }
+}
 
 fun buildEdge(edge: Edge, direction: Int): ArrayList<Edge> {
 

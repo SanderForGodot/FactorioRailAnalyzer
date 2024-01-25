@@ -17,7 +17,8 @@ class Edge
             //    println(this)
             var aaaahhhh = 1123
         }
-        EntityList.addUnique(entity)
+        if(!EntityList.addUnique(entity))
+            throw Exception("an Edge is not expected to have the same rail twice")
 
     }
 
