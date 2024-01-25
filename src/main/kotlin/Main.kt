@@ -41,77 +41,43 @@ fun decodeBpSting(filename: String): String {
     return str
 }
 
-fun main(args: Array<String>) {
+fun ArrayList<Entity>.determineMinMax(): Pair<Position, Position> {
+    val min = this.first().position.copy()
+    val max = min.copy()
+    this.forEach { entity ->
 
-    println("Program arguments: ${args.joinToString()}")
-
-
-    val jsonString: String = decodeBpSting("decodeTest.txt")
-    val gson = Gson()
-    val resultBP = gson.fromJson(jsonString, ResultBP::class.java)
-    println(resultBP)
-
-
-    //region filter relevant items and determinant min and max of BP
-    val relevantEntity = arrayOf(
-        "straight-rail",
-        "rail-chain-signal",
-        "rail-signal",
-        "curved-rail"
-    ) // ordered in guessed amount they appear in a BP
-    var min = Position(0.0, 0.0)
-    var max = Position(0.0, 0.0)
-    var firstRelevant = true
-    val entityIter = resultBP.blueprint.entities.iterator()
-
-    while (entityIter.hasNext()) {
-        val entity = entityIter.next()
-
-        if (!relevantEntity.contains(entity.name)) {
-            entityIter.remove()
-        }
-        if (firstRelevant) {
-            min = entity.position.copy()
-            max = entity.position.copy()
-            firstRelevant = false
-        } else {
-            val current = entity.position
-            if (min.x > current.x)
-                min.x = current.x
-            if (min.y > current.y)
-                min.y = current.y
-            if (max.x < current.x)
-                max.x = current.x
-            if (max.y < current.y)
-                max.y = current.y
-        }
+        val current = entity.position
+        if (min.x > current.x)
+            min.x = current.x
+        if (min.y > current.y)
+            min.y = current.y
+        if (max.x < current.x)
+            max.x = current.x
+        if (max.y < current.y)
+            max.y = current.y
     }
-    //endregion
-    //region transform coordinate space to start at 1, 1 (this makes the top left rail-corner be at 0.0)
+    // round down min value to be certain that every rail is included
     min.x = floor(min.x / 2) * 2
     min.y = floor(min.y / 2) * 2
-    max.x -= min.x
-    max.y -= min.y
-    println(min)
-    println(max)
-    resultBP.blueprint.entities.forEach { entity ->
-        entity.position.x -= min.x
-        entity.position.y -= min.y
-    }
-    //  println(resultBP.blueprint.entities)
 
-    val matrix: Array<Array<ArrayList<Entity>?>> =
-        Array(ceil(max.x / 2).toInt()) {
-            Array(ceil(max.y / 2).toInt()) {
-                null
-            }
+    return Pair(min, max)
+}
+
+fun generateMatrix(size: Position): Array<Array<ArrayList<Entity>?>> {
+    // the cordinate space is comprest by 2 to reduce the amount of empty List, as the Rails are on a 2 by 2 cordinate space anyway
+    return Array(ceil(size.x / 2).toInt()) {
+        Array(ceil(size.y / 2).toInt()) {
+            null
         }
+    }
+}
 
-
-    //endregion
-    //region insert entity's into 2D Array for essayer look up in the next step
-    resultBP.blueprint.entities.forEach { entity ->
+fun ArrayList<Entity>.filedMatrix(size: Position): Array<Array<ArrayList<Entity>?>> {
+    val matrix = generateMatrix(size)
+    // insert entity's into 2D Array based on the x y coordinates of the entity
+    this.forEach { entity ->
         entity.ini()
+        // calculate target x y base on the squashed system
         val x = floor(entity.position.x / 2).toInt()
         val y = floor(entity.position.y / 2).toInt()
         if (matrix[x][y] == null)
@@ -119,12 +85,42 @@ fun main(args: Array<String>) {
         else
             matrix[x][y]!!.add(entity)
     }
+    return matrix
+}
+
+fun main(args: Array<String>) {
+
+    println("Program arguments: ${args.joinToString()}")
+
+    //region Phase0: data decompression
+    val jsonString: String = decodeBpSting("decodeTest.txt")
+    val resultBP = Gson().fromJson(jsonString, ResultBP::class.java)
+    val entityList = resultBP.blueprint.entities
     //endregion
-    //region rail Linker: connected rails point to each other with pointer list does the same with signals
+
+    //region Phase1: data cleansing and preparation
+    //filter out entitys we don't care about
+    //ordered by (guessed) amount they appear in a BP
+    val relevantEntity = arrayOf("straight-rail", "rail-chain-signal", "rail-signal", "curved-rail")
+    entityList.retainAll {
+        relevantEntity.contains(it.name)
+    }
+    // determinant min and max of BP
+    val (min, max) = entityList.determineMinMax()
+    // normalize coordinate space to start at 1, 1 (this makes the top left rail-corner be at 0.0)
+    max -= min
+    entityList.forEach { entity ->
+        entity.position -= min
+    }
+
+    val matrix = entityList.filedMatrix(max)
+    //endregion
+
+    //region Phase2: rail Linker: connected rails point to each other with pointer list does the same with signals
     val graphviz = Graphviz() //for the grafikal output in graphviz
     graphviz.startGraph()
     val listOfSignals: ArrayList<Entity> = arrayListOf()
-    resultBP.blueprint.entities.forEach outer@{ entity ->
+    entityList.forEach outer@{ entity ->
         if (entity.name == "rail-signal" || entity.name == "rail-chain-signal") {
             listOfSignals.add(entity)
             return@outer
@@ -198,19 +194,19 @@ fun main(args: Array<String>) {
 // addes an ellement to a list only if that item isn`t altreddy in the list
 // true == added
 // false == failed
-fun <E> ArrayList<E>.addUnique(element: E):Boolean {
+fun <E> ArrayList<E>.addUnique(element: E): Boolean {
     if (!this.contains(element)) {
         this.add(element)
         return true
     }
 
 
-        return false;
+    return false;
 
 }
+
 fun <E> ArrayList<E>.addUniqueWithDBG(element: E) {
-    if (!this.addUnique(element))
-    {
+    if (!this.addUnique(element)) {
         println("addUnique failed: array: " + this + "element: " + element)
     }
 }
@@ -247,7 +243,8 @@ fun determineEnding(edge: Edge, direction: Int): Edge? {
     while (goodSide?.contains(edge.EntityList.first()) == true) { //remove the starting node so that rail signals end themselves
         goodSide.remove(edge.EntityList.first()) //todo re write this funkktion
     }
-    val hasWrong: Boolean = wrongSide?.isNotEmpty() ?: false // if there a signal on the opposite side we asume problems
+    val hasWrong: Boolean =
+        wrongSide?.isNotEmpty() ?: false // if there a signal on the opposite side we asume problems
     val anzRight = if (goodSide?.size == null) 0 else goodSide.size // I am proud of this line
 
 
@@ -298,11 +295,13 @@ fun determineEnding(edge: Edge, direction: Int): Edge? {
     }
 }
 
+//at specific transitions from rail a to b we need to flip the direction indicator
 fun isSpecialCase(current: Entity, next: Entity): Int {
     val candidates = intArrayOf(0, 1, 4, 5)
     // sorts outs most cases to improve efficiency
     if (!candidates.contains(current.direction) || !candidates.contains(next.direction))
         return 1
+
 
     if (current.name == "curved-rail" && current.direction == 0)
         if (next.name == "straight-rail" && next.direction == 0 ||
