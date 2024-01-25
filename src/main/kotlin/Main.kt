@@ -1,92 +1,10 @@
+
 import com.google.gson.Gson
 import factorioBlueprint.Entity
 import factorioBlueprint.Position
 import factorioBlueprint.ResultBP
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.util.*
-import java.util.zip.Inflater
 import kotlin.math.ceil
 import kotlin.math.floor
-
-
-//some idea what this code does, but we didn't write it
-//Made by @marcouberti on github
-//Source: https://gist.github.com/marcouberti/40dbbd836562b35ace7fb2c627b0f34f
-fun ByteArray.zlibDecompress(): String {
-    val inflater = Inflater()
-    val outputStream = ByteArrayOutputStream()
-
-    return outputStream.use {
-        val buffer = ByteArray(1024)
-
-        inflater.setInput(this)
-
-        var count = -1
-        while (count != 0) {
-            count = inflater.inflate(buffer)
-            outputStream.write(buffer, 0, count)
-        }
-
-        inflater.end()
-        outputStream.toString("UTF-8")
-    }
-}
-
-fun decodeBpSting(filename: String): String {
-    val base64String: String = File(filename).readText(Charsets.UTF_8)
-    val decoded = Base64.getDecoder().decode(base64String.substring(1))
-    val str: String = decoded.zlibDecompress()
-    println(str)
-    return str
-}
-
-fun ArrayList<Entity>.determineMinMax(): Pair<Position, Position> {
-    val min = this.first().position.copy()
-    val max = min.copy()
-    this.forEach { entity ->
-
-        val current = entity.position
-        if (min.x > current.x)
-            min.x = current.x
-        if (min.y > current.y)
-            min.y = current.y
-        if (max.x < current.x)
-            max.x = current.x
-        if (max.y < current.y)
-            max.y = current.y
-    }
-    // round down min value to be certain that every rail is included
-    min.x = floor(min.x / 2) * 2
-    min.y = floor(min.y / 2) * 2
-
-    return Pair(min, max)
-}
-
-fun generateMatrix(size: Position): Array<Array<ArrayList<Entity>?>> {
-    // the cordinate space is comprest by 2 to reduce the amount of empty List, as the Rails are on a 2 by 2 cordinate space anyway
-    return Array(ceil(size.x / 2).toInt()) {
-        Array(ceil(size.y / 2).toInt()) {
-            null
-        }
-    }
-}
-
-fun ArrayList<Entity>.filedMatrix(size: Position): Array<Array<ArrayList<Entity>?>> {
-    val matrix = generateMatrix(size)
-    // insert entity's into 2D Array based on the x y coordinates of the entity
-    this.forEach { entity ->
-        entity.ini()
-        // calculate target x y base on the squashed system
-        val x = floor(entity.position.x / 2).toInt()
-        val y = floor(entity.position.y / 2).toInt()
-        if (matrix[x][y] == null)
-            matrix[x][y] = arrayListOf(entity)
-        else
-            matrix[x][y]!!.add(entity)
-    }
-    return matrix
-}
 
 fun main(args: Array<String>) {
 
@@ -190,26 +108,54 @@ fun main(args: Array<String>) {
     }
 }
 
+//region Phase1 funktions
 
-// addes an ellement to a list only if that item isn`t altreddy in the list
-// true == added
-// false == failed
-fun <E> ArrayList<E>.addUnique(element: E): Boolean {
-    if (!this.contains(element)) {
-        this.add(element)
-        return true
+fun ArrayList<Entity>.determineMinMax(): Pair<Position, Position> {
+    val min = this.first().position.copy()
+    val max = min.copy()
+    this.forEach { entity ->
+
+        val current = entity.position
+        if (min.x > current.x)
+            min.x = current.x
+        if (min.y > current.y)
+            min.y = current.y
+        if (max.x < current.x)
+            max.x = current.x
+        if (max.y < current.y)
+            max.y = current.y
     }
+    // round down min value to be certain that every rail is included
+    min.x = floor(min.x / 2) * 2
+    min.y = floor(min.y / 2) * 2
 
-
-    return false;
-
+    return Pair(min, max)
+}
+fun generateMatrix(size: Position): Array<Array<ArrayList<Entity>?>> {
+    // the cordinate space is comprest by 2 to reduce the amount of empty List, as the Rails are on a 2 by 2 cordinate space anyway
+    return Array(ceil(size.x / 2).toInt()) {
+        Array(ceil(size.y / 2).toInt()) {
+            null
+        }
+    }
 }
 
-fun <E> ArrayList<E>.addUniqueWithDBG(element: E) {
-    if (!this.addUnique(element)) {
-        println("addUnique failed: array: " + this + "element: " + element)
+fun ArrayList<Entity>.filedMatrix(size: Position): Array<Array<ArrayList<Entity>?>> {
+    val matrix = generateMatrix(size)
+    // insert entity's into 2D Array based on the x y coordinates of the entity
+    this.forEach { entity ->
+        entity.ini()
+        // calculate target x y base on the squashed system
+        val x = floor(entity.position.x / 2).toInt()
+        val y = floor(entity.position.y / 2).toInt()
+        if (matrix[x][y] == null)
+            matrix[x][y] = arrayListOf(entity)
+        else
+            matrix[x][y]!!.add(entity)
     }
+    return matrix
 }
+//endregion
 
 fun buildEdge(edge: Edge, direction: Int): ArrayList<Edge> {
 
@@ -360,18 +306,4 @@ fun getClosestSignal(
     val distanceSignal1 = rail.distanceTo(signal1)
     val distanceSignal2 = rail.distanceTo(signal2)
     return if (distanceSignal1 < distanceSignal2) signal1 else signal2
-}
-
-fun printEdge(edge: Edge, i: Int) {
-    val graphviz = Graphviz()
-    val stringBuilder = StringBuilder()
-
-    graphviz.format(stringBuilder, edge)
-    //println(stringBuilder.toString())
-    File("input.dot").writeText(stringBuilder.toString())
-    val result = ProcessBuilder("dot", "-Tsvg", "input.dot", "-o output$i.svg")
-        .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-        .redirectError(ProcessBuilder.Redirect.INHERIT)
-        .start()
-        .waitFor()
 }

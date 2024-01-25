@@ -62,6 +62,21 @@ class Graphviz {
     }
 }
 
+fun printEdge(edge: Edge, i: Int) {
+    val graphviz = Graphviz()
+    val stringBuilder = StringBuilder()
+
+    graphviz.format(stringBuilder, edge)
+    //println(stringBuilder.toString())
+    File("input.dot").writeText(stringBuilder.toString())
+    val result = ProcessBuilder("dot", "-Tsvg", "input.dot", "-o output$i.svg")
+        .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+        .redirectError(ProcessBuilder.Redirect.INHERIT)
+        .start()
+        .waitFor()
+}
+
+
 /* How to use:
 have graphviz installed, possible by downloading the installer from here:
 https://graphviz.org/download/
