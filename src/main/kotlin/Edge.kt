@@ -120,9 +120,9 @@ class Edge
         var C: Position
         var D: Position
         for (i in 0..colisionShape.size - 2) {
+            A = colisionShape[i]
+            B = colisionShape[i + 1]
             for (ii in 0..other.colisionShape.size - 2) {
-                A = colisionShape[i]
-                B = colisionShape[i + 1]
                 C = other.colisionShape[i]
                 D = other.colisionShape[i + 1]
                 if (intersect(A, B, C, D)) {
