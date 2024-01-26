@@ -1,30 +1,56 @@
 package graph
 
+import java.util.*
+import kotlin.collections.ArrayList
+
 
 class Graph {
-    private val adjVertices: MutableMap<GraphNode, MutableList<GraphNode>> = mutableMapOf()
-    private val Path: MutableList<Int> = ArrayList()
-    private var testGraph: MutableMap<Int, MutableList<Int>> = mutableMapOf()
+
+    private val Path: MutableList<GraphNode> = ArrayList()
+    private var testGraph: MutableMap<GraphNode, MutableList<GraphNode>> = mutableMapOf()
     private var closedVertices: MutableMap<Int,MutableList<Int>> =  mutableMapOf()
 
-    fun addNode(id: Int) {
-        adjVertices.putIfAbsent(GraphNode(id), ArrayList<GraphNode>())
+    fun addNodeById(id: Int):GraphNode {
+        val node = GraphNode(id)
+        testGraph.putIfAbsent(node, mutableListOf())
+        return node
     }
 
-    fun removeNode(id: Int) {
-        val v = GraphNode(id)
-        adjVertices.values.stream().forEach { list -> list.drop(list.indexOf(v)) }
-        adjVertices.remove(GraphNode(id))
+    fun addNode(node: GraphNode) {
+        testGraph.putIfAbsent(node, mutableListOf())
     }
 
-    fun addDirectionalEdge(id1: Int, id2: Int) {
-        val v1 = GraphNode(id1)
-        val v2 = GraphNode(id2)
-        adjVertices.getValue(v1).add(v2)
+    fun addNeighbour(node: GraphNode,neighbour:GraphNode){
+        addNode(node)
+        addNode(neighbour)
+        testGraph[node]!!.add(neighbour)
     }
+
+    fun addNeighbourById(nodeId: Int,neighbourId:Int){
+        val node = addNodeById(nodeId)
+        val neighbour =addNodeById(neighbourId)
+        testGraph[node]!!.add(neighbour)
+    }
+
+    fun addNeighbours(node: GraphNode,neighbours:MutableList<GraphNode> ){
+        addNode(node)
+        neighbours.forEach {
+            addNode(it)
+            testGraph[node]!!.add(it)
+        }
+    }
+
+    fun findNodeById(id:Int): GraphNode {
+       testGraph.keys.forEach{
+           if (it.id==id){
+               return it
+           }
+       }
+        return addNodeById(id)
+    }
+
 
     fun tiernan() {// important Map must be sorted or the Tiernan will not work
-        testGraph=testGraph.toSortedMap()
         println(testGraph)
         testGraph.iterator().forEach {
             println("Startet Path: ${it.key}")
@@ -33,23 +59,21 @@ class Graph {
         }
     }
 
-    fun expandPath(node: Int) {
+    fun expandPath(node: GraphNode) {
         Path.add(node)
-        if(closedVertices[node]==null){
-            closedVertices[node] = mutableListOf()
+        if(closedVertices[node.id]==null){
+            closedVertices[node.id] = mutableListOf()
         }
-
-
         if (testGraph[node] != null) {
             for (neighbor in testGraph[node]!!) {
-                closedVertices[node]?.let { println(it.size) }
+
                 if (!Path.contains(neighbor)
-                    and (neighbor > Path.first())
-                    and ( (closedVertices[node]?.contains(neighbor) == false))
+                    and (neighbor.id > Path.first().id)
+                    and ( (closedVertices[node.id]?.contains(neighbor.id) == false))
                 ) {
-                    println("Expanding to: $neighbor")
+                    println("Expanding to:$neighbor")
                     expandPath(neighbor)
-                    closedVertices[node]?.add(neighbor)
+                    closedVertices[node.id]?.add(neighbor.id)
                 } else {
                     if(Path.first()==neighbor){
                         println("found deadlock ending in node: $node")
@@ -64,25 +88,35 @@ class Graph {
         } else {
             println("No neighbours: $node")
         }
-        closedVertices[node]=mutableListOf()
+        closedVertices[node.id]=mutableListOf()
         println("removing node:"+ Path.last())
         Path.removeLast()
     }
 
     fun gentestgraph(){
-        testGraph[1] = mutableListOf(2)
-        testGraph[2] = mutableListOf(3,4)
-        testGraph[3] = mutableListOf(1)
-        testGraph[4] = mutableListOf(5)
-        testGraph[5] = mutableListOf(2)
+        val node1= addNodeById(1)
+        val node2=addNodeById(2)
+        val node3=addNodeById(3)
+        val node4= addNodeById(4)
+        val node5=addNodeById(5)
+        addNeighbour(node1,node2)
+        addNeighbours(node2, mutableListOf(node2,node3,node4))
+        addNeighbour(node3,node5)
+        addNeighbour(node4,node3)
+        addNeighbour(node5,node1)
     }
 
     /* Graph from the Tiernan Paper
-     testGraph[1] = mutableListOf(2)
-     testGraph[2] = mutableListOf(2,3,4)
-     testGraph[3] = mutableListOf(5)
-     testGraph[4] = mutableListOf(3)
-     testGraph[5] = mutableListOf(1)
+     val node1= addNodeById(1)
+        val node2=addNodeById(2)
+        val node3=addNodeById(3)
+        val node4= addNodeById(4)
+        val node5=addNodeById(5)
+        addNeighbour(node1,node2)
+        addNeighbours(node2, mutableListOf(node2,node3,node4))
+        addNeighbour(node3,node5)
+        addNeighbour(node4,node3)
+        addNeighbour(node5,node1)
      */
 
     fun dfs(node: Int, visited: BooleanArray, graph: Array<List<Int>>) {
