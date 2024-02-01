@@ -52,6 +52,8 @@ class Edge
         this.validRail = validRail
         done = true
         cleanUpEndings()
+        if(last(1).name== "blank-Signal")
+            return this //TODO: set flags for being a ending edge or somthing
         generateCollision()
         return this
     }
@@ -76,6 +78,7 @@ class Edge
         //adding the starting point
         val start = EntityList.first().position
         val firstRail = EntityList[1]
+
         var listRef = collisionPoints[firstRail.name]?.get(firstRail.direction)!!
         colisionShape.add(closer(start, listRef))
 

@@ -1,4 +1,3 @@
-
 import com.google.gson.Gson
 import factorioBlueprint.Entity
 import factorioBlueprint.Position
@@ -131,6 +130,7 @@ fun ArrayList<Entity>.determineMinMax(): Pair<Position, Position> {
 
     return Pair(min, max)
 }
+
 fun generateMatrix(size: Position): Array<Array<ArrayList<Entity>?>> {
     // the cordinate space is comprest by 2 to reduce the amount of empty List, as the Rails are on a 2 by 2 cordinate space anyway
     return Array(ceil(size.x / 2).toInt()) {
@@ -242,6 +242,7 @@ fun determineEnding(edge: Edge, direction: Int): Edge? {
 }
 
 //at specific transitions from rail a to b we need to flip the direction indicator
+
 fun isSpecialCase(current: Entity, next: Entity): Int {
     val candidates = intArrayOf(0, 1, 4, 5)
     // sorts outs most cases to improve efficiency
