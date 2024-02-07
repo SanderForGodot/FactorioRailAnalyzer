@@ -175,15 +175,51 @@ fun main(args: Array<String>) {
         graphviz.appendEntity(entity)
     }
     graphviz.endGraph()
-    graphviz.createoutput()
+//    graphviz.createoutput()
 
     //endregion
-    val listOfEdges: ArrayList<Edge> = arrayListOf()
-
+    var relation = mutableMapOf<Entity, ArrayList<Edge>>()
     listOfSignals.forEach { startPoint ->
-        val test = buildEdge(Edge(startPoint), if (startPoint.direction < 4) -1 else 1)
-        listOfEdges.addAll(test)
+        relation[startPoint] = buildEdge(Edge(startPoint), if (startPoint.direction < 4) -1 else 1)
     }
+    val listOfEdges = arrayListOf<Edge>()
+    relation.values.forEach { edgeList ->
+        listOfEdges.addAll(edgeList)
+    }
+
+    listOfEdges.forEach { edge ->
+        val signal = edge.last(1)
+        if (!signal.name.contains("signal"))
+            throw Exception("Signal oder kein Signal das ist hier die frage")
+        if (signal.name == "blank-Signal")
+            return
+        edge.nextEdgeList = relation[signal]!!
+    }
+    var blockList = arrayListOf<Block>(Block(listOfEdges[0]))
+    listOfEdges[0].belongsToBlock = blockList[0]
+
+    var counter: Int = 1
+    while (counter < listOfEdges.size - 1) {
+        var edge = listOfEdges[counter]
+        blockList.forEach { block ->
+            if (block.doesCollide(edge) && edge.belongsToBlock ==null) {
+                block.edgeList.add(edge)
+                edge.belongsToBlock = block
+            }else
+            {
+                edge.belongsToBlock!!.merge(block)
+                blockList.remove(block)
+            }
+        }
+        if (edge.belongsToBlock == null) {
+            var newBlock = Block(edge)
+            edge.belongsToBlock = newBlock
+            blockList.add(newBlock)
+        }
+        counter++
+    }
+
+
 
 
     var i = 0;
@@ -191,6 +227,7 @@ fun main(args: Array<String>) {
         println(it)
         printEdge(it, i)
         i++
+
     }
 }
 
@@ -233,8 +270,8 @@ fun buildEdge(edge: Edge, direction: Int): ArrayList<Edge> {
                                     return arrayListOf(Edge(edge, goodSide[0]))
                                 } else {
                                     //illegal rail discard
-                                    return null;
                                 }
+                                    return null;
                             }
 
                             3 -> {

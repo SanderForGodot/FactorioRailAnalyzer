@@ -1,6 +1,22 @@
 import java.util.*
 
-class Block {
+class Block(edge: Edge) {
+    var edgeList = arrayListOf<Edge>(edge)
 
-    lateinit var edgeList : ArrayList<Edge>
+
+    fun doesCollide(toTest:Edge):Boolean
+    {
+       return edgeList.any{
+            it.doesCollide(toTest)
+        }
+    }
+
+    fun merge(otherBlock: Block){
+        otherBlock.edgeList.forEach{edge ->
+            edgeList.add(edge)
+            edge.belongsToBlock = this
+        }
+    }
 }
+
+

@@ -1,8 +1,7 @@
 import factorioBlueprint.Entity
 import factorioBlueprint.Position
 
-class Edge
-    () {
+class Edge() {
     constructor(edge: Edge) : this() {
         clone(edge)
     }
@@ -24,9 +23,10 @@ class Edge
     lateinit var EntityList: ArrayList<Entity>
     var totalLength: Int = 0
     var colisionShape: ArrayList<Position> = arrayListOf();
-    var belongsToBlock: Block = Block()
+    var belongsToBlock: Block? = null
     private var validRail: Boolean? = null
     var done = false
+    var nextEdgeList: List<Edge>  = arrayListOf()
 
     fun clone(edge: Edge) {
         EntityList = edge.EntityList
