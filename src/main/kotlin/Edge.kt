@@ -26,7 +26,7 @@ class Edge() {
     var belongsToBlock: Block? = null
     private var validRail: Boolean? = null
     var done = false
-    var nextEdgeList: List<Edge>  = arrayListOf()
+    var nextEdgeList: List<Edge> = arrayListOf()
 
     fun clone(edge: Edge) {
         EntityList = edge.EntityList
@@ -154,6 +154,19 @@ class Edge() {
         }
 
         return str
+    }
+
+    fun findEnd(): MutableList<Int> {
+        if (EntityList.first().name == "rail-signal") //TODO: leo
+            return mutableListOf(belongsToBlock!!.id)
+        else {
+            var resultList = mutableListOf<Int>()
+            nextEdgeList.forEach { edge ->
+                resultList.addAll( edge.findEnd())
+            }
+            return resultList
+
+        }
     }
 
 }

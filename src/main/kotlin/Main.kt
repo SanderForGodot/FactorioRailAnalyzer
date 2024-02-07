@@ -186,6 +186,7 @@ fun main(args: Array<String>) {
     relation.values.forEach { edgeList ->
         listOfEdges.addAll(edgeList)
     }
+    var hasPartnerSignal = arrayListOf<Entity>()
 
     listOfEdges.forEach { edge ->
         val signal = edge.last(1)
@@ -194,29 +195,39 @@ fun main(args: Array<String>) {
         if (signal.name == "blank-Signal")
             return
         edge.nextEdgeList = relation[signal]!!
+        hasPartnerSignal.addUnique(signal)
     }
-    var blockList = arrayListOf<Block>(Block(listOfEdges[0]))
+    var startSignales = listOfSignals.toSet() - hasPartnerSignal.toSet()
+
+    var blockList = arrayListOf<Block>(Block(listOfEdges[0], 0))
     listOfEdges[0].belongsToBlock = blockList[0]
 
-    var counter: Int = 1
-    while (counter < listOfEdges.size - 1) {
-        var edge = listOfEdges[counter]
+    var counter: Int = 0
+    listOfEdges.filter{edge ->
+        listOfEdges.first() != edge
+    }.forEach { edge ->
         blockList.forEach { block ->
-            if (block.doesCollide(edge) && edge.belongsToBlock ==null) {
+            if (block.doesCollide(edge) && edge.belongsToBlock == null) {
                 block.edgeList.add(edge)
                 edge.belongsToBlock = block
-            }else
-            {
+            } else {
                 edge.belongsToBlock!!.merge(block)
                 blockList.remove(block)
             }
         }
         if (edge.belongsToBlock == null) {
-            var newBlock = Block(edge)
+            counter++
+            val newBlock = Block(edge, counter)
             edge.belongsToBlock = newBlock
             blockList.add(newBlock)
         }
-        counter++
+    }
+
+     var Graph: MutableMap<Int, MutableList<Int>> = mutableMapOf()
+    blockList.filter { block ->
+        block.isRelevant(startSignales)
+    }.forEach { block ->
+        Graph[block.id] = block.findEnd()
     }
 
 
