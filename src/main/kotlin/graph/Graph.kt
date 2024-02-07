@@ -9,9 +9,9 @@ class Graph {
     private val Path: MutableList<GraphNode> = ArrayList()
     private var testGraph: MutableMap<GraphNode, MutableList<GraphNode>> = mutableMapOf()
     private var closedVertices: MutableMap<Int,MutableList<Int>> =  mutableMapOf()
-
+    private val Deadlocks: MutableList<MutableList<GraphNode>> = ArrayList()
     fun addNodeById(id: Int):GraphNode {
-        val node = GraphNode(id)
+        val node = GraphNode(id,"signal")
         testGraph.putIfAbsent(node, mutableListOf())
         return node
     }
@@ -78,6 +78,7 @@ class Graph {
                     if(Path.first()==neighbor){
                         println("found deadlock ending in node: $node")
                         println(Path)
+                        Deadlocks.add(Path)
                     }else{
                         println("no circuit at path-end: $node")
                     }
@@ -91,6 +92,18 @@ class Graph {
         closedVertices[node.id]=mutableListOf()
         println("removing node:"+ Path.last())
         Path.removeLast()
+    }
+
+    fun checkChainSignals(){
+        Deadlocks.forEach{
+            it.forEach{
+                testGraph[it]?.forEach {
+                    if (it.name=="chain-signal" && !Path.contains(it)){
+                        println("possible Deadlock prevention detected")
+                    }
+                }
+            }
+        }
     }
 
     fun gentestgraph(){
@@ -119,20 +132,5 @@ class Graph {
         addNeighbour(node5,node1)
      */
 
-    fun dfs(node: Int, visited: BooleanArray, graph: Array<List<Int>>) {
-        //possible algo Depth-First Search
-        // zur Kreiserkennung nutzbar laut https://medium.com/@AlexanderObregon/introduction-to-graph-algorithms-in-java-a-beginners-guide-450cace790d4
-        visited[node] = true
-        println("Visited node: $node")
 
-        for (neighbor in graph[node]) {
-            if (!visited[neighbor]) {
-                dfs(neighbor, visited, graph)
-            } else {
-                println("found deadlock ending in node: $node")
-                println(Path)
-            }
-        }
-
-    }
 }

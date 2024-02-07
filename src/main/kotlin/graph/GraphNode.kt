@@ -1,6 +1,6 @@
 package graph
 
-class GraphNode(var id: Int) {
+class GraphNode(var id: Int,var name:String) {
 
 
     override fun toString(): String {
