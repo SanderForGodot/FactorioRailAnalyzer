@@ -28,10 +28,14 @@ class Block(edge: Edge, var id:Int) {
         }
     }
 
-    fun findEnd():MutableList<Int> {
-        var resultList = mutableListOf<Int>()
+    fun findEnd():ArrayList<Int> {
+        var resultList = ArrayList<Int>()
         edgeList.forEach { edge ->
-            resultList.addAll( edge.findEnd())
+            //resultList.addAll( edge.findEnd())
+            var y = edge.findEnd()
+            y.forEach{yp->
+                resultList.addUnique(yp)
+            }
         }
         return resultList
     }

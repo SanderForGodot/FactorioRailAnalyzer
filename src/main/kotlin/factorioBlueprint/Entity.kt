@@ -1,5 +1,7 @@
 package factorioBlueprint
 
+
+import EntityType
 import com.google.gson.annotations.SerializedName
 
 
@@ -16,12 +18,20 @@ data class Entity(
     lateinit var rightNextRail: ArrayList<Entity>
     lateinit var signalOntheLeft: ArrayList<Entity>
     lateinit var signalOntheRight: ArrayList<Entity>
+    lateinit var entityType:EntityType
 
     fun ini() {
         leftNextRail = arrayListOf()
         rightNextRail = arrayListOf()
         signalOntheLeft = arrayListOf()
         signalOntheRight = arrayListOf()
+        entityType = when(name){
+            "straight-rail"-> EntityType.Rail
+            "curved-rail"->EntityType.CurvedRail
+            "rail-signal"->EntityType.Signal
+            "rail-chain-signal"->EntityType.ChainSignal
+            else -> {EntityType.Error}
+        }
     }
 
     override fun equals(other: Any?): Boolean {
@@ -74,5 +84,12 @@ data class Entity(
         return "Entity(entityNumber=$entityNumber)"
     }
 
+    fun isSignal():Boolean{
+        return entityType.isSignal()
+    }
+
+    fun isRail():Boolean{
+        return entityType.isRail()
+    }
 
 }

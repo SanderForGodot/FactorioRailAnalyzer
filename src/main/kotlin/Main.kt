@@ -2,6 +2,7 @@ import com.google.gson.Gson
 import factorioBlueprint.Entity
 import factorioBlueprint.Position
 import factorioBlueprint.ResultBP
+import graph.Graph
 import kotlin.math.ceil
 import kotlin.math.floor
 
@@ -88,7 +89,7 @@ fun main(args: Array<String>) {
         graphviz.appendEntity(entity)
     }
     graphviz.endGraph()
-//    graphviz.createoutput()
+   graphviz.createoutput()
 
     //endregion
     var relation = mutableMapOf<Entity, ArrayList<Edge>>()
@@ -105,8 +106,8 @@ fun main(args: Array<String>) {
         val signal = edge.last(1)
         if (!signal.name.contains("signal"))
             throw Exception("Signal oder kein Signal das ist hier die frage")
-        if (signal.name == "blank-Signal")
-            return
+        if (signal.name == "blank-signal")
+            return@forEach
         edge.nextEdgeList = relation[signal]!!
         hasPartnerSignal.addUnique(signal)
     }
@@ -124,27 +125,29 @@ fun main(args: Array<String>) {
                 block.edgeList.add(edge)
                 edge.belongsToBlock = block
             } else {
+                if (edge.belongsToBlock == null) {
+                    counter++
+                    val newBlock = Block(edge, counter)
+                    edge.belongsToBlock = newBlock
+                    blockList.add(newBlock)
+                }
                 edge.belongsToBlock!!.merge(block)
                 blockList.remove(block)
             }
         }
-        if (edge.belongsToBlock == null) {
-            counter++
-            val newBlock = Block(edge, counter)
-            edge.belongsToBlock = newBlock
-            blockList.add(newBlock)
-        }
+
     }
 
-     var Graph: MutableMap<Int, MutableList<Int>> = mutableMapOf()
+     var graph: MutableMap<Int, MutableList<Int>> = mutableMapOf()
     blockList.filter { block ->
         block.isRelevant(startSignales)
     }.forEach { block ->
-        Graph[block.id] = block.findEnd()
+        graph[block.id] = block.findEnd().toMutableList()
     }
 
-
-
+    val graphTesting = Graph()
+    graphTesting.setGraph(graph)
+    graphTesting.tiernan()
 
     var i = 0;
     listOfEdges.forEach {
@@ -221,7 +224,7 @@ fun buildEdge(edge: Edge, direction: Int): ArrayList<Edge> {
             val result = buildEdge(Edge(edge, entity), direction * modifier)
             arr.addAll(result)
         } else {
-        val blankSignal = Entity(0, "blank-Signal", Position(0.0, 0.0), 123, true)
+        val blankSignal = Entity(0, "blank-signal", Position(0.0, 0.0), 123, true)
         arr.add(edge.finishUpEdge(blankSignal, true))
     }
 

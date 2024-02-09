@@ -6,6 +6,7 @@ class Graph {
     private val Path: MutableList<Int> = ArrayList()
     private var testGraph: MutableMap<Int, MutableList<Int>> = mutableMapOf()
     private var closedVertices: MutableMap<Int,MutableList<Int>> =  mutableMapOf()
+    private var Deadlocks: MutableList<MutableList<Int>> = mutableListOf()
 
     fun addNode(id: Int) {
         adjVertices.putIfAbsent(GraphNode(id), ArrayList<GraphNode>())
@@ -24,7 +25,7 @@ class Graph {
     }
 
     fun tiernan() {// important Map must be sorted or the Tiernan will not work
-        testGraph=testGraph.toSortedMap()
+        //testGraph=testGraph.toSortedMap()
         println(testGraph)
         testGraph.iterator().forEach {
             println("Startet Path: ${it.key}")
@@ -54,6 +55,7 @@ class Graph {
                     if(Path.first()==neighbor){
                         println("found deadlock ending in node: $node")
                         println(Path)
+                        Deadlocks.add(Path)
                     }else{
                         println("no circuit at path-end: $node")
                     }
@@ -100,5 +102,12 @@ class Graph {
             }
         }
 
+    }
+    fun setGraph(graph:MutableMap<Int, MutableList<Int>>){
+        testGraph =graph
+    }
+
+    fun getDeadlocks(): MutableList<MutableList<Int>> {
+        return Deadlocks;
     }
 }

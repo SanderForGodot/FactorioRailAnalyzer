@@ -16,7 +16,7 @@ class Edge() {
             //    println(this)
             var aaaahhhh = 1123
         }
-        if(!EntityList.addUnique(entity))
+        if (!EntityList.addUnique(entity))
             throw Exception("an Edge is not expected to have the same rail twice")
 
     }
@@ -52,7 +52,7 @@ class Edge() {
         this.validRail = validRail
         done = true
         cleanUpEndings()
-        if(last(1).name== "blank-Signal")
+        if (last(1).name == "blank-Signal")
             return this //TODO: set flags for being a ending edge or somthing
         generateCollision()
         return this
@@ -78,8 +78,9 @@ class Edge() {
         //adding the starting point
         val start = EntityList.first().position
         val firstRail = EntityList[1]
-
+        if(EntityList.size <3) return // if the list is only 2 long, there are only signals in the list and no rails
         var listRef = collisionPoints[firstRail.name]?.get(firstRail.direction)!!
+
         colisionShape.add(closer(start, listRef))
 
 
@@ -161,12 +162,12 @@ class Edge() {
     }
 
     fun findEnd(): MutableList<Int> {
-        if (EntityList.first().name == "rail-signal") //TODO: leo
+        if (EntityList.first().entityType == EntityType.Signal)
             return mutableListOf(belongsToBlock!!.id)
         else {
             var resultList = mutableListOf<Int>()
             nextEdgeList.forEach { edge ->
-                resultList.addAll( edge.findEnd())
+                resultList.addAll(edge.findEnd())
             }
             return resultList
 
