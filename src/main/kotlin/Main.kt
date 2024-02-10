@@ -89,7 +89,7 @@ fun main(args: Array<String>) {
         graphviz.appendEntity(entity)
     }
     graphviz.endGraph()
-   graphviz.createoutput()
+    graphviz.createoutput()
 
     //endregion
     var relation = mutableMapOf<Entity, ArrayList<Edge>>()
@@ -117,28 +117,30 @@ fun main(args: Array<String>) {
     listOfEdges[0].belongsToBlock = blockList[0]
 
     var counter: Int = 0
-    listOfEdges.filter{edge ->
+    listOfEdges.filter { edge ->
         listOfEdges.first() != edge
     }.forEach { edge ->
         blockList.forEach { block ->
-            if (block.doesCollide(edge) && edge.belongsToBlock == null) {
-                block.edgeList.add(edge)
-                edge.belongsToBlock = block
-            } else {
+            if (block.doesCollide(edge)) {
                 if (edge.belongsToBlock == null) {
-                    counter++
-                    val newBlock = Block(edge, counter)
-                    edge.belongsToBlock = newBlock
-                    blockList.add(newBlock)
+                    block.edgeList.add(edge)
+                    edge.belongsToBlock = block
+                } else {
+                    edge.belongsToBlock!!.merge(block)
+                    blockList.remove(block)
                 }
-                edge.belongsToBlock!!.merge(block)
-                blockList.remove(block)
             }
         }
-
+        if (edge.belongsToBlock == null) {
+            counter++
+            val newBlock = Block(edge, counter)
+            edge.belongsToBlock = newBlock
+            blockList.add(newBlock)
+        }
     }
 
-     var graph: MutableMap<Int, MutableList<Int>> = mutableMapOf()
+
+    var graph: MutableMap<Int, MutableList<Int>> = mutableMapOf()
     blockList.filter { block ->
         block.isRelevant(startSignales)
     }.forEach { block ->
