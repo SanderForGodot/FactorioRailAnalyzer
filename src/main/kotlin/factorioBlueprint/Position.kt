@@ -17,6 +17,12 @@ data class Position(
             y + position.y
         )
     }
+    operator fun minus(position: Position): Position {
+        return Position(
+            x - position.x,
+            y - position.y
+        )
+    }
 
     fun distanceTo(position: Position): Double {
         val yDifference = (position.y - this.y).pow(2)

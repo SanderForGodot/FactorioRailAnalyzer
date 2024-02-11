@@ -28,7 +28,7 @@ fun main(args: Array<String>) {
     // normalize coordinate space to start at 1, 1 (this makes the top left rail-corner be at 0.0)
     max -= min
     entityList.forEach { entity ->
-        entity.position -= min
+        entity.position = entity.position - min
     }
 
     val matrix = entityList.filedMatrix(max)
@@ -113,6 +113,12 @@ fun main(args: Array<String>) {
     }
     var startSignales = listOfSignals.toSet() - hasPartnerSignal.toSet()
 
+    //calculating the lengths of the edges
+    listOfEdges.forEach{edge ->
+        edge.calcTileLength()
+    }
+    if(listOfEdges.size == 0 ) throw Exception("No Edges Found, probably because there are no signals in the blueprint")
+    //creating the blocks that are defined by the signals in factorio
     var blockList = arrayListOf<Block>(Block(listOfEdges[0], 0))
     listOfEdges[0].belongsToBlock = blockList[0]
 
@@ -139,7 +145,7 @@ fun main(args: Array<String>) {
         }
     }
 
-
+    // creating the Graph out of the Blocks and edges
     var graph: MutableMap<Int, MutableList<Int>> = mutableMapOf()
     blockList.filter { block ->
         block.isRelevant(startSignales)
@@ -147,10 +153,12 @@ fun main(args: Array<String>) {
         graph[block.id] = block.findEnd().toMutableList()
     }
 
+    //analysing the graph
     val graphTesting = Graph()
     graphTesting.setGraph(graph)
     graphTesting.tiernan()
 
+    //debug output
     var i = 0;
     listOfEdges.forEach {
         println(it)
@@ -194,6 +202,8 @@ fun generateMatrix(size: Position): Array<Array<ArrayList<Entity>?>> {
 }
 
 fun ArrayList<Entity>.filedMatrix(size: Position): Array<Array<ArrayList<Entity>?>> {
+    if(size.x<8){ size.x=8.0 }// make size at least 8 big, so that the matrix is at least 4 big, since a curved rail has the position 4
+    if (size.y<8){ size.y=8.0 }
     val matrix = generateMatrix(size)
     // insert entity's into 2D Array based on the x y coordinates of the entity
     this.forEach { entity ->
@@ -227,6 +237,7 @@ fun buildEdge(edge: Edge, direction: Int): ArrayList<Edge> {
             arr.addAll(result)
         } else {
         val blankSignal = Entity(0, "blank-signal", Position(0.0, 0.0), 123, true)
+        blankSignal.entityType = EntityType.VirtualSignal
         arr.add(edge.finishUpEdge(blankSignal, true))
     }
 
