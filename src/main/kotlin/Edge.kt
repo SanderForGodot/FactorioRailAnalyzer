@@ -67,7 +67,7 @@ class Edge() {
             return
         }
         if (start) {
-            EntityList.removeAt(2)
+            EntityList.removeAt(1)
         }
         if (!end) // condition is inverted do to how Factorio works check docks //todo: add kapietel nummer
         {
@@ -75,7 +75,56 @@ class Edge() {
         }
     }
 
-    private fun generateCollision() { //TODO: Check if the collisionshape is correct, or if the shape is shiftet into the wrong direction
+    private fun generateCollision() { // for refence what wa dedtroyed
+        if (EntityList.size < 3) return // if the list is only 2 long, there are only signals in the list and no rails
+
+        //adding the starting point
+        val start = EntityList.first()
+        val firstRail = EntityList[1]
+        if (!start.isSignal()) throw Exception("cannot calculate collisionShape, got rail: $firstRail, expected signal")
+        if (!firstRail.isRail()) throw Exception("cannot calculate collisionShape, got signal: $start, expected rail")
+
+        var listRef = collisionPoints[firstRail.entityType]?.get(firstRail.direction)!!.toMutableList()
+        listRef[0] +=firstRail.position
+        listRef[1] +=firstRail.position
+        collisionShape.add(closer(start.position, listRef ))
+
+
+        //adding 3 points for each curve (if the curves touch it will only add 2 points )
+        val curves = collisionPoints[EntityType.CurvedRail]!!
+        EntityList.filter {
+            it.entityType == EntityType.CurvedRail
+        }.forEach {
+            var pointA = curves[it.direction]?.get(0)!! + it.position
+            var pointB = curves[it.direction]?.get(1)!! + it.position
+            val end = collisionShape[collisionShape.size - 1]
+            if (pointB.x == end.x || pointB.y == end.y || pointB.x - end.x == pointB.y - end.y) {
+                var tmp = pointA
+                pointA = pointB
+                pointB = pointA
+            }
+            if (collisionShape[collisionShape.size-1] != pointA )
+                collisionShape.add(pointA)
+            collisionShape.add(it.position)
+            collisionShape.add(pointB)
+        }
+
+
+        val lastRail = last(2)
+        listRef = collisionPoints[lastRail.entityType]?.get(lastRail.direction)!!.toMutableList()
+        listRef[0] += lastRail.position
+        listRef[1]+= lastRail.position
+        val lastPoint = collisionShape[collisionShape.size-1]
+        listRef.remove(closer(lastPoint, listRef))
+        if (lastPoint != listRef[0] )
+            collisionShape.add(listRef[0])
+
+    }
+
+
+
+
+    private fun LEOgenerateCollision() { //TODO: Check if the collisionshape is correct, or if the shape is shiftet into the wrong direction
 
         if (EntityList.size < 3) return // if the list is only 2 long, there are only signals in the list and no rails
         //adding the starting point
@@ -84,11 +133,11 @@ class Edge() {
             val rail = EntityList[1]
             if (rail.isSignal()) throw Exception("cannot calculate collisionShape, got signal, expected rail")
             if (rail.entityType == EntityType.Rail) {
-                var listRef = collisionPoints[rail.name]?.get(rail.direction)!!
+                var listRef = collisionPoints[rail.entityType]?.get(rail.direction)!!
                 collisionShape.add(rail.position + listRef[0])
                 collisionShape.add(rail.position + listRef[1])
             } else {
-                var listRef = collisionPoints[rail.name]?.get(rail.direction)!!
+                var listRef = collisionPoints[rail.entityType]?.get(rail.direction)!!
                 collisionShape.add(rail.position + listRef[0]) // TODO: Check (s.o.)
                 collisionShape.add(rail.position) // TODO: Check (s.o.)
                 collisionShape.add(rail.position + listRef[1]) // TODO: Check (s.o.)
@@ -101,13 +150,13 @@ class Edge() {
         if (firstRail.isSignal()) throw Exception("cannot calculate collisionShape, got signal: $firstRail, expected rail")
         if (firstSignal.isRail()) throw Exception("cannot calculate collisionShape, got rail: $firstSignal, expected signal")
 
-        var listRef = collisionPoints[firstRail.name]?.get(firstRail.direction)!!
+        var listRef = collisionPoints[firstRail.entityType]?.get(firstRail.direction)!!
 
         collisionShape.add(firstRail.position + closer(firstSignal.position, listRef)) // TODO: Check (s.o.)
 
 
         //adding 3 points for each curve (if the curves touch it will only add 2 points )
-        val curves = collisionPoints["curved-rail"]!!
+        val curves = collisionPoints[EntityType.CurvedRail]!!
         EntityList.filter {
             it.name == "curved-rail"
         }.forEach {
@@ -128,7 +177,7 @@ class Edge() {
         val lastRail = last(2)
         if (lastRail.isSignal()) throw Exception("cannot calculate collisionShape, got signal: $lastRail, expected rail")
         if (endSignal.isRail()) throw Exception("cannot calculate collisionShape, got rail: $endSignal, expected signal")
-        listRef = collisionPoints[lastRail.name]?.get(lastRail.direction)!!
+        listRef = collisionPoints[lastRail.entityType]?.get(lastRail.direction)!!
         if (endSignal.entityType != EntityType.VirtualSignal) {
             collisionShape.addUnique(lastRail.position + closer(endSignal.position, listRef))  // TODO: Check (s.o.)
         } else {//very different logic for a BlankSignal, since it's position is unknown

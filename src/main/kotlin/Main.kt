@@ -105,7 +105,7 @@ fun main(args: Array<String>) {
     listOfEdges.forEach { edge ->
         val signal = edge.last(1)
         if (!signal.name.contains("signal"))
-            throw Exception("Signal oder kein Signal das ist hier die frage")
+             throw Exception("Signal oder kein Signal das ist hier die frage")
         if (signal.name == "blank-signal")
             return@forEach
         edge.nextEdgeList = relation[signal]!!
@@ -194,8 +194,8 @@ fun ArrayList<Entity>.determineMinMax(): Pair<Position, Position> {
 
 fun generateMatrix(size: Position): Array<Array<ArrayList<Entity>?>> {
     // the cordinate space is comprest by 2 to reduce the amount of empty List, as the Rails are on a 2 by 2 cordinate space anyway
-    return Array(ceil(size.x / 2).toInt()) {
-        Array(ceil(size.y / 2).toInt()) {
+    return Array(ceil(size.x / 2).toInt()+1) {
+        Array(ceil(size.y / 2).toInt()+1) {
             null
         }
     }

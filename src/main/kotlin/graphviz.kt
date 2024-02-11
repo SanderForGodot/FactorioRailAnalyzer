@@ -26,7 +26,7 @@ class Graphviz {
     }
 
     fun appendEntity(entity: Entity){
-        val name = entity.name+entity.direction
+        val name = entity.name+ " r:" +entity.direction  + " id:" + entity.entityNumber
         sb.append(MessageFormat.format(NODE, entity.entityNumber, name))
         entity.leftNextRail.forEach {
             sb.append(MessageFormat.format(EDGE, entity.entityNumber, it.entityNumber ))

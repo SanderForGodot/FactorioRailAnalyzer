@@ -68,11 +68,16 @@ val fact: Map<String, Map<Int, List<Entity>>> = mapOf(
             Entity(1, "signal", Position(0.5, 0.5), 5,false),
         ),
     ),
+    /*
+    To check:
+    3,6,1
+    * */
+
     "curved-rail" to mapOf(
         0 to listOf(
-            Entity(1, "straight-rail", Position(0.0, 2.0), 0),
-            Entity(1, "curved-rail", Position(1.0, 5.0), 4),
-            Entity(1, "curved-rail", Position(-1.0, 5.0), 5),
+            Entity(1, "straight-rail", Position(1.0, 5.0), 0),
+            Entity(1, "curved-rail", Position(2.0, 8.0), 4),
+            Entity(1, "curved-rail", Position(0.0, 8.0), 5),
             Entity(-1, "straight-rail", Position(-3.0, -3.0), 1),
             Entity(-1, "curved-rail", Position(-4.0, -6.0), 4),
 
@@ -83,9 +88,9 @@ val fact: Map<String, Map<Int, List<Entity>>> = mapOf(
         ), 1 to listOf(
             Entity(1, "straight-rail", Position(3.0, -3.0), 7),
             Entity(1, "curved-rail", Position(4.0, -6.0), 5),
-            Entity(-1, "straight-rail", Position(1.0, 5.0), 0),
-            Entity(-1, "curved-rail", Position(2.0, 8.0), 4),
-            Entity(-1, "curved-rail", Position(0.0, 8.0), 5),
+            Entity(-1, "straight-rail", Position(-1.0, 5.0), 0),
+            Entity(-1, "curved-rail", Position(0.0, 8.0), 4),
+            Entity(-1, "curved-rail", Position(-2.0, 8.0), 5),
 
             Entity(-1, "signal", Position(0.5, -3.5), 1,false),
             Entity(1, "signal", Position(2.5, -2.5), 5,true),
@@ -94,7 +99,6 @@ val fact: Map<String, Map<Int, List<Entity>>> = mapOf(
         ), 2 to listOf(
             Entity(1, "straight-rail", Position(3.0, -3.0), 3),
             Entity(1, "curved-rail", Position(6.0, -4.0), 6),
-
             Entity(-1, "straight-rail", Position(-5.0, 1.0), 2),
             Entity(-1, "curved-rail", Position(-8.0, 2.0), 6),
             Entity(-1, "curved-rail", Position(-8.0, 0.0), 7),
@@ -104,8 +108,8 @@ val fact: Map<String, Map<Int, List<Entity>>> = mapOf(
             Entity(-1, "signal", Position(1.5, -2.5), 1,false),
             Entity(1, "signal", Position(3.5, -0.5), 5,true),
         ), 3 to listOf(
-            Entity(1, "straight-rail", Position(3.0, 1.0), 1),
-            Entity(1, "curved-rail", Position(6.0, 1.0), 7),
+            Entity(1, "straight-rail", Position(3.0, 3.0), 1),
+            Entity(1, "curved-rail", Position(6.0, 4.0), 7),
             Entity(-1, "straight-rail", Position(-5.0, -1.0), 2),
             Entity(-1, "curved-rail", Position(-8.0, 0.0), 6),
             Entity(-1, "curved-rail", Position(-8.0, -2.0), 7),
@@ -117,9 +121,9 @@ val fact: Map<String, Map<Int, List<Entity>>> = mapOf(
         ), 4 to listOf(
             Entity(1, "straight-rail", Position(3.0, 3.0), 5),
             Entity(1, "curved-rail", Position(4.0, 6.0), 0),
-            Entity(1, "straight-rail", Position(-1.0, -5.0), 0),
-            Entity(1, "curved-rail", Position(-2.0, -8.0), 0),
-            Entity(1, "curved-rail", Position(0.0, -8.0), 1),
+            Entity(-1, "straight-rail", Position(-1.0, -5.0), 0),
+            Entity(-1, "curved-rail", Position(-2.0, -8.0), 0),
+            Entity(-1, "curved-rail", Position(0.0, -8.0), 1),
 
             Entity(-1, "signal", Position(-2.5, -3.5), 0,false),
             Entity(1, "signal", Position(0.5, -3.5), 7,true),
@@ -140,8 +144,7 @@ val fact: Map<String, Map<Int, List<Entity>>> = mapOf(
             Entity(1, "straight-rail", Position(5.0, -1.0), 2),
             Entity(1, "curved-rail", Position(8.0, -2.0), 2),
             Entity(1, "curved-rail", Position(8.0, 0.0), 3),
-
-            Entity(-1, "straight-rail", Position(3.0, 3.0), 7),
+            Entity(-1, "straight-rail", Position(-3.0, 3.0), 7),
             Entity(-1, "curved-rail", Position(-6.0, 4.0), 2),
 
             Entity(1, "signal", Position(3.5, -2.5), 6,false),
@@ -163,8 +166,8 @@ val fact: Map<String, Map<Int, List<Entity>>> = mapOf(
     )
 )
 
-val collisionPoints: Map<String, Map<Int, List<Position>>> = mapOf(
-    "straight-rail" to mapOf(
+val collisionPoints: Map<EntityType, Map<Int, List<Position>>> = mapOf(
+    EntityType.Rail to mapOf(
         0 to listOf(Position(-1.0,0.0),Position(1.0,0.0)),
         2 to listOf(Position(0.0,-1.0),Position(0.0,1.0)),
         1 to listOf(Position(0.0,-1.0),Position(1.0,0.0)),
@@ -172,7 +175,7 @@ val collisionPoints: Map<String, Map<Int, List<Position>>> = mapOf(
         5 to listOf(Position(0.0,1.0),Position(-1.0,0.0)),
         7 to listOf(Position(0.0,-1.0),Position(-1.0,0.0)),
     ),
-    "curved-rail" to mapOf(
+    EntityType.CurvedRail to mapOf(
         0 to listOf(Position(-2.0,-3.0), Position(1.0,4.0)),
         1 to listOf(Position(2.0,-3.0), Position(-1.0,4.0)),
         2 to listOf(Position(3.0,-2.0), Position(-4.0,1.0)),
