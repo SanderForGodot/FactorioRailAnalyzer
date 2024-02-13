@@ -96,6 +96,7 @@ fun main(args: Array<String>) {
     listOfSignals.forEach { startPoint ->
         relation[startPoint] = buildEdge(Edge(startPoint), if (startPoint.direction < 4) -1 else 1)
     }
+
     val listOfEdges = arrayListOf<Edge>()
     relation.values.forEach { edgeList ->
         listOfEdges.addAll(edgeList)

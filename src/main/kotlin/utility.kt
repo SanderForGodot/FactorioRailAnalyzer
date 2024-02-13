@@ -1,3 +1,4 @@
+import factorioBlueprint.Position
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.*
@@ -51,4 +52,15 @@ fun <E> ArrayList<E>.addUniqueWithDBG(element: E) {
     if (!this.addUnique(element)) {
         println("addUnique failed: array: " + this + "element: " + element)
     }
+}
+
+//TODO : find where we stole this from and add reference
+
+fun intersect(A: Position, B: Position, C: Position, D: Position): Boolean {
+    return ccw(A, C, D) != ccw(B, C, D) && ccw(A, B, C) != ccw(A, B, D)
+}
+
+fun ccw(A: Position, B: Position, C: Position): Boolean {
+    return (C.y - A.y) * (B.x - A.x) > (B.y - A.y) * (C.x - A.x)
+
 }
