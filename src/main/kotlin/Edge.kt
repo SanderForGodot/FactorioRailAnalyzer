@@ -278,13 +278,9 @@ class Edge() {
     private fun checkDiagonal(entity: Entity): Double {// returns the length of a straight or diagonal rail
         return when (entity.direction) {
             //normal straight rail
-            0 -> 2.0
-            2 -> 2.0
+            0,2 -> 2.0
             //diagonal rails
-            1 -> 1.414 //rounded value exact value: sqrt(2)
-            3 -> 1.414 //rounded value exact value: sqrt(2)
-            5 -> 1.414 //rounded value exact value: sqrt(2)
-            7 -> 1.414 //rounded value exact value: sqrt(2)
+            1,3,5,7 -> 1.414 //rounded value exact value: sqrt(2)
             else -> throw Exception("Not a straight rail, logically this shouldn't happen, how did you get here")
         }
     }
