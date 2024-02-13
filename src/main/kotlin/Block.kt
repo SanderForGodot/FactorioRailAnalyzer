@@ -19,7 +19,7 @@ class Block(edge: Edge, var id:Int) {
 
     fun isRelevant(startSignales: Set<Entity>): Boolean {
         return edgeList.any{edge->
-            (edge.EntityList.first().name == "rail-signal") //todo: constant string auslagern
+            (edge.EntityList.first().entityType == EntityType.Signal) //todo: constant string auslagern
                     ||
            ( startSignales.any()
             {signal->

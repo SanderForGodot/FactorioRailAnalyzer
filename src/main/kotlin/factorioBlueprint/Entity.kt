@@ -8,7 +8,7 @@ import com.google.gson.annotations.SerializedName
 data class Entity(
 
     @SerializedName("entity_number") var entityNumber: Int? = null,
-    @SerializedName("name") var name: String,
+    @SerializedName("name") var entityType: EntityType = EntityType.Error,
     @SerializedName("position") var position: Position = Position(0.0, 0.0),
     @SerializedName("direction") var direction: Int = 0,  // when no direction is provided it is in the default aka 0 direction
     var removeRelatedRail: Boolean?=null
@@ -18,29 +18,19 @@ data class Entity(
     lateinit var rightNextRail: ArrayList<Entity>
     lateinit var signalOntheLeft: ArrayList<Entity>
     lateinit var signalOntheRight: ArrayList<Entity>
-    lateinit var entityType:EntityType
-
     fun ini() {
         leftNextRail = arrayListOf()
         rightNextRail = arrayListOf()
         signalOntheLeft = arrayListOf()
         signalOntheRight = arrayListOf()
-        entityType = when(name){
-            "straight-rail"-> EntityType.Rail
-            "curved-rail"->EntityType.CurvedRail
-            "rail-signal"->EntityType.Signal
-            "rail-chain-signal"->EntityType.ChainSignal
-            else -> {EntityType.Error}
-        }
     }
-
     override fun equals(other: Any?): Boolean {
         if (other !is Entity)
             return false
         val other: Entity = other as Entity
 
         return position == other.position
-                && name == other.name
+                && entityType == other.entityType
                 && direction == other.direction
     }
 
@@ -64,20 +54,13 @@ data class Entity(
         return signalOntheLeft.size + signalOntheRight.size > 0
     }
 
-    fun getTheSingleRail(): ArrayList<Entity> {
-        val arr: ArrayList<Entity> = arrayListOf<Entity>()
-        rightNextRail.let { arr.addAll(it) }
-        leftNextRail.let { arr.addAll(it) }
-        assert(arr.size == 1)
-        return arr;
-    }
     fun distanceTo(entity: Entity): Double {
         return this.position.distanceTo(entity.position);
     }
 
     fun relevantShit(): String {
 
-        return "Entity(entityNumber=$entityNumber, name='$name', position=$position, direction=$direction, leftNextRail=$leftNextRail, rightNextRail=$rightNextRail, signalOntheLeft=$signalOntheLeft, signalOntheRight=$signalOntheRight)"
+        return "Entity(entityNumber=$entityNumber, name='${entityType.name}', position=$position, direction=$direction, leftNextRail=$leftNextRail, rightNextRail=$rightNextRail, signalOntheLeft=$signalOntheLeft, signalOntheRight=$signalOntheRight)"
     }
 
     override fun toString(): String {

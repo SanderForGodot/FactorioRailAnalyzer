@@ -19,9 +19,8 @@ fun main(args: Array<String>) {
     //region Phase1: data cleansing and preparation
     //filter out entitys we don't care about
     //ordered by (guessed) amount they appear in a BP
-    val relevantEntity = arrayOf("straight-rail", "rail-chain-signal", "rail-signal", "curved-rail")
     entityList.retainAll {
-        relevantEntity.contains(it.name)
+        it.entityType != EntityType.Error
     }
     // determinant min and max of BP
     val (min, max) = entityList.determineMinMax()
@@ -39,11 +38,11 @@ fun main(args: Array<String>) {
     graphviz.startGraph()
     val listOfSignals: ArrayList<Entity> = arrayListOf()
     entityList.forEach outer@{ entity ->
-        if (entity.name == "rail-signal" || entity.name == "rail-chain-signal") {
+        if (entity.isSignal()) {
             listOfSignals.add(entity)
             return@outer
         }
-        fact[entity.name]?.get(entity.direction)?.forEach inner@{ possibleRail ->
+        fact[entity.entityType]?.get(entity.direction)?.forEach inner@{ possibleRail ->
             val possiblePosition = entity.position + possibleRail.position
             val x = floor(possiblePosition.x / 2).toInt()
             val y = floor(possiblePosition.y / 2).toInt()
@@ -51,17 +50,17 @@ fun main(args: Array<String>) {
                 return@inner
             }
             matrix[x][y]?.forEach { foundRail ->
-                if (foundRail.name.contains(possibleRail.name)
+                if (foundRail.entityType == possibleRail.entityType
                     && foundRail.direction == possibleRail.direction
                 ) {
-                    if (possibleRail.name == "signal") {
+                    if (possibleRail.isSignal()) {
 
                         foundRail.removeRelatedRail =
                             when (foundRail.removeRelatedRail) {
                                 null -> possibleRail.removeRelatedRail!!
                                 (possibleRail.removeRelatedRail!! == foundRail.removeRelatedRail) -> foundRail.removeRelatedRail
                                 //this line means: if the rails disagree prioritise the curved rail state
-                                else -> (entity.name == "curved-rail") == possibleRail.removeRelatedRail!!
+                                else -> (entity.entityType == EntityType.CurvedRail) == possibleRail.removeRelatedRail!!
                             }
 
                         if (possibleRail.entityNumber == 1) {
@@ -105,9 +104,9 @@ fun main(args: Array<String>) {
 
     listOfEdges.forEach { edge ->
         val signal = edge.last(1)
-        if (!signal.name.contains("signal"))
+        if (!signal.isSignal())
              throw Exception("Signal oder kein Signal das ist hier die frage")
-        if (signal.name == "blank-signal")
+        if (signal.entityType ==EntityType.VirtualSignal)
             return@forEach
         edge.nextEdgeList = relation[signal]!!
         hasPartnerSignal.addUnique(signal)
@@ -237,7 +236,7 @@ fun buildEdge(edge: Edge, direction: Int): ArrayList<Edge> {
             val result = buildEdge(Edge(edge, entity), direction * modifier)
             arr.addAll(result)
         } else {
-        val blankSignal = Entity(0, "blank-signal", Position(0.0, 0.0), 123, true)
+        val blankSignal = Entity(0, EntityType.VirtualSignal, Position(0.0, 0.0), 123, true)
         blankSignal.entityType = EntityType.VirtualSignal
         arr.add(edge.finishUpEdge(blankSignal, true))
     }
@@ -315,28 +314,28 @@ fun isSpecialCase(current: Entity, next: Entity): Int {
         return 1
 
 
-    if (current.name == "curved-rail" && current.direction == 0)
-        if (next.name == "straight-rail" && next.direction == 0 ||
-            next.name == "curved-rail" && next.direction == 5
+    if (current.entityType == EntityType.CurvedRail && current.direction == 0)
+        if (next.entityType == EntityType.Rail && next.direction == 0 ||
+            next.entityType == EntityType.CurvedRail && next.direction == 5
         )
             return -1
-    if (current.name == "straight-rail" && current.direction == 0)
-        if (next.name == "curved-rail" && next.direction == 0)
+    if (current.entityType == EntityType.Rail && current.direction == 0)
+        if (next.entityType == EntityType.CurvedRail && next.direction == 0)
             return -1
-    if (current.name == "curved-rail" && current.direction == 5)
-        if (next.name == "curved-rail" && next.direction == 0)
+    if (current.entityType == EntityType.CurvedRail && current.direction == 5)
+        if (next.entityType == EntityType.CurvedRail && next.direction == 0)
             return -1
 
-    if (current.name == "curved-rail" && current.direction == 4)
-        if (next.name == "straight-rail" && next.direction == 0 ||
-            next.name == "curved-rail" && next.direction == 1
+    if (current.entityType == EntityType.CurvedRail && current.direction == 4)
+        if (next.entityType == EntityType.Rail && next.direction == 0 ||
+            next.entityType == EntityType.CurvedRail && next.direction == 1
         )
             return -1
-    if (current.name == "straight-rail" && current.direction == 0)
-        if (next.name == "curved-rail" && next.direction == 4)
+    if (current.entityType == EntityType.Rail && current.direction == 0)
+        if (next.entityType == EntityType.CurvedRail && next.direction == 4)
             return -1
-    if (current.name == "curved-rail" && current.direction == 1)
-        if (next.name == "curved-rail" && next.direction == 4)
+    if (current.entityType == EntityType.CurvedRail && current.direction == 1)
+        if (next.entityType == EntityType.CurvedRail && next.direction == 4)
             return -1
 
     return 1
