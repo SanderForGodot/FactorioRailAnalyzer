@@ -7,6 +7,7 @@ import com.google.gson.annotations.SerializedName
 
 data class Entity(
 
+    // we re use the entityNumber as an indication for direction wich we only do in the fakc.kt
     @SerializedName("entity_number") var entityNumber: Int? = null,
     @SerializedName("name") var name: String,
     @SerializedName("position") var position: Position = Position(0.0, 0.0),
@@ -44,20 +45,22 @@ data class Entity(
                 && direction == other.direction
     }
 
-    fun getDirectionalRailList(direction: Int): ArrayList<Entity> {
+    fun getRailList(direction: Int): ArrayList<Entity> {
         return if (direction == -1)
             leftNextRail
-        else
+        else if (direction == 1)
             rightNextRail
+        else
+            throw Exception("getRailList expects -1 or 1 ")
     }
 
-    fun getDirectionalSignalList(direction: Int): ArrayList<Entity>? {
+    fun getSignalList(direction: Int): ArrayList<Entity> {
         if (direction == -1)
             return signalOntheLeft;
         else if (direction == 1)
             return signalOntheRight
         else
-            return null
+          throw Exception("getSignalList expects -1 or 1 ")
     }
 
     fun hasSignal(): Boolean {
@@ -83,6 +86,9 @@ data class Entity(
     override fun toString(): String {
         return "Entity(entityNumber=$entityNumber)"
     }
+     fun testDebug(): String {
+        return "Entity(entityType=$entityType, position=$position, direction=$direction)"
+    }
 
     fun isSignal():Boolean{
         return entityType.isSignal()
@@ -91,5 +97,7 @@ data class Entity(
     fun isRail():Boolean{
         return entityType.isRail()
     }
+
+
 
 }

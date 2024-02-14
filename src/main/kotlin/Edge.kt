@@ -21,7 +21,7 @@ class Edge() {
     lateinit var EntityList: ArrayList<Entity>
     var collisionShape: ArrayList<Position> = arrayListOf();
     var belongsToBlock: Block? = null
-    private var validRail: Boolean? = null
+    var validRail: Boolean? = null
     var nextEdgeList: List<Edge> = arrayListOf()
     var tileLength: Double = 0.0 // how many tiles the edge is long
 
@@ -188,5 +188,9 @@ class Edge() {
         }
         str += "tile length:$tileLength"
         return str
+    }
+
+    fun debugPrint(): Pair<Boolean, Entity> {
+        return Pair(validRail!!, last(1))
     }
 }
