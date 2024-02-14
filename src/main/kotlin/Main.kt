@@ -36,61 +36,23 @@ fun main(args: Array<String>) {
     //region Phase2: rail Linker: connected rails point to each other with pointer list does the same with signals
     val graphviz = Graphviz() //for the grafikal output in graphviz
     graphviz.startGraph()
-    val listOfSignals: ArrayList<Entity> = arrayListOf()
-    entityList.forEach outer@{ entity ->
-        if (entity.isSignal()) {
-            listOfSignals.add(entity)
-            return@outer
-        }
-        fact[entity.entityType]?.get(entity.direction)?.forEach inner@{ possibleRail ->
-            val possiblePosition = entity.position + possibleRail.position
-            val x = floor(possiblePosition.x / 2).toInt()
-            val y = floor(possiblePosition.y / 2).toInt()
-            if (x < 0 || y < 0 || matrix.size <= x || matrix[0].size <= y) {
-                return@inner
-            }
-            matrix[x][y]?.forEach { foundRail ->
-                if (foundRail.entityType == possibleRail.entityType
-                    && foundRail.direction == possibleRail.direction
-                ) {
-                    if (possibleRail.isSignal()) {
 
-                        foundRail.removeRelatedRail =
-                            when (foundRail.removeRelatedRail) {
-                                null -> possibleRail.removeRelatedRail!!
-                                (possibleRail.removeRelatedRail!! == foundRail.removeRelatedRail) -> foundRail.removeRelatedRail
-                                //this line means: if the rails disagree prioritise the curved rail state
-                                else -> (entity.entityType == EntityType.CurvedRail) == possibleRail.removeRelatedRail!!
-                            }
+    entityList.railLinker(matrix)
 
-                        if (possibleRail.entityNumber == 1) {
-                            foundRail.rightNextRail.addUnique(entity)
-                            entity.signalOntheRight.addUnique(foundRail)
-                        } else {
-                            foundRail.leftNextRail.addUnique(entity)
-                            entity.signalOntheLeft.addUnique(foundRail)
-                        }
-                    } else {
-                        if (possibleRail.entityNumber == 1) {//right
+    val listOfSignals: ArrayList<Entity> = entityList.filter { entity ->
+        entity.isSignal()
+    } as ArrayList<Entity>
 
-                            entity.rightNextRail.addUnique(foundRail)
 
-                        } else {
-
-                            entity.leftNextRail.addUnique(foundRail)
-
-                        }
-                    }
-                }
-            }
-        }
+    //region colps
+    entityList.forEach { entity ->
         println(entity.relevantShit())
         graphviz.appendEntity(entity)
     }
+
     graphviz.endGraph()
     graphviz.createoutput()
 
-    //endregion
     var relation = mutableMapOf<Entity, ArrayList<Edge>>()
     listOfSignals.forEach { startPoint ->
         relation[startPoint] = buildEdge(Edge(startPoint), if (startPoint.direction < 4) -1 else 1)
@@ -105,8 +67,8 @@ fun main(args: Array<String>) {
     listOfEdges.forEach { edge ->
         val signal = edge.last(1)
         if (!signal.isSignal())
-             throw Exception("Signal oder kein Signal das ist hier die frage")
-        if (signal.entityType ==EntityType.VirtualSignal)
+            throw Exception("Signal oder kein Signal das ist hier die frage")
+        if (signal.entityType == EntityType.VirtualSignal)
             return@forEach
         edge.nextEdgeList = relation[signal]!!
         hasPartnerSignal.addUnique(signal)
@@ -114,10 +76,10 @@ fun main(args: Array<String>) {
     var startSignales = listOfSignals.toSet() - hasPartnerSignal.toSet()
 
     //calculating the lengths of the edges
-    listOfEdges.forEach{edge ->
+    listOfEdges.forEach { edge ->
         edge.calcTileLength()
     }
-    if(listOfEdges.size == 0 ) throw Exception("No Edges Found, probably because there are no signals in the blueprint")
+    if (listOfEdges.size == 0) throw Exception("No Edges Found, probably because there are no signals in the blueprint")
     //creating the blocks that are defined by the signals in factorio
     var blockList = arrayListOf<Block>(Block(listOfEdges[0], 0))
     listOfEdges[0].belongsToBlock = blockList[0]
@@ -166,7 +128,62 @@ fun main(args: Array<String>) {
         i++
 
     }
+    //endregion
 }
+
+fun ArrayList<Entity>.railLinker(matrix: Array<Array<ArrayList<Entity>?>>) {
+    //endregion
+    this.filter { entity ->
+        entity.isRail()
+    }.forEach outer@{ Rail -> // for Each (R)eal rail entity
+        fact[Rail.entityType]?.get(Rail.direction)?.forEach inner@{ factEntity -> // for each entity T
+            // calulate P = R + T
+            val possiblePosition = Rail.position + factEntity.position
+            val x = floor(possiblePosition.x / 2).toInt()
+            val y = floor(possiblePosition.y / 2).toInt()
+            if (x < 0 || y < 0 || matrix.size <= x || matrix[0].size <= y) {
+                return@inner
+            }
+            //look up P in matrix
+            addEachMachingEntity(matrix[x][y], factEntity,Rail)
+        }
+    }
+}
+//todo ggf nen besseren namen
+fun addEachMachingEntity(entities: ArrayList<Entity>?, factEntity: Entity, Rail: Entity)
+{
+    entities?.filter { entity ->// for each existing Entity E
+        // if T and E are equel (exept position)
+        (entity.isSignal() == factEntity.isSignal()||
+                entity.isRail() == factEntity.isRail())  //thecicly  this line is unecesary
+                && entity.direction == factEntity.direction
+    }?.forEach { foundEntity ->
+        // yes -> Add a reference from R to E to the direction depending on T
+        if (foundEntity.isSignal()) {
+            // for signal we do tow way add and set an edge case var
+            foundEntity.removeRelatedRail = setRemoveRelatedRail(foundEntity, factEntity, Rail)
+            foundEntity.getRailList(factEntity.entityNumber!!).addUnique(Rail)
+            Rail.getSignalList(factEntity.entityNumber!!).addUnique(foundEntity)
+        } else {
+            Rail.getRailList(factEntity.entityNumber!!).addUnique(foundEntity)
+        }
+    }
+}
+fun setRemoveRelatedRail(foundRail: Entity, factEntity: Entity, Rail: Entity): Boolean {
+    //set removeRelatedRail depending on foundRail (A) and possibleRail (input)
+    var current = foundRail.removeRelatedRail
+    var factVal = factEntity.removeRelatedRail!! //theoretical value determiand by the fackt tk
+    return when (current) {
+        // if bool is not set thake the input value
+        null -> factVal
+        // if the bool and the iput have the same value all ok contine
+        (factVal == current) -> current
+        // if the rails disagree prioritise the curved rail state
+        else -> (Rail.entityType == EntityType.CurvedRail) == factVal
+
+    }
+}
+
 
 //region Phase1 funktions
 
@@ -194,16 +211,20 @@ fun ArrayList<Entity>.determineMinMax(): Pair<Position, Position> {
 
 fun generateMatrix(size: Position): Array<Array<ArrayList<Entity>?>> {
     // the cordinate space is comprest by 2 to reduce the amount of empty List, as the Rails are on a 2 by 2 cordinate space anyway
-    return Array(ceil(size.x / 2).toInt()+1) {
-        Array(ceil(size.y / 2).toInt()+1) {
+    return Array(ceil(size.x / 2).toInt() + 1) {
+        Array(ceil(size.y / 2).toInt() + 1) {
             null
         }
     }
 }
 
 fun ArrayList<Entity>.filedMatrix(size: Position): Array<Array<ArrayList<Entity>?>> {
-    if(size.x<8){ size.x=8.0 }// make size at least 8 big, so that the matrix is at least 4 big, since a curved rail has the position 4
-    if (size.y<8){ size.y=8.0 }
+    if (size.x < 8) {
+        size.x = 8.0
+    }// make size at least 8 big, so that the matrix is at least 4 big, since a curved rail has the position 4
+    if (size.y < 8) {
+        size.y = 8.0
+    }
     val matrix = generateMatrix(size)
     // insert entity's into 2D Array based on the x y coordinates of the entity
     this.forEach { entity ->
@@ -229,7 +250,7 @@ fun buildEdge(edge: Edge, direction: Int): ArrayList<Edge> {
         //otherwise continue and ignore (happens once at the start of every edg to ignore the starting signal)
     }
     val arr: ArrayList<Edge> = arrayListOf()
-    val nextRails = edge.last(1).getDirectionalRailList(direction)
+    val nextRails = edge.last(1).getRailList(direction)
     if (nextRails.size > 0)
         nextRails.forEach { entity ->
             val modifier = isSpecialCase(edge.last(1), entity)
@@ -248,8 +269,8 @@ fun determineEnding(edge: Edge, direction: Int): Edge? {
     //this is an edge case fest
     //we need to check if the signals are relevant and if so is they are on the correct side or at least have a partner
 
-    val goodSide = edge.last(1).getDirectionalSignalList(direction)?.clone() as ArrayList<Entity>?
-    val wrongSide = edge.last(1).getDirectionalSignalList(-direction)?.clone() as ArrayList<Entity>?
+    val goodSide = edge.last(1).getSignalList(direction)?.clone() as ArrayList<Entity>?
+    val wrongSide = edge.last(1).getSignalList(-direction)?.clone() as ArrayList<Entity>?
     while (goodSide?.contains(edge.EntityList.first()) == true) { //remove the starting node so that rail signals end themselves
         goodSide.remove(edge.EntityList.first()) //todo re write this funkktion
     }
