@@ -106,7 +106,7 @@ fun main(args: Array<String>) {
     listOfEdges.forEach { edge ->
         val signal = edge.last(1)
         if (!signal.name.contains("signal"))
-             throw Exception("Signal oder kein Signal das ist hier die frage")
+            throw Exception("Signal oder kein Signal das ist hier die frage")
         if (signal.name == "blank-signal")
             return@forEach
         edge.nextEdgeList = relation[signal]!!
@@ -115,10 +115,10 @@ fun main(args: Array<String>) {
     var startSignales = listOfSignals.toSet() - hasPartnerSignal.toSet()
 
     //calculating the lengths of the edges
-    listOfEdges.forEach{edge ->
+    listOfEdges.forEach { edge ->
         edge.calcTileLength()
     }
-    if(listOfEdges.size == 0 ) throw Exception("No Edges Found, probably because there are no signals in the blueprint")
+    if (listOfEdges.size == 0) throw Exception("No Edges Found, probably because there are no signals in the blueprint")
     //creating the blocks that are defined by the signals in factorio
     var blockList = arrayListOf<Block>(Block(listOfEdges[0], 0))
     listOfEdges[0].belongsToBlock = blockList[0]
@@ -195,16 +195,20 @@ fun ArrayList<Entity>.determineMinMax(): Pair<Position, Position> {
 
 fun generateMatrix(size: Position): Array<Array<ArrayList<Entity>?>> {
     // the cordinate space is comprest by 2 to reduce the amount of empty List, as the Rails are on a 2 by 2 cordinate space anyway
-    return Array(ceil(size.x / 2).toInt()+1) {
-        Array(ceil(size.y / 2).toInt()+1) {
+    return Array(ceil(size.x / 2).toInt() + 1) {
+        Array(ceil(size.y / 2).toInt() + 1) {
             null
         }
     }
 }
 
 fun ArrayList<Entity>.filedMatrix(size: Position): Array<Array<ArrayList<Entity>?>> {
-    if(size.x<8){ size.x=8.0 }// make size at least 8 big, so that the matrix is at least 4 big, since a curved rail has the position 4
-    if (size.y<8){ size.y=8.0 }
+    if (size.x < 8) {
+        size.x = 8.0
+    }// make size at least 8 big, so that the matrix is at least 4 big, since a curved rail has the position 4
+    if (size.y < 8) {
+        size.y = 8.0
+    }
     val matrix = generateMatrix(size)
     // insert entity's into 2D Array based on the x y coordinates of the entity
     this.forEach { entity ->
@@ -306,6 +310,134 @@ fun determineEnding(edge: Edge, direction: Int): Edge? {
     }
 }
 
+fun determineEndingNew(edge: Edge, direction: Int): Edge? {
+
+    if (edge.last(1).entityType == EntityType.Rail) {
+        return determineEndingForStraightRail(edge, direction)
+    } else {
+        return determineEndingForCurvedRail(edge, direction)
+    }
+
+    return null
+}
+
+fun determineEndingForStraightRail(edge: Edge, direction: Int): Edge? {
+    return null
+}
+
+fun determineEndingForCurvedRail(edge: Edge, direction: Int): Edge? {
+    val goodSide = edge.last(1).getDirectionalSignalList(direction)?.clone() as ArrayList<Entity>?
+    val wrongSide = edge.last(1).getDirectionalSignalList(-direction)?.clone() as ArrayList<Entity>?
+
+    if (goodSide?.any { it == edge.EntityList.first() } == true || wrongSide?.any { it == edge.EntityList.first() } == true)
+    //check if the starting signal of the edge is on the rail that called this function
+    {
+        if (isStartSignalAtEnd(edge)) {
+            return null//continue with edge creation
+        } else {
+            return determineEndingStartSignalAtStartPosition(edge, direction)
+        }
+    } else {
+        return determineEndingTrueEnding(edge, direction)
+
+    }
+
+    return null
+}
+
+fun isStartSignalAtEnd(edge: Edge): Boolean { // Todo: test this fucking function, sanders explanation was no help
+    val rail = edge.last(1)
+    val signal = edge.EntityList.first()
+
+    var virtualsignal = fact[rail.name]?.get(rail.direction)?.filter { signal.direction == it.direction }
+    if (virtualsignal?.first()?.removeRelatedRail == true) {
+        // removeRelatedRail correlates to the position of the signal, which in turn determines if it is a starting or ending position
+        // somehow those are the same (blame snader) else build a new lookuptable(leo)
+        return false //maybe wrong, other way around
+    } else {
+        return true //maybe wrong, other way around
+    }
+
+}
+
+fun determineEndingStartSignalAtStartPosition(edge: Edge, direction: Int): Edge? {
+    val goodSide = edge.last(1).getDirectionalSignalList(direction)?.clone() as ArrayList<Entity>?
+    val wrongSide = edge.last(1).getDirectionalSignalList(-direction)?.clone() as ArrayList<Entity>?
+    val startSignal = edge.EntityList.first()
+    val signalCount = (goodSide?.size ?: 0) + (wrongSide?.size ?: 0)
+
+    return when (signalCount) {// different cases for the 4 different possible signal numbers
+        1 -> {
+            return null
+        }//continue with edge creation
+        2 -> {
+            if (goodSide!!.size == 2) {
+                val endSignal = goodSide.first { it != startSignal }
+                //end edge with signal on the same side, which is not the starting signal
+                return edge.finishUpEdge(endSignal, true)
+            }
+            if (wrongSide != null) {
+                if (isSignalOpposite(startSignal, wrongSide.first())) {
+                    return null//continue with edge creation
+                } else {
+                    val falseSignal = wrongSide.first()
+                    // take the signal on the wrong side
+                    return edge.finishUpEdge(falseSignal, false)
+                }
+            } else {
+                throw Exception("determine ending got logically impossible case")
+            }
+        }
+
+        3 -> {
+            if ((wrongSide!!.size) == 2) {
+                val falseSignal = wrongSide.first { !isSignalOpposite(startSignal, it) }
+                // take the signal on the wrong side that is also on the wrong end
+                return edge.finishUpEdge(falseSignal, false)
+            } else {
+                val endsignal = goodSide?.first { it != startSignal }
+                //end edge with signal on the same side, which is not the starting signal
+                return edge.finishUpEdge(endsignal!!, true)
+            }
+        }
+
+        4 -> {
+            val endsignal = goodSide?.first { it != startSignal }
+            //end edge with signal on the same side, which is not the starting signal
+            return edge.finishUpEdge(endsignal!!, true)
+        }
+
+        else -> {
+            throw Exception("determine ending got wrong number of signals:$signalCount")
+        }
+    }
+}
+
+fun determineEndingTrueEnding(edge: Edge, direction: Int): Edge? {
+    val goodSide = edge.last(1).getDirectionalSignalList(direction)?.clone() as ArrayList<Entity>?
+    val wrongSide = edge.last(1).getDirectionalSignalList(-direction)?.clone() as ArrayList<Entity>?
+
+    if ((wrongSide?.size ?: 0) > (goodSide?.size ?: 0)) {
+        //not valid rail
+        val falseSignal = wrongSide?.first()
+        // take the signal on the wrong side
+        return edge.finishUpEdge(falseSignal!!, false)
+    } else {
+        if (((wrongSide?.size ?: 0) == 1) && ((goodSide?.size ?: 0) == 1)) {
+            if (!isSignalOpposite(wrongSide!!.first(), goodSide!!.first())) {
+                //not valid rail
+                val falseSignal = wrongSide.first()
+                // take the signal on the wrong side
+                return edge.finishUpEdge(falseSignal, false)
+            }
+
+        }
+    }
+    // every other case is a correct edge
+    val endSignal = getClosetSignal(edge, goodSide)
+    //end edge with signal on the good side
+    return endSignal?.let { edge.finishUpEdge(it, true) }
+}
 //at specific transitions from rail a to b we need to flip the direction indicator
 
 fun isSpecialCase(current: Entity, next: Entity): Int {
