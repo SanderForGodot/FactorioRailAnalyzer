@@ -19,9 +19,8 @@ fun main(args: Array<String>) {
     //region Phase1: data cleansing and preparation
     //filter out entitys we don't care about
     //ordered by (guessed) amount they appear in a BP
-    val relevantEntity = arrayOf("straight-rail", "rail-chain-signal", "rail-signal", "curved-rail")
     entityList.retainAll {
-        relevantEntity.contains(it.name)
+        it.entityType != EntityType.Error
     }
     // determinant min and max of BP
     val (min, max) = entityList.determineMinMax()
@@ -37,61 +36,23 @@ fun main(args: Array<String>) {
     //region Phase2: rail Linker: connected rails point to each other with pointer list does the same with signals
     val graphviz = Graphviz() //for the grafikal output in graphviz
     graphviz.startGraph()
-    val listOfSignals: ArrayList<Entity> = arrayListOf()
-    entityList.forEach outer@{ entity ->
-        if (entity.name == "rail-signal" || entity.name == "rail-chain-signal") {
-            listOfSignals.add(entity)
-            return@outer
-        }
-        fact[entity.name]?.get(entity.direction)?.forEach inner@{ possibleRail ->
-            val possiblePosition = entity.position + possibleRail.position
-            val x = floor(possiblePosition.x / 2).toInt()
-            val y = floor(possiblePosition.y / 2).toInt()
-            if (x < 0 || y < 0 || matrix.size <= x || matrix[0].size <= y) {
-                return@inner
-            }
-            matrix[x][y]?.forEach { foundRail ->
-                if (foundRail.name.contains(possibleRail.name)
-                    && foundRail.direction == possibleRail.direction
-                ) {
-                    if (possibleRail.name == "signal") {
 
-                        foundRail.removeRelatedRail =
-                            when (foundRail.removeRelatedRail) {
-                                null -> possibleRail.removeRelatedRail!!
-                                (possibleRail.removeRelatedRail!! == foundRail.removeRelatedRail) -> foundRail.removeRelatedRail
-                                //this line means: if the rails disagree prioritise the curved rail state
-                                else -> (entity.name == "curved-rail") == possibleRail.removeRelatedRail!!
-                            }
+    entityList.railLinker(matrix)
 
-                        if (possibleRail.entityNumber == 1) {
-                            foundRail.rightNextRail.addUnique(entity)
-                            entity.signalOntheRight.addUnique(foundRail)
-                        } else {
-                            foundRail.leftNextRail.addUnique(entity)
-                            entity.signalOntheLeft.addUnique(foundRail)
-                        }
-                    } else {
-                        if (possibleRail.entityNumber == 1) {//right
+    val listOfSignals: ArrayList<Entity> = entityList.filter { entity ->
+        entity.isSignal()
+    } as ArrayList<Entity>
 
-                            entity.rightNextRail.addUnique(foundRail)
 
-                        } else {
-
-                            entity.leftNextRail.addUnique(foundRail)
-
-                        }
-                    }
-                }
-            }
-        }
+    //region colps
+    entityList.forEach { entity ->
         println(entity.relevantShit())
         graphviz.appendEntity(entity)
     }
+
     graphviz.endGraph()
     graphviz.createoutput()
 
-    //endregion
     var relation = mutableMapOf<Entity, ArrayList<Edge>>()
     listOfSignals.forEach { startPoint ->
         relation[startPoint] = buildEdge(Edge(startPoint), if (startPoint.direction < 4) -1 else 1)
@@ -105,9 +66,9 @@ fun main(args: Array<String>) {
 
     listOfEdges.forEach { edge ->
         val signal = edge.last(1)
-        if (!signal.name.contains("signal"))
+        if (!signal.isSignal())
             throw Exception("Signal oder kein Signal das ist hier die frage")
-        if (signal.name == "blank-signal")
+        if (signal.entityType == EntityType.VirtualSignal)
             return@forEach
         edge.nextEdgeList = relation[signal]!!
         hasPartnerSignal.addUnique(signal)
@@ -167,7 +128,62 @@ fun main(args: Array<String>) {
         i++
 
     }
+    //endregion
 }
+
+fun ArrayList<Entity>.railLinker(matrix: Array<Array<ArrayList<Entity>?>>) {
+    //endregion
+    this.filter { entity ->
+        entity.isRail()
+    }.forEach outer@{ Rail -> // for Each (R)eal rail entity
+        fact[Rail.entityType]?.get(Rail.direction)?.forEach inner@{ factEntity -> // for each entity T
+            // calulate P = R + T
+            val possiblePosition = Rail.position + factEntity.position
+            val x = floor(possiblePosition.x / 2).toInt()
+            val y = floor(possiblePosition.y / 2).toInt()
+            if (x < 0 || y < 0 || matrix.size <= x || matrix[0].size <= y) {
+                return@inner
+            }
+            //look up P in matrix
+            addEachMachingEntity(matrix[x][y], factEntity,Rail)
+        }
+    }
+}
+//todo ggf nen besseren namen
+fun addEachMachingEntity(entities: ArrayList<Entity>?, factEntity: Entity, Rail: Entity)
+{
+    entities?.filter { entity ->// for each existing Entity E
+        // if T and E are equel (exept position)
+        (entity.isSignal() == factEntity.isSignal()||
+                entity.isRail() == factEntity.isRail())  //thecicly  this line is unecesary
+                && entity.direction == factEntity.direction
+    }?.forEach { foundEntity ->
+        // yes -> Add a reference from R to E to the direction depending on T
+        if (foundEntity.isSignal()) {
+            // for signal we do tow way add and set an edge case var
+            foundEntity.removeRelatedRail = setRemoveRelatedRail(foundEntity, factEntity, Rail)
+            foundEntity.getRailList(factEntity.entityNumber!!).addUnique(Rail)
+            Rail.getSignalList(factEntity.entityNumber!!).addUnique(foundEntity)
+        } else {
+            Rail.getRailList(factEntity.entityNumber!!).addUnique(foundEntity)
+        }
+    }
+}
+fun setRemoveRelatedRail(foundRail: Entity, factEntity: Entity, Rail: Entity): Boolean {
+    //set removeRelatedRail depending on foundRail (A) and possibleRail (input)
+    var current = foundRail.removeRelatedRail
+    var factVal = factEntity.removeRelatedRail!! //theoretical value determiand by the fackt tk
+    return when (current) {
+        // if bool is not set thake the input value
+        null -> factVal
+        // if the bool and the iput have the same value all ok contine
+        (factVal == current) -> current
+        // if the rails disagree prioritise the curved rail state
+        else -> (Rail.entityType == EntityType.CurvedRail) == factVal
+
+    }
+}
+
 
 //region Phase1 funktions
 
@@ -234,14 +250,14 @@ fun buildEdge(edge: Edge, direction: Int): ArrayList<Edge> {
         //otherwise continue and ignore (happens once at the start of every edg to ignore the starting signal)
     }
     val arr: ArrayList<Edge> = arrayListOf()
-    val nextRails = edge.last(1).getDirectionalRailList(direction)
+    val nextRails = edge.last(1).getRailList(direction)
     if (nextRails.size > 0)
         nextRails.forEach { entity ->
             val modifier = isSpecialCase(edge.last(1), entity)
             val result = buildEdge(Edge(edge, entity), direction * modifier)
             arr.addAll(result)
         } else {
-        val blankSignal = Entity(0, "blank-signal", Position(0.0, 0.0), 123, true)
+        val blankSignal = Entity(0, EntityType.VirtualSignal, Position(0.0, 0.0), 123, true)
         blankSignal.entityType = EntityType.VirtualSignal
         arr.add(edge.finishUpEdge(blankSignal, true))
     }
@@ -253,8 +269,8 @@ fun determineEnding(edge: Edge, direction: Int): Edge? {
     //this is an edge case fest
     //we need to check if the signals are relevant and if so is they are on the correct side or at least have a partner
 
-    val goodSide = edge.last(1).getDirectionalSignalList(direction)?.clone() as ArrayList<Entity>?
-    val wrongSide = edge.last(1).getDirectionalSignalList(-direction)?.clone() as ArrayList<Entity>?
+    val goodSide = edge.last(1).getSignalList(direction)?.clone() as ArrayList<Entity>?
+    val wrongSide = edge.last(1).getSignalList(-direction)?.clone() as ArrayList<Entity>?
     while (goodSide?.contains(edge.EntityList.first()) == true) { //remove the starting node so that rail signals end themselves
         goodSide.remove(edge.EntityList.first()) //todo re write this funkktion
     }
@@ -447,28 +463,28 @@ fun isSpecialCase(current: Entity, next: Entity): Int {
         return 1
 
 
-    if (current.name == "curved-rail" && current.direction == 0)
-        if (next.name == "straight-rail" && next.direction == 0 ||
-            next.name == "curved-rail" && next.direction == 5
+    if (current.entityType == EntityType.CurvedRail && current.direction == 0)
+        if (next.entityType == EntityType.Rail && next.direction == 0 ||
+            next.entityType == EntityType.CurvedRail && next.direction == 5
         )
             return -1
-    if (current.name == "straight-rail" && current.direction == 0)
-        if (next.name == "curved-rail" && next.direction == 0)
+    if (current.entityType == EntityType.Rail && current.direction == 0)
+        if (next.entityType == EntityType.CurvedRail && next.direction == 0)
             return -1
-    if (current.name == "curved-rail" && current.direction == 5)
-        if (next.name == "curved-rail" && next.direction == 0)
+    if (current.entityType == EntityType.CurvedRail && current.direction == 5)
+        if (next.entityType == EntityType.CurvedRail && next.direction == 0)
             return -1
 
-    if (current.name == "curved-rail" && current.direction == 4)
-        if (next.name == "straight-rail" && next.direction == 0 ||
-            next.name == "curved-rail" && next.direction == 1
+    if (current.entityType == EntityType.CurvedRail && current.direction == 4)
+        if (next.entityType == EntityType.Rail && next.direction == 0 ||
+            next.entityType == EntityType.CurvedRail && next.direction == 1
         )
             return -1
-    if (current.name == "straight-rail" && current.direction == 0)
-        if (next.name == "curved-rail" && next.direction == 4)
+    if (current.entityType == EntityType.Rail && current.direction == 0)
+        if (next.entityType == EntityType.CurvedRail && next.direction == 4)
             return -1
-    if (current.name == "curved-rail" && current.direction == 1)
-        if (next.name == "curved-rail" && next.direction == 4)
+    if (current.entityType == EntityType.CurvedRail && current.direction == 1)
+        if (next.entityType == EntityType.CurvedRail && next.direction == 4)
             return -1
 
     return 1

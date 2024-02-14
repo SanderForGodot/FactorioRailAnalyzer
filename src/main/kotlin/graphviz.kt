@@ -17,7 +17,7 @@ class Graphviz {
         sb.append(OPEN_GRAPH)
         var i=0
         while (i<edge.EntityList.size-1){
-            sb.append(MessageFormat.format(NODE, edge.EntityList[i].entityNumber, edge.EntityList[i].name+edge.EntityList[i].direction ))
+            sb.append(MessageFormat.format(NODE, edge.EntityList[i].entityNumber, edge.EntityList[i].entityType.name+edge.EntityList[i].direction ))
             sb.append(MessageFormat.format(EDGE, edge.EntityList[i].entityNumber, edge.EntityList[i+1].entityNumber ))
             i++
         }
@@ -26,7 +26,7 @@ class Graphviz {
     }
 
     fun appendEntity(entity: Entity){
-        val name = entity.name+ " r:" +entity.direction  + " id:" + entity.entityNumber
+        val name = entity.entityType.name + " r:" +entity.direction  + " id:" + entity.entityNumber
         sb.append(MessageFormat.format(NODE, entity.entityNumber, name))
         entity.leftNextRail.forEach {
             sb.append(MessageFormat.format(EDGE, entity.entityNumber, it.entityNumber ))

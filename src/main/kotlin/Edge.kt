@@ -183,7 +183,7 @@ class Edge() {
 
         EntityList.forEach {
             val int: String = (it.entityNumber ?: 0).toString();
-            str += int + "|" + it.name + "|" + it.position.toString() + "\n"
+            str += int + "|" + it.entityType.name + "|" + it.position.toString() + "\n"
 
         }
         str += "tile length:$tileLength"
