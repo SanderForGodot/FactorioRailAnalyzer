@@ -342,8 +342,8 @@ fun determineEndingForStraightRail(edge: Edge, direction: Int): Edge? {
 }
 
 fun determineEndingForCurvedRail(edge: Edge, direction: Int): Edge? {
-    val goodSide = edge.last(1).getDirectionalSignalList(direction)?.clone() as ArrayList<Entity>?
-    val wrongSide = edge.last(1).getDirectionalSignalList(-direction)?.clone() as ArrayList<Entity>?
+    val goodSide = edge.last(1).getSignalList(direction)?.clone() as ArrayList<Entity>?
+    val wrongSide = edge.last(1).getSignalList(-direction)?.clone() as ArrayList<Entity>?
 
     if (goodSide?.any { it == edge.EntityList.first() } == true || wrongSide?.any { it == edge.EntityList.first() } == true)
     //check if the starting signal of the edge is on the rail that called this function
@@ -365,7 +365,7 @@ fun isStartSignalAtEnd(edge: Edge): Boolean { // Todo: test this fucking functio
     val rail = edge.last(1)
     val signal = edge.EntityList.first()
 
-    var virtualsignal = fact[rail.name]?.get(rail.direction)?.filter { signal.direction == it.direction }
+    var virtualsignal = fact[rail.entityType]?.get(rail.direction)?.filter { signal.direction == it.direction }
     if (virtualsignal?.first()?.removeRelatedRail == true) {
         // removeRelatedRail correlates to the position of the signal, which in turn determines if it is a starting or ending position
         // somehow those are the same (blame snader) else build a new lookuptable(leo)
@@ -377,8 +377,8 @@ fun isStartSignalAtEnd(edge: Edge): Boolean { // Todo: test this fucking functio
 }
 
 fun determineEndingStartSignalAtStartPosition(edge: Edge, direction: Int): Edge? {
-    val goodSide = edge.last(1).getDirectionalSignalList(direction)?.clone() as ArrayList<Entity>?
-    val wrongSide = edge.last(1).getDirectionalSignalList(-direction)?.clone() as ArrayList<Entity>?
+    val goodSide = edge.last(1).getSignalList(direction)?.clone() as ArrayList<Entity>?
+    val wrongSide = edge.last(1).getSignalList(-direction)?.clone() as ArrayList<Entity>?
     val startSignal = edge.EntityList.first()
     val signalCount = (goodSide?.size ?: 0) + (wrongSide?.size ?: 0)
 
@@ -430,8 +430,8 @@ fun determineEndingStartSignalAtStartPosition(edge: Edge, direction: Int): Edge?
 }
 
 fun determineEndingTrueEnding(edge: Edge, direction: Int): Edge? {
-    val goodSide = edge.last(1).getDirectionalSignalList(direction)?.clone() as ArrayList<Entity>?
-    val wrongSide = edge.last(1).getDirectionalSignalList(-direction)?.clone() as ArrayList<Entity>?
+    val goodSide = edge.last(1).getSignalList(direction)?.clone() as ArrayList<Entity>?
+    val wrongSide = edge.last(1).getSignalList(-direction)?.clone() as ArrayList<Entity>?
 
     if ((wrongSide?.size ?: 0) > (goodSide?.size ?: 0)) {
         //not valid rail

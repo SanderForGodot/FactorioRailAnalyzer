@@ -73,7 +73,7 @@ fun main() {
     }
     var ergebnise = arrayListOf<Any?>()
     edgeListOben.forEach { edge ->
-        ergebnise.add(determineEnding(edge, 1))
+        ergebnise.add(determineEndingNew(edge, 1))
     }
     var i = -1
     while (i < solutionOben.size - 1) {
@@ -86,6 +86,11 @@ fun main() {
                 var t = (ergebnise[i] as Edge).debugPrint()
                 println("Fail case:" + i + " should be " + solutionOben[i] + " but is" +t.first + " " + t.second.testDebug())
             }
+            continue
+        }
+        if (ergebnise[i] == null)
+        {
+            println("Fail case:" + i + " should be " + solutionOben[i] + " but is null" )
             continue
         }
         var edge = ergebnise[i] as Edge
