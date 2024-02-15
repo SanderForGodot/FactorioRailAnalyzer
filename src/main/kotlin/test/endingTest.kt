@@ -40,8 +40,8 @@ fun main() {
             Pair(false, getFact(2)),
             Pair(false, getFact(2)),
         )
-    //test("oben.txt", solutionOben)
-    test("unten.txt", solutionUnten)
+    test("oben.txt", solutionOben)
+   test("unten.txt", solutionUnten)
 
 }
 fun test(filename:String, solution:ArrayList<Any?>){
@@ -84,8 +84,11 @@ fun test(filename:String, solution:ArrayList<Any?>){
 
         edgeListOben.add(edge)
     }
+    var padpw = 0
     var ergebnise = arrayListOf<Any?>()
     edgeListOben.forEach { edge ->
+        println(padpw)
+        padpw ++;
         ergebnise.add(determineEndingSander(edge, 1))
     }
     println(filename)
