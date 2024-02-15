@@ -1,67 +1,34 @@
 import factorioBlueprint.Entity
-
-val a = 0;
-val b = 1;
-val c = 2;
-val d = 3;
 fun determineEndingSander(edge: Edge, direction: Int): Edge? {
-    val goodSide = edge.last(1).getSignalList(direction)
-    val wrongSide = edge.last(1).getSignalList(-direction)
+    val goodSide = edge.last(1).getSignalList(direction)            // in drive direction on the right site
+    val wrongSide = edge.last(1).getSignalList(-direction)          // in drive direction on the left  site
 
-    // var namen relativ zu R2 einer gebogenen schiene (grafik)
-    var untenLinks: Entity? = retiveSignal(goodSide, false)
-    var untenRechts: Entity? = retiveSignal(goodSide, true)
-    var obenLinks: Entity? = retiveSignal(wrongSide, true)
-    var obenRechts: Entity? = retiveSignal(wrongSide, false)
-    var startSignal = edge.EntityList.first()
-    if (goodSide.contains(startSignal)) {
-        var a = obenLinks
-        var b = obenRechts
-        var x = untenLinks
-        var y = untenRechts
-        var c = goodSide.size == 2
-        var d = x == startSignal
+    // var namen relativ zu R2 einer gebogenen schiene (grafik)        // equivalent if you view it in drive direction
+    val untenLinks: Entity? = retrieveSignal(goodSide, false)         // firstRight
+    val untenRechts: Entity? = retrieveSignal(goodSide, true)         // secondRight
+    val obenLinks: Entity? = retrieveSignal(wrongSide, true)          // firstLeft
+    val obenRechts: Entity? = retrieveSignal(wrongSide, false)        // secondLeft
+    val startSignal = edge.EntityList.first()
 
-        var abcd = arrayListOf<Any?>(a, b, c, d)
-
-        var endingSig = topCase(a, b, c, d, y)
-        if (endingSig == null)
-            return null
-        var validRail = goodSide.contains(endingSig)
-
-        return edge.finishUpEdge(endingSig, validRail)
+    val endingSig: Entity? = if (goodSide.contains(startSignal)) {
+        if (untenRechts == startSignal) // !d   = x == startSignal
+            null
+        else if (goodSide.size == 2) // c    = goodSide.size == 2
+            untenRechts
+        else
+            obenRechts
     } else {
-        var abcd = arrayListOf<Entity?>(obenLinks, untenLinks, obenRechts, untenRechts)
-        var endingSig = bottomCase(abcd)
-        var validRail = goodSide.contains(endingSig)
-        return edge.finishUpEdge(endingSig, validRail)
-
+        //left bevor right | unten vor oben
+        val priorityOrder = arrayListOf(untenLinks, obenLinks, untenRechts, obenRechts)
+        priorityOrder.first { it != null }!!
     }
-
-
-}
-
-fun topCase(a: Entity?, b: Entity?, c: Boolean, d: Boolean, y: Entity?): Entity? {
-    if (!d)
+    if (endingSig == null)
         return null
-    if (c)
-        return y
-    return b
+    val validRail = goodSide.contains(endingSig)
+    return edge.finishUpEdge(endingSig, validRail)
 }
 
-fun bottomCase(abcd: ArrayList<Entity?>): Entity {
-    if (abcd[b] != null)
-        return abcd[b]!!
-    if (abcd[a] != null)
-        return abcd[a]!!
-    if (abcd[d] != null)
-        return abcd[d]!!
-    if (abcd[c] != null)
-        return abcd[c]!!
-    throw Exception("Determine ending should have never been called!")
-}
-
-fun retiveSignal(signalList: ArrayList<Entity>, b: Boolean): Entity? {
+fun retrieveSignal(signalList: ArrayList<Entity>, b: Boolean): Entity? {
     return if (signalList.size == 0)
         null
     else
