@@ -24,24 +24,23 @@ fun main() {
         )
     var solutionUnten: ArrayList<Any?> =
         arrayListOf(
-            Pair(true, getFact(6)),
-            Pair(true, getFact(6)),
-            Pair(true, getFact(6)),
-            Pair(false, getFact(2)),
-            Pair(true, getFact(5)),
-            Pair(true, getFact(6)),
-            Pair(true, getFact(6)),
+            Pair(true, getFact(6)),    //0
             Pair(true, getFact(6)),
             Pair(false, getFact(2)),
-            Pair(true, getFact(6)),
-            Pair(true, getFact(6)),
-            Pair(false, getFact(1)),
+            Pair(true, getFact(6)),    //3
             Pair(true, getFact(5)),
+            Pair(true, getFact(6)),     //5
+            Pair(true, getFact(6)),     //6
+            Pair(false, getFact(2)),    //7
+            Pair(true, getFact(6)),     //8
             Pair(true, getFact(6)),
+            Pair(false, getFact(1)),    //10
+            Pair(true, getFact(5)),     //11
+            Pair(true, getFact(6)),     //12
             Pair(false, getFact(2)),
             Pair(false, getFact(2)),
         )
-    test("oben.txt", solutionOben)
+    //test("oben.txt", solutionOben)
     test("unten.txt", solutionUnten)
 
 }
@@ -87,7 +86,7 @@ fun test(filename:String, solution:ArrayList<Any?>){
     }
     var ergebnise = arrayListOf<Any?>()
     edgeListOben.forEach { edge ->
-        ergebnise.add(determineEnding(edge, 1))
+        ergebnise.add(determineEndingSander(edge, 1))
     }
     println(filename)
     var i = -1
