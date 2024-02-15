@@ -30,8 +30,14 @@ data class Entity(
             return false
         val other: Entity = other as Entity
 
+        var A = false
+        if (this.entityType == EntityType.AnySignal || other.entityType ==EntityType.AnySignal)
+            A = (this.isSignal() && other.isSignal())
+        else
+            A = entityType == other.entityType
+
         return position == other.position
-                && entityType == other.entityType
+                && A
                 && direction == other.direction
     }
 
