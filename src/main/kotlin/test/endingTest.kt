@@ -86,13 +86,12 @@ fun test(filename:String, solution:ArrayList<Any?>){
         edgeListOben.add(edge)
     }
     var ergebnise = arrayListOf<Any?>()
-    var dEC= determineEndingClass()
     edgeListOben.forEach { edge ->
-        ergebnise.add(dEC.determineEndingNew(edge, 1))
+        ergebnise.add(determineEnding(edge, 1))
     }
     println(filename)
     var i = -1
-    while (i < (solution.size - 1)) {
+    while (i < (ergebnise.size - 1)) {
 
         i++
         if (solution[i] == null) {
