@@ -66,10 +66,10 @@ data class Entity(
         return "Entity(entityNumber=$entityNumber, name='${entityType.name}', position=$position, direction=$direction, leftNextRail=$leftNextRail, rightNextRail=$rightNextRail, signalOntheLeft=$signalOntheLeft, signalOntheRight=$signalOntheRight)"
     }
 
-    override fun toString(): String {
+    fun etityNumberString(): String {
         return "Entity(entityNumber=$entityNumber)"
     }
-     fun testDebug(): String {
+    override fun toString(): String {
         return "Entity(entityType=$entityType, position=$position, direction=$direction)"
     }
 

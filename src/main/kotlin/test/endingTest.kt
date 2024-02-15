@@ -84,7 +84,7 @@ fun main() {
                 println("Erfolg case:" + i)
             else {
                 var t = (ergebnise[i] as Edge).debugPrint()
-                println("Fail case:" + i + " should be " + solutionOben[i] + " but is" +t.first + " " + t.second.testDebug())
+                println("Fail case:" + i + " should be " + solutionOben[i] + " but is" +t)
             }
             continue
         }
@@ -99,7 +99,7 @@ fun main() {
         if (edge.validRail == lösug.first && edge.last(1) == lösug.second)
             println("Erfolg case:" + i)
         else
-            println("Fail case:" + i + " should be " + solutionOben[i] + " but is" + Pair(edge.validRail, edge.last(1).testDebug()))
+            println("Fail case:" + i + " should be " + solutionOben[i] + " but is" +edge.debugPrint())
     }
 
 }
