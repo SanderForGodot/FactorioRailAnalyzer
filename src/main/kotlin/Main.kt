@@ -16,7 +16,7 @@ fun main(args: Array<String>) {
     val entityList = resultBP.blueprint.entities
     //endregion
     //region Phase1: data cleansing and preparation
-    //filter out entitys we don't care about
+    //filter out entity's we don't care about
     //ordered by (guessed) amount they appear in a BP
     entityList.retainAll {
         it.entityType != EntityType.Error
@@ -82,7 +82,7 @@ fun main(args: Array<String>) {
     graphTesting.tiernan()
 
     //debug output
-    var i = 0;
+    var i = 0
     listOfEdges.forEach {
         println(it)
         printEdge(it, i)
@@ -95,7 +95,7 @@ fun main(args: Array<String>) {
 fun connectEdgesToBlocks(listOfEdges: ArrayList<Edge>): ArrayList<Block> {
     val blockList: ArrayList<Block> = arrayListOf(Block(listOfEdges[0], 0))
     listOfEdges[0].belongsToBlock = blockList[0]
-    var counter: Int = 0
+    var counter = 0
     listOfEdges.filter { edge ->
         listOfEdges.first() != edge
     }.forEach { edge ->
@@ -124,58 +124,57 @@ fun ArrayList<Entity>.railLinker(matrix: Array<Array<ArrayList<Entity>?>>) {
     //endregion
     this.filter { entity ->
         entity.isRail()
-    }.forEach outer@{ Rail -> // for Each (R)eal rail entity
-        fact[Rail.entityType]?.get(Rail.direction)?.forEach inner@{ factEntity -> // for each entity T
-            // calulate P = R + T
-            val possiblePosition = Rail.position + factEntity.position
+    }.forEach outer@{ rail -> // for Each (R)eal rail entity
+        fact[rail.entityType]?.get(rail.direction)?.forEach inner@{ factEntity -> // for each entity T
+            // calculate P = R + T
+            val possiblePosition = rail.position + factEntity.position
             val x = floor(possiblePosition.x / 2).toInt()
             val y = floor(possiblePosition.y / 2).toInt()
             if (x < 0 || y < 0 || matrix.size <= x || matrix[0].size <= y) {
                 return@inner
             }
             //look up P in matrix
-            addEachMatchingEntity(matrix[x][y], factEntity, Rail)
+            addEachMatchingEntity(matrix[x][y], factEntity, rail)
         }
     }
 }
 
-//todo ggf nen besseren namen
-fun addEachMatchingEntity(entities: ArrayList<Entity>?, factEntity: Entity, Rail: Entity) {
+fun addEachMatchingEntity(entities: ArrayList<Entity>?, factEntity: Entity, rail: Entity) {
     entities?.filter { entity ->// for each existing Entity E
-        // if T and E are equel (exept position)
+        // if T and E are equal (except position)
         (entity.isSignal() == factEntity.isSignal() ||
-                entity.isRail() == factEntity.isRail())  //thecicly  this line is unecesary
+                entity.isRail() == factEntity.isRail())  //technically  this check is unnecessary
                 && entity.direction == factEntity.direction
     }?.forEach { foundEntity ->
         // yes -> Add a reference from R to E to the direction depending on T
         if (foundEntity.isSignal()) {
-            // for signal we do tow way add and set an edge case var
-            foundEntity.removeRelatedRail = setRemoveRelatedRail(foundEntity, factEntity, Rail)
-            foundEntity.getRailList(factEntity.entityNumber!!).addUnique(Rail)
-            Rail.getSignalList(factEntity.entityNumber!!).addUnique(foundEntity)
+            // for signal, we do tow way add and set an edge case var
+            foundEntity.removeRelatedRail = setRemoveRelatedRail(foundEntity, factEntity, rail)
+            foundEntity.getRailList(factEntity.entityNumber!!).addUnique(rail)
+            rail.getSignalList(factEntity.entityNumber!!).addUnique(foundEntity)
         } else {
-            Rail.getRailList(factEntity.entityNumber!!).addUnique(foundEntity)
+            rail.getRailList(factEntity.entityNumber!!).addUnique(foundEntity)
         }
     }
 }
 
-fun setRemoveRelatedRail(foundRail: Entity, factEntity: Entity, Rail: Entity): Boolean {
+fun setRemoveRelatedRail(foundRail: Entity, factEntity: Entity, rail: Entity): Boolean {
     //set removeRelatedRail depending on foundRail (A) and possibleRail (input)
-    var current = foundRail.removeRelatedRail
-    var factVal = factEntity.removeRelatedRail!! //theoretical value determiand by the fackt tk
+    val current = foundRail.removeRelatedRail
+    val factVal = factEntity.removeRelatedRail!! //theoretical value determined by the fact.tk
     return when (current) {
-        // if bool is not set thake the input value
+        // if bool is not set take the input value
         null -> factVal
-        // if the bool and the iput have the same value all ok contine
+        // if the bool and the input have the same value all ok continue
         (factVal == current) -> current
         // if the rails disagree prioritise the curved rail state
-        else -> (Rail.entityType == EntityType.CurvedRail) == factVal
+        else -> (rail.entityType == EntityType.CurvedRail) == factVal
 
     }
 }
 
 
-//region Phase1 funktions
+//region Phase1 functions
 
 fun ArrayList<Entity>.determineMinMax(): Pair<Position, Position> {
     val min = this.first().position.copy()
@@ -200,7 +199,7 @@ fun ArrayList<Entity>.determineMinMax(): Pair<Position, Position> {
 }
 
 fun generateMatrix(size: Position): Array<Array<ArrayList<Entity>?>> {
-    // the cordinate space is comprest by 2 to reduce the amount of empty List, as the Rails are on a 2 by 2 cordinate space anyway
+    // the coordinate space is compress by 2 to reduce the amount of empty List, as the Rails are on a 2 by 2 coordinate space anyway
     return Array(ceil(size.x / 2).toInt() + 1) {
         Array(ceil(size.y / 2).toInt() + 1) {
             null
@@ -259,13 +258,13 @@ fun determineEnding(edge: Edge, direction: Int): Edge? {
     //this is an edge case fest
     //we need to check if the signals are relevant and if so is they are on the correct side or at least have a partner
 
-    val goodSide = edge.last(1).getSignalList(direction)?.clone() as ArrayList<Entity>?
-    val wrongSide = edge.last(1).getSignalList(-direction)?.clone() as ArrayList<Entity>?
+    val goodSide = edge.last(1).getSignalList(direction).clone() as ArrayList<Entity>?
+    val wrongSide = edge.last(1).getSignalList(-direction).clone() as ArrayList<Entity>?
     while (goodSide?.contains(edge.entityList.first()) == true) { //remove the starting node so that rail signals end themselves
-        goodSide.remove(edge.entityList.first()) //todo re write this funkktion
+        goodSide.remove(edge.entityList.first()) //todo re write this function
     }
     val hasWrong: Boolean =
-        wrongSide?.isNotEmpty() ?: false // if there a signal on the opposite side we asume problems
+        wrongSide?.isNotEmpty() ?: false // if there is a signal on the opposite side we assume problems
     val anzRight = if (goodSide?.size == null) 0 else goodSide.size // I am proud of this line
 
 
