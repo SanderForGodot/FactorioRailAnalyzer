@@ -1,6 +1,3 @@
-import factorioBlueprint.Entity
-
-
 fun determineEndingNew(edge: Edge, direction: Int): Edge? {
 
     if (edge.last(1).entityType == EntityType.Rail) {
@@ -46,7 +43,7 @@ fun determineEndingForStraightRailOnesignal(edge: Edge, direction: Int): Edge? {
         // take the signal on the wrong side
         return edge.finishUpEdge(falseSignal, false)
     }
-    if (goodSide.first() == edge.EntityList.first()) {//starting rail
+    if (goodSide.first() == edge.entityList.first()) {//starting rail
         return null //continue with edge creation
     } else {//ending rail with good side
         val endSignal = goodSide.first()
@@ -59,7 +56,7 @@ fun determineEndingForStraightRailOnesignal(edge: Edge, direction: Int): Edge? {
 fun determineEndingForStraightRailTwosignals(edge: Edge, direction: Int): Edge? {
     val goodSide = edge.last(1).getSignalList(direction)
     val wrongSide = edge.last(1).getSignalList(-direction)
-    val startSignal = edge.EntityList.first()
+    val startSignal = edge.entityList.first()
 
     throw Exception("not yet implemented")
 }
@@ -67,7 +64,7 @@ fun determineEndingForStraightRailTwosignals(edge: Edge, direction: Int): Edge? 
 fun determineEndingForCurvedRail(edge: Edge, direction: Int): Edge? {
     val goodSide = edge.last(1).getSignalList(direction)
     val wrongSide = edge.last(1).getSignalList(-direction)
-    val startSignal = edge.EntityList.first()
+    val startSignal = edge.entityList.first()
 
     if (goodSide.any { it == startSignal } || wrongSide.any { it == startSignal })
     //check if the starting signal of the edge is on the rail that called this function
@@ -86,7 +83,7 @@ fun determineEndingForCurvedRail(edge: Edge, direction: Int): Edge? {
 
 fun isStartSignalAtEnd(edge: Edge): Boolean { // Should now be correct
     val rail = edge.last(1)
-    val signal = edge.EntityList.first()
+    val signal = edge.entityList.first()
 
     var virtualsignal = fact[rail.entityType]?.get(rail.direction)?.filter { signal.direction == it.direction }
     return virtualsignal?.first()?.removeRelatedRail == true
@@ -97,7 +94,7 @@ fun isStartSignalAtEnd(edge: Edge): Boolean { // Should now be correct
 fun determineEndingStartSignalAtStartPosition(edge: Edge, direction: Int): Edge? {
     val goodSide = edge.last(1).getSignalList(direction)
     val wrongSide = edge.last(1).getSignalList(-direction)
-    val startSignal = edge.EntityList.first()
+    val startSignal = edge.entityList.first()
     val signalCount = (goodSide.size ?: 0) + (wrongSide.size ?: 0)
 
     when (signalCount) {// different cases for the 4 different possible signal numbers

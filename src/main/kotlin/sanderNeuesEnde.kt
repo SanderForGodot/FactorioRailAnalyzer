@@ -9,7 +9,7 @@ fun determineEndingSander(edge: Edge, direction: Int): Edge? {
     val secondRight: Entity? = retrieveSignal(goodSide, true)       // untenRechts
     val firstLeft: Entity? = retrieveSignal(wrongSide, true)        // obenLinks
     val secondLeft: Entity? = retrieveSignal(wrongSide, false)      // obenRechts
-    val startSignal = edge.EntityList.first()
+    val startSignal = edge.entityList.first()
 
     val endingSig: Entity? = if (goodSide.contains(startSignal)) {
         if (secondRight == startSignal) // !d   = x == startSignal

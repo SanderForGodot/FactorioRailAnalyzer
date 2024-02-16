@@ -16,9 +16,9 @@ class Graphviz {
     fun format(sb: Appendable,edge: Edge) {
         sb.append(OPEN_GRAPH)
         var i=0
-        while (i<edge.EntityList.size-1){
-            sb.append(MessageFormat.format(NODE, edge.EntityList[i].entityNumber, edge.EntityList[i].entityType.name+edge.EntityList[i].direction ))
-            sb.append(MessageFormat.format(EDGE, edge.EntityList[i].entityNumber, edge.EntityList[i+1].entityNumber ))
+        while (i<edge.entityList.size-1){
+            sb.append(MessageFormat.format(NODE, edge.entityList[i].entityNumber, edge.entityList[i].entityType.name+edge.entityList[i].direction ))
+            sb.append(MessageFormat.format(EDGE, edge.entityList[i].entityNumber, edge.entityList[i+1].entityNumber ))
             i++
         }
 
@@ -59,6 +59,17 @@ class Graphviz {
             .waitFor()
         println("Graphviz output created")
         sb = StringBuilder()
+    }
+
+    fun generateEntityRelations(entityList: ArrayList<Entity>) {
+        startGraph()
+
+        entityList.forEach { entity ->
+            println(entity.relevantShit())
+            appendEntity(entity)
+        }
+        endGraph()
+        createoutput()
     }
 }
 

@@ -1,4 +1,4 @@
-import com.google. gson.Gson
+import com.google.gson.Gson
 import factorioBlueprint.Entity
 import factorioBlueprint.Position
 import factorioBlueprint.ResultBP
@@ -15,7 +15,6 @@ fun main(args: Array<String>) {
     val resultBP = Gson().fromJson(jsonString, ResultBP::class.java)
     val entityList = resultBP.blueprint.entities
     //endregion
-
     //region Phase1: data cleansing and preparation
     //filter out entitys we don't care about
     //ordered by (guessed) amount they appear in a BP
@@ -32,58 +31,70 @@ fun main(args: Array<String>) {
 
     val matrix = entityList.filedMatrix(max)
     //endregion
-
     //region Phase2: rail Linker: connected rails point to each other with pointer list does the same with signals
-    val graphviz = Graphviz() //for the grafikal output in graphviz
-    graphviz.startGraph()
-
     entityList.railLinker(matrix)
-
-    val listOfSignals: ArrayList<Entity> = entityList.filter { entity ->
+    //endregion
+    Graphviz().generateEntityRelations(entityList)
+    //region Phase3: edge creation
+    val signalList: ArrayList<Entity> = entityList.filter { entity ->
         entity.isSignal()
     } as ArrayList<Entity>
 
-
-    //region colps
-    entityList.forEach { entity ->
-        println(entity.relevantShit())
-        graphviz.appendEntity(entity)
-    }
-
-    graphviz.endGraph()
-    graphviz.createoutput()
-
-    var relation = mutableMapOf<Entity, ArrayList<Edge>>()
-    listOfSignals.forEach { startPoint ->
-        relation[startPoint] = buildEdge(Edge(startPoint), if (startPoint.direction < 4) -1 else 1)
-    }
-
     val listOfEdges = arrayListOf<Edge>()
-    relation.values.forEach { edgeList ->
-        listOfEdges.addAll(edgeList)
+    val relation = mutableMapOf<Entity, ArrayList<Edge>>()
+    signalList.forEach { startPoint ->
+        relation[startPoint] = buildEdge(Edge(startPoint), if (startPoint.direction < 4) -1 else 1)
+        listOfEdges.addAll(relation[startPoint]!!)
     }
-    var hasPartnerSignal = arrayListOf<Entity>()
 
-    listOfEdges.forEach { edge ->
+    val notStartSignalList = arrayListOf<Entity>()
+
+    listOfEdges.filter { edge ->
         val signal = edge.last(1)
-        if (!signal.isSignal())
-            throw Exception("Signal oder kein Signal das ist hier die frage")
-        if (signal.entityType == EntityType.VirtualSignal)
-            return@forEach
-        edge.nextEdgeList = relation[signal]!!
-        hasPartnerSignal.addUnique(signal)
+        signal.isSignal() && signal.entityType != EntityType.VirtualSignal
+                &&edge.validRail!!
+    }.forEach { edge ->
+        val endingSignal = edge.last(1)
+        edge.nextEdgeList = relation[endingSignal]!!
+        notStartSignalList.addUnique(endingSignal)
     }
-    var startSignales = listOfSignals.toSet() - hasPartnerSignal.toSet()
+    //endregion
+    if (listOfEdges.size == 0) {
+        if (signalList.size == 0)
+            throw Exception("No Edges Found, because there are no signals in the blueprint")
+        throw Exception("No Edges Found, but there are some signals ")
+    }
+    //region Phase3: creating the blocks that are defined by the signals in factorio
 
-    //calculating the lengths of the edges
-    listOfEdges.forEach { edge ->
-        edge.calcTileLength()
+    val blockList = connectEdgesToBlocks(listOfEdges)
+    // creating the Graph out of the Blocks and edges
+    val startSignals = signalList.toSet() - notStartSignalList.toSet()
+    val graph: MutableMap<Int, MutableList<Int>> = mutableMapOf()
+    blockList.filter { block ->
+        block.isRelevant(startSignals)
+    }.forEach { block ->
+        graph[block.id] = block.findEnd().toMutableList()
     }
-    if (listOfEdges.size == 0) throw Exception("No Edges Found, probably because there are no signals in the blueprint")
-    //creating the blocks that are defined by the signals in factorio
-    var blockList = arrayListOf<Block>(Block(listOfEdges[0], 0))
+
+    //analysing the graph
+    val graphTesting = Graph()
+    graphTesting.setGraph(graph)
+    graphTesting.tiernan()
+
+    //debug output
+    var i = 0;
+    listOfEdges.forEach {
+        println(it)
+        printEdge(it, i)
+        i++
+
+    }
+    //endregion
+}
+
+fun connectEdgesToBlocks(listOfEdges: ArrayList<Edge>): ArrayList<Block> {
+    val blockList: ArrayList<Block> = arrayListOf(Block(listOfEdges[0], 0))
     listOfEdges[0].belongsToBlock = blockList[0]
-
     var counter: Int = 0
     listOfEdges.filter { edge ->
         listOfEdges.first() != edge
@@ -106,29 +117,7 @@ fun main(args: Array<String>) {
             blockList.add(newBlock)
         }
     }
-
-    // creating the Graph out of the Blocks and edges
-    var graph: MutableMap<Int, MutableList<Int>> = mutableMapOf()
-    blockList.filter { block ->
-        block.isRelevant(startSignales)
-    }.forEach { block ->
-        graph[block.id] = block.findEnd().toMutableList()
-    }
-
-    //analysing the graph
-    val graphTesting = Graph()
-    graphTesting.setGraph(graph)
-    graphTesting.tiernan()
-
-    //debug output
-    var i = 0;
-    listOfEdges.forEach {
-        println(it)
-        printEdge(it, i)
-        i++
-
-    }
-    //endregion
+    return blockList
 }
 
 fun ArrayList<Entity>.railLinker(matrix: Array<Array<ArrayList<Entity>?>>) {
@@ -145,16 +134,16 @@ fun ArrayList<Entity>.railLinker(matrix: Array<Array<ArrayList<Entity>?>>) {
                 return@inner
             }
             //look up P in matrix
-            addEachMachingEntity(matrix[x][y], factEntity,Rail)
+            addEachMatchingEntity(matrix[x][y], factEntity, Rail)
         }
     }
 }
+
 //todo ggf nen besseren namen
-fun addEachMachingEntity(entities: ArrayList<Entity>?, factEntity: Entity, Rail: Entity)
-{
+fun addEachMatchingEntity(entities: ArrayList<Entity>?, factEntity: Entity, Rail: Entity) {
     entities?.filter { entity ->// for each existing Entity E
         // if T and E are equel (exept position)
-        (entity.isSignal() == factEntity.isSignal()||
+        (entity.isSignal() == factEntity.isSignal() ||
                 entity.isRail() == factEntity.isRail())  //thecicly  this line is unecesary
                 && entity.direction == factEntity.direction
     }?.forEach { foundEntity ->
@@ -169,6 +158,7 @@ fun addEachMachingEntity(entities: ArrayList<Entity>?, factEntity: Entity, Rail:
         }
     }
 }
+
 fun setRemoveRelatedRail(foundRail: Entity, factEntity: Entity, Rail: Entity): Boolean {
     //set removeRelatedRail depending on foundRail (A) and possibleRail (input)
     var current = foundRail.removeRelatedRail
@@ -244,7 +234,7 @@ fun ArrayList<Entity>.filedMatrix(size: Position): Array<Array<ArrayList<Entity>
 fun buildEdge(edge: Edge, direction: Int): ArrayList<Edge> {
 
     if (edge.last(1).hasSignal()) {
-        val end = determineEnding(edge, direction)
+        val end = determineEndingSander(edge, direction)
         if (end != null)
             return arrayListOf(end)
         //otherwise continue and ignore (happens once at the start of every edg to ignore the starting signal)
@@ -271,8 +261,8 @@ fun determineEnding(edge: Edge, direction: Int): Edge? {
 
     val goodSide = edge.last(1).getSignalList(direction)?.clone() as ArrayList<Entity>?
     val wrongSide = edge.last(1).getSignalList(-direction)?.clone() as ArrayList<Entity>?
-    while (goodSide?.contains(edge.EntityList.first()) == true) { //remove the starting node so that rail signals end themselves
-        goodSide.remove(edge.EntityList.first()) //todo re write this funkktion
+    while (goodSide?.contains(edge.entityList.first()) == true) { //remove the starting node so that rail signals end themselves
+        goodSide.remove(edge.entityList.first()) //todo re write this funkktion
     }
     val hasWrong: Boolean =
         wrongSide?.isNotEmpty() ?: false // if there a signal on the opposite side we asume problems
@@ -311,7 +301,7 @@ fun determineEnding(edge: Edge, direction: Int): Edge? {
         }
 
         !hasWrong && anzRight == 0 -> {
-            assert(edge.EntityList.size < 2)
+            assert(edge.entityList.size < 2)
             return null
         }//Start case, first signal was filtered out
         !hasWrong && anzRight == 1 -> {

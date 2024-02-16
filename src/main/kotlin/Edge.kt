@@ -8,17 +8,17 @@ class Edge() {
     }
 
     constructor(item: Entity) : this() {
-        EntityList = arrayListOf(item)
+        entityList = arrayListOf(item)
     }
 
     constructor(edge: Edge, entity: Entity) : this() {
         clone(edge)
-        if (!EntityList.addUnique(entity))
+        if (!entityList.addUnique(entity))
             throw Exception("an Edge is not expected to have the same rail twice")
 
     }
 
-    lateinit var EntityList: ArrayList<Entity>
+    lateinit var entityList: ArrayList<Entity>
     var collisionShape: ArrayList<Position> = arrayListOf();
     var belongsToBlock: Block? = null
     var validRail: Boolean? = null
@@ -26,7 +26,7 @@ class Edge() {
     var tileLength: Double = 0.0 // how many tiles the edge is long
 
     private fun clone(edge: Edge) {
-        EntityList = edge.EntityList.clone() as ArrayList<Entity>
+        entityList = edge.entityList.clone() as ArrayList<Entity>
         collisionShape = edge.collisionShape.clone() as ArrayList<Position>
         belongsToBlock = edge.belongsToBlock
         validRail = edge.validRail
@@ -35,15 +35,15 @@ class Edge() {
 
     fun last(n: Int): Entity {
         // return EntityList.last();
-        if (EntityList.size > n - 1) {
-            return EntityList[EntityList.size - n];
+        if (entityList.size > n - 1) {
+            return entityList[entityList.size - n];
         } else {
             return last(n - 1) // isnt this then just list[0]?
         }
     }
 
     fun finishUpEdge(signal: Entity, validRail: Boolean): Edge {
-        EntityList.add(signal)
+        entityList.add(signal)
         this.validRail = validRail
         cleanUpEndings()
         generateCollision()
@@ -52,27 +52,27 @@ class Edge() {
     }
 
     private fun cleanUpEndings() {
-        val start = EntityList.first().removeRelatedRail
+        val start = entityList.first().removeRelatedRail
         val end = last(1).removeRelatedRail
         if (start == null || end == null) {
             println("removeRelatedRail flag has not been set")
             return
         }
         if (start) {
-            EntityList.removeAt(1)
+            entityList.removeAt(1)
         }
         if (!end) // condition is inverted do to how Factorio works check docks //todo: add kapietel nummer
         {
-            EntityList.removeAt(EntityList.size - 2)
+            entityList.removeAt(entityList.size - 2)
         }
     }
 
     private fun generateCollision() { // for refence what wa dedtroyed
-        if (EntityList.size < 3) return // if the list is only 2 long, there are only signals in the list and no rails
+        if (entityList.size < 3) return // if the list is only 2 long, there are only signals in the list and no rails
 
         //adding the starting point
-        val start = EntityList.first()
-        val firstRail = EntityList[1]
+        val start = entityList.first()
+        val firstRail = entityList[1]
         if (!start.isSignal()) throw Exception("cannot calculate collisionShape, got rail: $firstRail, expected signal")
         if (!firstRail.isRail()) throw Exception("cannot calculate collisionShape, got signal: $start, expected rail")
 
@@ -84,7 +84,7 @@ class Edge() {
 
         //adding 3 points for each curve (if the curves touch it will only add 2 points )
         val curves = collisionPoints[EntityType.CurvedRail]!!
-        EntityList.filter {
+        entityList.filter {
             it.entityType == EntityType.CurvedRail
         }.forEach {
             var pointA = curves[it.direction]?.get(0)!! + it.position
@@ -126,7 +126,7 @@ class Edge() {
 
     fun calcTileLength() {// calculates the tile length of the edge
         tileLength = 0.0
-        EntityList.filter {entity ->
+        entityList.filter { entity ->
             entity.isRail()
         }.forEach { entity ->
             tileLength += when (entity.entityType) {
@@ -167,7 +167,7 @@ class Edge() {
     }
 
     fun findEnd(): MutableList<Int> {
-        if (EntityList.first().entityType == EntityType.Signal)
+        if (entityList.first().entityType == EntityType.Signal)
             return mutableListOf(belongsToBlock!!.id)
         else {
             var resultList = mutableListOf<Int>()
@@ -181,7 +181,7 @@ class Edge() {
     override fun toString(): String {
         var str = "EdgeStart------------------\n"
 
-        EntityList.forEach {
+        entityList.forEach {
             val int: String = (it.entityNumber ?: 0).toString();
             str += int + "|" + it.entityType.name + "|" + it.position.toString() + "\n"
 
