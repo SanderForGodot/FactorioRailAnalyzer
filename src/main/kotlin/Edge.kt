@@ -3,14 +3,9 @@ import factorioBlueprint.Position
 import kotlin.math.sqrt
 
 class Edge() {
-    constructor(edge: Edge) : this() {
-        clone(edge)
-    }
-
     constructor(item: Entity) : this() {
         entityList = arrayListOf(item)
     }
-
     constructor(edge: Edge, entity: Entity) : this() {
         clone(edge)
         if (!entityList.addUnique(entity))
@@ -19,11 +14,11 @@ class Edge() {
     }
 
     lateinit var entityList: ArrayList<Entity>
-    var collisionShape: ArrayList<Position> = arrayListOf();
+    private var collisionShape: ArrayList<Position> = arrayListOf()
     var belongsToBlock: Block? = null
     var validRail: Boolean? = null
     var nextEdgeList: List<Edge> = arrayListOf()
-    var tileLength: Double = 0.0 // how many tiles the edge is long
+    private var tileLength: Double = 0.0 // how many tiles the edge is long
 
     private fun clone(edge: Edge) {
         entityList = edge.entityList.clone() as ArrayList<Entity>
@@ -35,10 +30,10 @@ class Edge() {
 
     fun last(n: Int): Entity {
         // return EntityList.last();
-        if (entityList.size > n - 1) {
-            return entityList[entityList.size - n];
+        return if (entityList.size > n - 1) {
+            entityList[entityList.size - n]
         } else {
-            return last(n - 1) // isnt this then just list[0]?
+            last(n - 1) // isn't this then just list[0]?
         }
     }
 
@@ -61,13 +56,13 @@ class Edge() {
         if (start) {
             entityList.removeAt(1)
         }
-        if (!end) // condition is inverted do to how Factorio works check docks //todo: add kapietel nummer
+        if (!end) // condition is inverted do to how Factorio works check docks //todo: add a reference to the docs
         {
             entityList.removeAt(entityList.size - 2)
         }
     }
 
-    private fun generateCollision() { // for refence what wa dedtroyed
+    private fun generateCollision() {
         if (entityList.size < 3) return // if the list is only 2 long, there are only signals in the list and no rails
 
         //adding the starting point
@@ -81,7 +76,6 @@ class Edge() {
         listRef[1] += firstRail.position
         collisionShape.add(closer(start.position, listRef))
 
-
         //adding 3 points for each curve (if the curves touch it will only add 2 points )
         val curves = collisionPoints[EntityType.CurvedRail]!!
         entityList.filter {
@@ -91,16 +85,15 @@ class Edge() {
             var pointB = curves[it.direction]?.get(1)!! + it.position
             val end = collisionShape[collisionShape.size - 1]
             if (pointB.x == end.x || pointB.y == end.y || pointB.x - end.x == pointB.y - end.y) {
-                var tmp = pointA
+                val tmp = pointA
                 pointA = pointB
-                pointB = pointA
+                pointB = tmp
             }
             if (collisionShape[collisionShape.size - 1] != pointA)
                 collisionShape.add(pointA)
             collisionShape.add(it.position)
             collisionShape.add(pointB)
         }
-
 
         val lastRail = last(2)
         listRef = collisionPoints[lastRail.entityType]?.get(lastRail.direction)!!.toMutableList()
@@ -110,7 +103,6 @@ class Edge() {
         listRef.remove(closer(lastPoint, listRef))
         if (lastPoint != listRef[0])
             collisionShape.add(listRef[0])
-
     }
 
 
@@ -124,7 +116,7 @@ class Edge() {
         }
     }
 
-    fun calcTileLength() {// calculates the tile length of the edge
+    private fun calcTileLength() {// calculates the tile length of the edge
         tileLength = 0.0
         entityList.filter { entity ->
             entity.isRail()
@@ -132,7 +124,7 @@ class Edge() {
             tileLength += when (entity.entityType) {
                 EntityType.Rail -> checkDiagonal(entity)
                 EntityType.CurvedRail -> 7.843 //rounded value exact value: 8.55-(sqrt(2)/2)
-                else -> throw Exception("Not a rail, should have been caught, how did you get here");
+                else -> throw Exception("Not a rail, should have been caught, how did you get here")
             }
         }
     }
@@ -167,14 +159,14 @@ class Edge() {
     }
 
     fun findEnd(): MutableList<Int> {
-        if (entityList.first().entityType == EntityType.Signal)
-            return mutableListOf(belongsToBlock!!.id)
+        return if (entityList.first().entityType == EntityType.Signal)
+            mutableListOf(belongsToBlock!!.id)
         else {
-            var resultList = mutableListOf<Int>()
+            val resultList = mutableListOf<Int>()
             nextEdgeList.forEach { edge ->
                 resultList.addAll(edge.findEnd())
             }
-            return resultList
+            resultList
 
         }
     }
@@ -182,7 +174,7 @@ class Edge() {
         var str = "EdgeStart------------------\n"
 
         entityList.forEach {
-            val int: String = (it.entityNumber ?: 0).toString();
+            val int: String = (it.entityNumber ?: 0).toString()
             str += int + "|" + it.entityType.name + "|" + it.position.toString() + "\n"
 
         }
