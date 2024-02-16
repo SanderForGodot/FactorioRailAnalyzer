@@ -1,27 +1,29 @@
 import factorioBlueprint.Entity
+
 fun determineEndingSander(edge: Edge, direction: Int): Edge? {
     val goodSide = edge.last(1).getSignalList(direction)            // in drive direction on the right site
     val wrongSide = edge.last(1).getSignalList(-direction)          // in drive direction on the left  site
 
-    // var namen relativ zu R2 einer gebogenen schiene (grafik)        // equivalent if you view it in drive direction
-    val untenLinks: Entity? = retrieveSignal(goodSide, false)         // firstRight
-    val untenRechts: Entity? = retrieveSignal(goodSide, true)         // secondRight
-    val obenLinks: Entity? = retrieveSignal(wrongSide, true)          // firstLeft
-    val obenRechts: Entity? = retrieveSignal(wrongSide, false)        // secondLeft
+    // signal name viewed it in drive direction                        // equivalent if you view a Curved Rail of direction 2
+    val firstRight: Entity? = retrieveSignal(goodSide, false)       // untenLinks  (this is how we first thought about the problem)
+    val secondRight: Entity? = retrieveSignal(goodSide, true)       // untenRechts
+    val firstLeft: Entity? = retrieveSignal(wrongSide, true)        // obenLinks
+    val secondLeft: Entity? = retrieveSignal(wrongSide, false)      // obenRechts
     val startSignal = edge.EntityList.first()
 
     val endingSig: Entity? = if (goodSide.contains(startSignal)) {
-        if (untenRechts == startSignal) // !d   = x == startSignal
+        if (secondRight == startSignal) // !d   = x == startSignal
             null
-        else if (goodSide.size == 2) // c    = goodSide.size == 2
-            untenRechts
+        else if (goodSide.size == 2) // c  = goodSide.size == 2
+            secondRight
         else
-            obenRechts
+            secondLeft
     } else {
-        //left bevor right | unten vor oben
-        val priorityOrder = arrayListOf(untenLinks, obenLinks, untenRechts, obenRechts)
+        //first before right | right before left
+        val priorityOrder = arrayListOf(firstRight, firstLeft, secondRight, secondLeft)
         priorityOrder.first { it != null }!!
     }
+
     if (endingSig == null)
         return null
     val validRail = goodSide.contains(endingSig)
