@@ -34,10 +34,10 @@ class Graphviz {
         entity.rightNextRail.forEach {
             sb.append(MessageFormat.format(EDGE, entity.entityNumber, it.entityNumber ))
         }
-        entity.signalOntheLeft.forEach {
+        entity.signalOnTheLeft.forEach {
             sb.append(MessageFormat.format(EDGE, entity.entityNumber, it.entityNumber ))
         }
-        entity.signalOntheRight.forEach {
+        entity.signalOnTheRight.forEach {
             sb.append(MessageFormat.format(EDGE, entity.entityNumber, it.entityNumber ))
         }
 
