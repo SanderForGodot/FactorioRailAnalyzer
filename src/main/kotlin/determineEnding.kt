@@ -140,7 +140,7 @@ fun determineEndingStartSignalAtStartPosition(edge: Edge, direction: Int): Edge?
     }
 }
 
-fun determineEndingTrueEnding(edge: Edge, direction: Int): Edge? {
+fun determineEndingTrueEnding(edge: Edge, direction: Int): Edge {
     val goodSide = edge.last(1).getSignalList(direction)
     val wrongSide = edge.last(1).getSignalList(-direction)
 

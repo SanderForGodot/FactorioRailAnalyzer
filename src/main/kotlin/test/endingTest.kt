@@ -3,7 +3,7 @@ import factorioBlueprint.Entity
 import factorioBlueprint.ResultBP
 
 fun main() {
-    var solutionOben: ArrayList<Any?> =
+    val solutionOben: ArrayList<Any?> =
         arrayListOf(
             null,
             Pair(true, getFact(5)),
@@ -22,7 +22,7 @@ fun main() {
             null,
             null,
         )
-    var solutionUnten: ArrayList<Any?> =
+    val solutionUnten: ArrayList<Any?> =
         arrayListOf(
             Pair(true, getFact(6)),    //0
             Pair(true, getFact(6)),
@@ -69,7 +69,8 @@ fun test(filename:String, solution:ArrayList<Any?>){
 
 
 
-    var edgeListOben = arrayListOf<Edge>()
+
+    val edgeListOben = arrayListOf<Edge>()
     listOben.filter { entity ->
         entity.entityType == EntityType.ChainSignal
     }.sortedBy {
@@ -85,10 +86,10 @@ fun test(filename:String, solution:ArrayList<Any?>){
         edgeListOben.add(edge)
     }
     var padpw = 0
-    var ergebnise = arrayListOf<Any?>()
+    val ergebnise = arrayListOf<Any?>()
     edgeListOben.forEach { edge ->
         println(padpw)
-        padpw ++;
+        padpw ++
         ergebnise.add(determineEndingSander(edge, 1))
     }
     println(filename)
@@ -100,7 +101,7 @@ fun test(filename:String, solution:ArrayList<Any?>){
             if (ergebnise[i] == null)
                 println("Erfolg case:" + i)
             else {
-                var t = (ergebnise[i] as Edge).debugPrint()
+                val t = (ergebnise[i] as Edge).debugPrint()
                 println("Fail case:" + i + " should be " + solution[i] + " but is" + t)
             }
             continue
@@ -109,10 +110,10 @@ fun test(filename:String, solution:ArrayList<Any?>){
             println("Fail case:" + i + " should be " + solution[i] + " but is null")
             continue
         }
-        var edge = ergebnise[i] as Edge
-        var lösug = solution[i] as Pair<Boolean, Entity>
-        lösug.second.position += edge.last(2).position
-        if (edge.validRail == lösug.first && edge.last(1).direction == lösug.second.direction)
+        val edge = ergebnise[i] as Edge
+        val correct = solution[i] as Pair<Boolean, Entity>
+        correct.second.position += edge.last(2).position
+        if (edge.validRail == correct.first && edge.last(1).direction == correct.second.direction)
             println("Erfolg case:" + i)
         else
             println("Fail case:" + i + " should be " + solution[i] + " but is" + edge.debugPrint())

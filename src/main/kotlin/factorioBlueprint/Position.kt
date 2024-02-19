@@ -32,10 +32,9 @@ data class Position(
 
     override fun equals(other: Any?): Boolean {
         if (other !is Position)
-            return false;
-        val other: Position = other as Position
-
-        return x == other.x && y == other.y;
+            return false
+        @Suppress("NAME_SHADOWING") val other: Position = other
+        return x == other.x && y == other.y
     }
 
     operator fun minusAssign(other: Position) {

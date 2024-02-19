@@ -3,13 +3,13 @@ package graph
 
 class Graph {
     private val adjVertices: MutableMap<GraphNode, MutableList<GraphNode>> = mutableMapOf()
-    private val Path: MutableList<Int> = ArrayList()
+    private val path: MutableList<Int> = ArrayList()
     private var testGraph: MutableMap<Int, MutableList<Int>> = mutableMapOf()
     private var closedVertices: MutableMap<Int,MutableList<Int>> =  mutableMapOf()
-    private var Deadlocks: MutableList<MutableList<Int>> = mutableListOf()
+    private var deadlocks: MutableList<MutableList<Int>> = mutableListOf()
 
     fun addNode(id: Int) {
-        adjVertices.putIfAbsent(GraphNode(id), ArrayList<GraphNode>())
+        adjVertices.putIfAbsent(GraphNode(id), ArrayList())
     }
 
     fun removeNode(id: Int) {
@@ -34,8 +34,8 @@ class Graph {
         }
     }
 
-    fun expandPath(node: Int) {
-        Path.add(node)
+    private fun expandPath(node: Int) {
+        path.add(node)
         if(closedVertices[node]==null){
             closedVertices[node] = mutableListOf()
         }
@@ -44,18 +44,18 @@ class Graph {
         if (testGraph[node] != null) {
             for (neighbor in testGraph[node]!!) {
                 closedVertices[node]?.let { println(it.size) }
-                if (!Path.contains(neighbor)
-                    and (neighbor > Path.first())
+                if (!path.contains(neighbor)
+                    and (neighbor > path.first())
                     and ( (closedVertices[node]?.contains(neighbor) == false))
                 ) {
                     println("Expanding to: $neighbor")
                     expandPath(neighbor)
                     closedVertices[node]?.add(neighbor)
                 } else {
-                    if(Path.first()==neighbor){
+                    if(path.first()==neighbor){
                         println("found deadlock ending in node: $node")
-                        println(Path)
-                        Deadlocks.add(Path)
+                        println(path)
+                        deadlocks.add(path)
                     }else{
                         println("no circuit at path-end: $node")
                     }
@@ -67,8 +67,8 @@ class Graph {
             println("No neighbours: $node")
         }
         closedVertices[node]=mutableListOf()
-        println("removing node:"+ Path.last())
-        Path.removeLast()
+        println("removing node:"+ path.last())
+        path.removeLast()
     }
 
     fun gentestgraph(){
@@ -87,7 +87,7 @@ class Graph {
      testGraph[5] = mutableListOf(1)
      */
 
-    fun dfs(node: Int, visited: BooleanArray, graph: Array<List<Int>>) {
+    private fun dfs(node: Int, visited: BooleanArray, graph: Array<List<Int>>) {
         //possible algo Depth-First Search
         // zur Kreiserkennung nutzbar laut https://medium.com/@AlexanderObregon/introduction-to-graph-algorithms-in-java-a-beginners-guide-450cace790d4
         visited[node] = true
@@ -98,7 +98,7 @@ class Graph {
                 dfs(neighbor, visited, graph)
             } else {
                 println("found deadlock ending in node: $node")
-                println(Path)
+                println(path)
             }
         }
 
@@ -108,6 +108,6 @@ class Graph {
     }
 
     fun getDeadlocks(): MutableList<MutableList<Int>> {
-        return Deadlocks;
+        return deadlocks
     }
 }

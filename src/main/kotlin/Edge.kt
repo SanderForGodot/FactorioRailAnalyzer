@@ -139,17 +139,17 @@ class Edge() {
         }
     }
     fun doesCollide(other: Edge): Boolean {
-        var A: Position
-        var B: Position
-        var C: Position
-        var D: Position
+        var pointA: Position
+        var pointB: Position
+        var pointC: Position
+        var pointD: Position
         for (i in 0..collisionShape.size - 2) {
-            A = collisionShape[i]
-            B = collisionShape[i + 1]
+            pointA = collisionShape[i]
+            pointB = collisionShape[i + 1]
             for (ii in 0..other.collisionShape.size - 2) {
-                C = other.collisionShape[i]
-                D = other.collisionShape[i + 1]
-                if (intersect(A, B, C, D)) {
+                pointC = other.collisionShape[i]
+                pointD = other.collisionShape[i + 1]
+                if (intersect(pointA, pointB, pointC, pointD)) {
                     return true
                 }
             }

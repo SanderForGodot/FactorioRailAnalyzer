@@ -45,17 +45,11 @@ fun <E> ArrayList<E>.addUnique(element: E): Boolean {
         this.add(element)
         return true
     }
-    return false;
+    return false
 }
 
-fun <E> ArrayList<E>.addUniqueWithDBG(element: E) {
-    if (!this.addUnique(element)) {
-        println("addUnique failed: array: " + this + "element: " + element)
-    }
-}
 
 //TODO : find where we stole this from and add reference
-
 fun intersect(A: Position, B: Position, C: Position, D: Position): Boolean {
     return ccw(A, C, D) != ccw(B, C, D) && ccw(A, B, C) != ccw(A, B, D)
 }
