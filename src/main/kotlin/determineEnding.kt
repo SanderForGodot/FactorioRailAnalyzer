@@ -1,171 +1,44 @@
-fun determineEndingNew(edge: Edge, direction: Int): Edge? {
+import factorioBlueprint.Entity
 
-    if (edge.last(1).entityType == EntityType.Rail) {
-        return determineEndingForStraightRail(edge, direction)
-    } else {
-        return determineEndingForCurvedRail(edge, direction)
-    }
+fun determineEnding(edge: Edge, direction: Int): Edge? {
+    val goodSide = edge.last(1).getSignalList(direction)            // in drive direction on the right site
+    val wrongSide = edge.last(1).getSignalList(-direction)          // in drive direction on the left  site
 
-    return null
-}
-
-fun determineEndingForStraightRail(edge: Edge, direction: Int): Edge? {
-    val goodSide = edge.last(1).getSignalList(direction)
-    val wrongSide = edge.last(1).getSignalList(-direction)
-    val signalCount = (goodSide.size ?: 0) + (wrongSide.size ?: 0)
-
-    when (signalCount) {
-        1 -> {
-            return determineEndingForStraightRailOnesignal(edge, direction)
-        }
-
-        2 -> {
-            return determineEndingForStraightRailTwosignals(edge, direction)
-        }
-
-        3 -> {
-            throw Exception("Too many Signals on straight rail. It needs a lot of determination, to get into this state. You have really outdone yourself. ")
-        }
-
-        4 -> {
-            throw Exception("Too many Signals on straight rail. It needs a lot of determination, to get into this state. You have really outdone yourself. ")
-        }
-    }
-    return null
-}
-
-fun determineEndingForStraightRailOnesignal(edge: Edge, direction: Int): Edge? {
-    val goodSide = edge.last(1).getSignalList(direction)
-    val wrongSide = edge.last(1).getSignalList(-direction)
-
-    if ((wrongSide.size ?: 0) > 0) {//ending rail with wrong side
-        val falseSignal = wrongSide.first()
-        // take the signal on the wrong side
-        return edge.finishUpEdge(falseSignal, false)
-    }
-    if (goodSide.first() == edge.entityList.first()) {//starting rail
-        return null //continue with edge creation
-    } else {//ending rail with good side
-        val endSignal = goodSide.first()
-        //end edge with signal on the same side
-        return edge.finishUpEdge(endSignal, true)
-    }
-
-}
-
-fun determineEndingForStraightRailTwosignals(edge: Edge, direction: Int): Edge? {
-    val goodSide = edge.last(1).getSignalList(direction)
-    val wrongSide = edge.last(1).getSignalList(-direction)
+    // signal name viewed it in drive direction                        // equivalent if you view a Curved Rail of direction 2
+    val firstRight: Entity? = retrieveSignal(goodSide, false)       // untenLinks  (this is how we first thought about the problem)
+    val secondRight: Entity? = retrieveSignal(goodSide, true)       // untenRechts
+    val firstLeft: Entity? = retrieveSignal(wrongSide, true)        // obenLinks
+    val secondLeft: Entity? = retrieveSignal(wrongSide, false)      // obenRechts
     val startSignal = edge.entityList.first()
 
-    throw Exception("not yet implemented")
-}
-
-fun determineEndingForCurvedRail(edge: Edge, direction: Int): Edge? {
-    val goodSide = edge.last(1).getSignalList(direction)
-    val wrongSide = edge.last(1).getSignalList(-direction)
-    val startSignal = edge.entityList.first()
-
-    if (goodSide.any { it == startSignal } || wrongSide.any { it == startSignal })
-    //check if the starting signal of the edge is on the rail that called this function
-    {
-        if (isStartSignalAtEnd(edge)) {
-            return null//continue with edge creation
-        } else {
-            return determineEndingStartSignalAtStartPosition(edge, direction)
-        }
+    val endingSig: Entity? = if (goodSide.contains(startSignal)) {
+        if (secondRight == startSignal) // !d   = x == startSignal
+            null
+        else if (goodSide.size == 2) // c  = goodSide.size == 2
+            secondRight
+        else
+            secondLeft
     } else {
-        return determineEndingTrueEnding(edge, direction)// TODO: put sander function here
-
+        //first before right | right before left
+        val priorityOrder = arrayListOf(firstRight, firstLeft, secondRight, secondLeft)
+        priorityOrder.first { it != null }!!
     }
-    return null
+
+    if (endingSig == null)
+        return null
+    val validRail = goodSide.contains(endingSig)
+    return edge.finishUpEdge(endingSig, validRail)
 }
 
-fun isStartSignalAtEnd(edge: Edge): Boolean { // Should now be correct
-    val rail = edge.last(1)
-    val signal = edge.entityList.first()
-
-    var virtualsignal = fact[rail.entityType]?.get(rail.direction)?.filter { signal.direction == it.direction }
-    return virtualsignal?.first()?.removeRelatedRail == true
-    // removeRelatedRail correlates to the position of the signal, which in turn determines if it is a starting or ending position
-    // somehow those are the same (blame sander) else build a new lookuptable(leo)
+fun retrieveSignal(signalList: ArrayList<Entity>, b: Boolean): Entity? {
+    return if (signalList.size == 0)
+        null
+    else
+        if (signalList[0].removeRelatedRail == b)
+            signalList[0]
+        else
+            if (signalList.size == 1)
+                null
+            else // signalList.size == 2
+                signalList[1]
 }
-
-fun determineEndingStartSignalAtStartPosition(edge: Edge, direction: Int): Edge? {
-    val goodSide = edge.last(1).getSignalList(direction)
-    val wrongSide = edge.last(1).getSignalList(-direction)
-    val startSignal = edge.entityList.first()
-    val signalCount = (goodSide.size ?: 0) + (wrongSide.size ?: 0)
-
-    when (signalCount) {// different cases for the 4 different possible signal numbers
-        1 -> {
-            return null
-        }//continue with edge creation
-        2 -> {
-            if (goodSide.size == 2) {
-                val endSignal = goodSide.first { it != startSignal }
-                //end edge with signal on the same side, which is not the starting signal
-                return edge.finishUpEdge(endSignal, true)
-            }
-            if (isSignalOpposite(startSignal, wrongSide.first())) {
-                return null//continue with edge creation
-            } else {
-                val falseSignal = wrongSide.first()
-                // take the signal on the wrong side
-                return edge.finishUpEdge(falseSignal, false)
-            }
-        }
-
-        3 -> {
-            if ((wrongSide.size) == 2) {
-                val falseSignal = wrongSide.first { !isSignalOpposite(startSignal, it) }
-                // take the signal on the wrong side that is also on the wrong end
-                return edge.finishUpEdge(falseSignal, false)
-            } else {
-                val endsignal = goodSide.first { it != startSignal }
-                //end edge with signal on the same side, which is not the starting signal
-                return edge.finishUpEdge(endsignal, true)
-            }
-        }
-
-        4 -> {
-            val endsignal = goodSide?.first { it != startSignal }
-            //end edge with signal on the same side, which is not the starting signal
-            return edge.finishUpEdge(endsignal!!, true)
-        }
-
-        else -> {
-            throw Exception("determine ending got wrong number of signals:$signalCount")
-        }
-    }
-}
-
-fun determineEndingTrueEnding(edge: Edge, direction: Int): Edge {
-    val goodSide = edge.last(1).getSignalList(direction)
-    val wrongSide = edge.last(1).getSignalList(-direction)
-
-    if ((wrongSide.size ?: 0) > (goodSide.size ?: 0)) {
-        //not valid rail
-        val falseSignal = wrongSide.first()
-        // take the signal on the wrong side
-        return edge.finishUpEdge(falseSignal, false)
-    } else {
-        if (((wrongSide.size ?: 0) == 1) && ((goodSide.size ?: 0) == 1)) {
-            if (!isSignalOpposite(wrongSide.first(), goodSide.first())) {
-                //not valid rail
-                val falseSignal = wrongSide.first()
-                // take the signal on the wrong side
-                return edge.finishUpEdge(falseSignal, false)
-            }
-
-        }
-    }
-    // every other case is a correct edge
-    val endSignal = getClosetSignal(edge, goodSide)
-    //end edge with signal on the good side
-    if(endSignal != null) {
-        return edge.finishUpEdge(endSignal, true)
-    }
-    throw Exception("determine ending ran logically impossible case")
-}
-

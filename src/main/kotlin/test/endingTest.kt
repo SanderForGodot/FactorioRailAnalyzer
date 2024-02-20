@@ -90,7 +90,7 @@ fun test(filename:String, solution:ArrayList<Any?>){
     edgeListOben.forEach { edge ->
         println(padpw)
         padpw ++
-        ergebnise.add(determineEndingSander(edge, 1))
+        ergebnise.add(determineEnding(edge, 1))
     }
     println(filename)
     var i = -1

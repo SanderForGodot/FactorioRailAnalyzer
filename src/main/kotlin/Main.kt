@@ -233,7 +233,7 @@ fun ArrayList<Entity>.filedMatrix(size: Position): Array<Array<ArrayList<Entity>
 fun buildEdge(edge: Edge, direction: Int): ArrayList<Edge> {
 
     if (edge.last(1).hasSignal()) {
-        val end = determineEndingSander(edge, direction)
+        val end = determineEnding(edge, direction)
         if (end != null)
             return arrayListOf(end)
         //otherwise continue and ignore (happens once at the start of every edg to ignore the starting signal)
@@ -254,66 +254,6 @@ fun buildEdge(edge: Edge, direction: Int): ArrayList<Edge> {
     return arr
 }
 
-fun determineEnding(edge: Edge, direction: Int): Edge? {
-    //this is an edge case fest
-    //we need to check if the signals are relevant and if so is they are on the correct side or at least have a partner
-
-    val goodSide = edge.last(1).getSignalList(direction).clone() as ArrayList<Entity>?
-    val wrongSide = edge.last(1).getSignalList(-direction).clone() as ArrayList<Entity>?
-    while (goodSide?.contains(edge.entityList.first()) == true) { //remove the starting node so that rail signals end themselves
-        goodSide.remove(edge.entityList.first()) //todo re write this function
-    }
-    val hasWrong: Boolean =
-        wrongSide?.isNotEmpty() ?: false // if there is a signal on the opposite side we assume problems
-    val anzRight = if (goodSide?.size == null) 0 else goodSide.size // I am proud of this line
-
-
-    when {
-        hasWrong && anzRight == 0 -> {
-            val endSignal = getClosetSignal(edge, wrongSide) ?: throw Exception()//impossible case
-            return edge.finishUpEdge(endSignal, false)
-        }
-
-        hasWrong && anzRight == 1 -> {
-            var isOpposite = isSignalOpposite(goodSide!![0], wrongSide!![0]) //!! ist save
-            when (wrongSide.size) {
-                1 -> {
-                    val closestSignal = getClosestSignal(edge.last(2), goodSide[0], wrongSide[0])
-                    return edge.finishUpEdge(if (isOpposite) goodSide[0] else closestSignal, isOpposite)
-                }
-
-                2 -> {//one good signal and 2 bad
-                    val closestWrong: Entity = getClosestSignal(edge.last(2), wrongSide[0], wrongSide[1])
-                    isOpposite = isSignalOpposite(goodSide[0], closestWrong)
-                    return edge.finishUpEdge(if (isOpposite) goodSide[0] else closestWrong, isOpposite)
-                }
-
-                else -> {
-                    //should be impossible
-                    /*bc:
-                    * isWrong== true -> isWrong.size>0 -> 0 in impossible
-                    * a rail can only have 2 signals on one side -> more than 3 is impossible
-                    * */
-                    throw Exception("Impossible ")
-                }
-            }
-        }
-
-        !hasWrong && anzRight == 0 -> {
-            assert(edge.entityList.size < 2)
-            return null
-        }//Start case, first signal was filtered out
-        !hasWrong && anzRight == 1 -> {
-            return edge.finishUpEdge(goodSide!![0], true)
-        }
-
-        anzRight == 2 -> {
-            return edge.finishUpEdge(getClosetSignal(edge, goodSide)!!, true)
-        }
-
-        else -> throw Exception()
-    }
-}
 //at specific transitions from rail a to b we need to flip the direction indicator
 
 fun isSpecialCase(current: Entity, next: Entity): Int {
@@ -349,35 +289,4 @@ fun isSpecialCase(current: Entity, next: Entity): Int {
 
     return 1
 
-}
-
-fun isSignalOpposite(signal1: Entity, signal2: Entity): Boolean {
-    val distanceSignal = signal1.distanceTo(signal2)
-    return (distanceSignal <= 3) //TODO: Check the minimum distance so that the signal is opposite, maybe different distances for straight and curved
-}
-
-
-fun getClosetSignal(
-    edge: Edge,
-    signals: ArrayList<Entity>?
-): Entity? {
-    if (signals == null) return null
-    when (signals.size) {
-        0 -> return null
-        1 -> return signals[0]
-        2 -> {
-            return getClosestSignal(edge.last(2), signals[0], signals[1])
-        }
-    }
-    return null
-}
-
-fun getClosestSignal(
-    rail: Entity,
-    signal1: Entity,
-    signal2: Entity
-): Entity { //Important: This needs the rail BEFORE the rail with the signal otherwise it has undefined behavior
-    val distanceSignal1 = rail.distanceTo(signal1)
-    val distanceSignal2 = rail.distanceTo(signal2)
-    return if (distanceSignal1 < distanceSignal2) signal1 else signal2
 }
