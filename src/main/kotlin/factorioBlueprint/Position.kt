@@ -41,4 +41,10 @@ data class Position(
         this.x -= other.x
         this.y -= other.y
     }
+
+    operator fun div(dividend: Int): Position {
+        this.x /= dividend
+        this.y /= dividend
+        return this
+    }
 }
