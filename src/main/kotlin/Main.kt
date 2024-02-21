@@ -69,11 +69,13 @@ fun main(args: Array<String>) {
 
     val blockList = connectEdgesToBlocks(listOfEdges)
     // creating the Graph out of the Blocks and edges
+    println("relevante blöcke")
     val startSignals = signalList.toSet() - notStartSignalList.toSet()
     val graph: MutableMap<Int, MutableList<Int>> = mutableMapOf()
     blockList.filter { block ->
         block.isRelevant(startSignals)
     }.forEach { block ->
+        print(" " +block.id)
         graph[block.id] = block.findEnd().toMutableList()
     }
 
@@ -85,10 +87,19 @@ fun main(args: Array<String>) {
     //debug output
     var i = 0
     listOfEdges.forEach {
-        println(it)
+       // println(it)
         printEdge(it, i)
         i++
 
     }
+
+    println("joooo")
+    printGraf(graph)
+
+    blockList.forEach {
+        println("id:" +it.id +" center: " + it.calculateCenter())
+    }
+
+    println(graph)
     //endregion
 }

@@ -17,6 +17,7 @@ data class Position(
             y + position.y
         )
     }
+
     operator fun minus(position: Position): Position {
         return Position(
             x - position.x,
@@ -40,5 +41,11 @@ data class Position(
     operator fun minusAssign(other: Position) {
         this.x -= other.x
         this.y -= other.y
+    }
+
+    operator fun div(div: Int): Position {
+        this.x /= div
+        this.y /= div
+        return this
     }
 }

@@ -147,8 +147,8 @@ class Edge() {
             pointA = collisionShape[i]
             pointB = collisionShape[i + 1]
             for (ii in 0..other.collisionShape.size - 2) {
-                pointC = other.collisionShape[i]
-                pointD = other.collisionShape[i + 1]
+                pointC = other.collisionShape[ii]
+                pointD = other.collisionShape[ii + 1]
                 if (intersect(pointA, pointB, pointC, pointD)) {
                     return true
                 }
@@ -158,13 +158,13 @@ class Edge() {
 
     }
 
-    fun findEnd(): MutableList<Int> {
-        return if (entityList.first().entityType == EntityType.Signal)
+    fun findEnd(first: Boolean): MutableList<Int> {
+        return if (!first && entityList.first().entityType == EntityType.Signal)
             mutableListOf(belongsToBlock!!.id)
         else {
             val resultList = mutableListOf<Int>()
             nextEdgeList.forEach { edge ->
-                resultList.addAll(edge.findEnd())
+                resultList.addAll(edge.findEnd(false))
             }
             resultList
 

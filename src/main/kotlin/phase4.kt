@@ -6,14 +6,16 @@ fun connectEdgesToBlocks(listOfEdges: ArrayList<Edge>): ArrayList<Block> {
     listOfEdges.filter { edge ->
         listOfEdges.first() != edge
     }.forEach { edge ->
-        blockList.forEach { block ->
+        val blockIterator = blockList.iterator()
+        while (blockIterator.hasNext()) {
+        val block = blockIterator.next()
             if (block.doesCollide(edge)) {
                 if (edge.belongsToBlock == null) {
                     block.edgeList.add(edge)
                     edge.belongsToBlock = block
                 } else {
                     edge.belongsToBlock!!.merge(block)
-                    blockList.remove(block)
+                   blockIterator.remove()
                 }
             }
         }

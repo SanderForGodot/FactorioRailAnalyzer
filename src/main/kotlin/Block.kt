@@ -1,4 +1,5 @@
 import factorioBlueprint.Entity
+import factorioBlueprint.Position
 
 class Block(edge: Edge, var id:Int) {
     var edgeList = arrayListOf(edge)
@@ -32,12 +33,27 @@ class Block(edge: Edge, var id:Int) {
         val resultList = ArrayList<Int>()
         edgeList.forEach { edge ->
             //resultList.addAll( edge.findEnd())
-            val y = edge.findEnd()
+            val y = edge.findEnd(true)
             y.forEach{yp->
                 resultList.addUnique(yp)
             }
         }
         return resultList
+    }
+
+    fun calculateCenter(): Position
+    {
+        var result = Position ( 0.0, 0.0)
+        var count =0
+        edgeList.forEach{edge ->
+            edge.entityList.filter {entity ->
+                entity.isRail()
+            }.forEach {rail->
+                result += rail.position
+                count++
+            }
+        }
+        return result / count
     }
 
 
