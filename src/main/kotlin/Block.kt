@@ -3,6 +3,9 @@ import factorioBlueprint.Position
 
 class Block(edge: Edge, var id:Int) {
     var edgeList = arrayListOf(edge)
+    lateinit var dependingOn: ArrayList<Block>
+    var isRelevant: Boolean = false
+
 
     fun doesCollide(toTest:Edge):Boolean
     {
@@ -18,8 +21,8 @@ class Block(edge: Edge, var id:Int) {
         }
     }
 
-    fun isRelevant(startSignalList: Set<Entity>): Boolean {
-        return edgeList.any{edge->
+    fun markRelevant(startSignalList: Set<Entity>) {
+        isRelevant= edgeList.any{edge->
             (edge.entityList.first().entityType == EntityType.Signal)
                     ||
            ( startSignalList.any()
@@ -29,16 +32,33 @@ class Block(edge: Edge, var id:Int) {
         }
     }
 
-    fun findEnd():ArrayList<Int> {
-        val resultList = ArrayList<Int>()
+    fun findEnd():ArrayList<Block> {
+        val resultList = ArrayList<Block>()
         edgeList.forEach { edge ->
             //resultList.addAll( edge.findEnd())
-            val y = edge.findEnd()
+            val y = edge.findEnd(true)
             y.forEach{yp->
                 resultList.addUnique(yp)
             }
         }
+        this.dependingOn= resultList
         return resultList
+
+    }
+
+    fun calculateCenter(): Position
+    {
+        var result = Position ( 0.0, 0.0)
+        var count =0
+        edgeList.forEach{edge ->
+            edge.entityList.filter {entity ->
+                entity.isRail()
+            }.forEach {rail->
+                result += rail.position
+                count++
+            }
+        }
+        return result / count
     }
     fun calculateCenter(): Position
     {

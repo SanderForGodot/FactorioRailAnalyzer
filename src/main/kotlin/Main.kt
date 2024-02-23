@@ -1,4 +1,3 @@
-
 import com.google.gson.Gson
 import factorioBlueprint.Entity
 import factorioBlueprint.ResultBP
@@ -54,7 +53,7 @@ fun main(args: Array<String>) {
     listOfEdges.filter { edge ->
         val signal = edge.last(1)
         signal.isSignal() && signal.entityType != EntityType.VirtualSignal
-                &&edge.validRail!!
+                && edge.validRail!!
     }.forEach { edge ->
         val endingSignal = edge.last(1)
         edge.nextEdgeList = relation[endingSignal]!!
@@ -69,13 +68,16 @@ fun main(args: Array<String>) {
 
     val blockList = connectEdgesToBlocks(listOfEdges)
     // creating the Graph out of the Blocks and edges
+    println("relevante blöcke")
     val startSignals = signalList.toSet() - notStartSignalList.toSet()
+
     val graph: MutableMap<Int, MutableList<Int>> = mutableMapOf()
-    blockList.filter { block ->
-        block.isRelevant(startSignals)
-    }.forEach { block ->
-        graph[block.id] = block.findEnd().toMutableList()
-    }
+    blockList.forEach { block -> block.markRelevant(startSignals) }
+    blockList.filter { block -> block.isRelevant }
+        .forEach { block ->
+            block.findEnd()
+            graph[block.id] =block.dependingOn.map { it.id }.toMutableList()
+        }
 
     //analysing the graph
     val graphTesting = Graph()
@@ -85,10 +87,19 @@ fun main(args: Array<String>) {
     //debug output
     var i = 0
     listOfEdges.forEach {
-        println(it)
+        // println(it)
         printEdge(it, i)
         i++
 
     }
+
+    println("joooo")
+    printGraf(graph)
+    printBlockList(blockList)
+    blockList.forEach {
+        println("id:" + it.id + " center: " + it.calculateCenter())
+    }
+
+    println(graph)
     //endregion
 }
