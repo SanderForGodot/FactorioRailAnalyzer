@@ -81,8 +81,8 @@ val fact: Map<EntityType, Map<Int, List<Entity>>> = mapOf(
             Entity(-1, EntityType.Rail, Position(-3.0, -3.0), 1),
             Entity(-1, EntityType.CurvedRail, Position(-4.0, -6.0), 4),
 
-            Entity(-1, EntityType.AnySignal, Position(-0.5, -3.5), 3,true),
-            Entity(1, EntityType.AnySignal, Position(-2.5, -1.5), 7,false),
+            Entity(1, EntityType.AnySignal, Position(-0.5, -3.5), 3,true),
+            Entity(-1, EntityType.AnySignal, Position(-2.5, -1.5), 7,false),
             Entity(1, EntityType.AnySignal, Position(2.5, 3.5), 4,false),
             Entity(-1, EntityType.AnySignal, Position(-0.5, 3.5), 0,true),
         ), 1 to listOf(
@@ -116,8 +116,8 @@ val fact: Map<EntityType, Map<Int, List<Entity>>> = mapOf(
 
             Entity(-1, EntityType.AnySignal, Position(-3.5, -2.5), 2,true),
             Entity(1, EntityType.AnySignal, Position(-3.5, 0.5), 6,false),
-            Entity(1, EntityType.AnySignal, Position(1.5, 2.5), 7,false),
-            Entity(-1, EntityType.AnySignal, Position(3.5, 0.5), 3,true),
+            Entity(1, EntityType.AnySignal, Position(1.5, 2.5), 7,true),
+            Entity(-1, EntityType.AnySignal, Position(3.5, 0.5), 3,false),
         ), 4 to listOf(
             Entity(1, EntityType.Rail, Position(3.0, 3.0), 5),
             Entity(1, EntityType.CurvedRail, Position(4.0, 6.0), 0),
@@ -125,9 +125,9 @@ val fact: Map<EntityType, Map<Int, List<Entity>>> = mapOf(
             Entity(-1, EntityType.CurvedRail, Position(-2.0, -8.0), 0),
             Entity(-1, EntityType.CurvedRail, Position(0.0, -8.0), 1),
 
-            Entity(-1, EntityType.AnySignal, Position(-2.5, -3.5), 0,false),
+            Entity(1, EntityType.AnySignal, Position(-2.5, -3.5), 0,false),
             Entity(1, EntityType.AnySignal, Position(0.5, 3.5), 7,true),
-            Entity(1, EntityType.AnySignal, Position(0.5, -3.5), 4,true),
+            Entity(-1, EntityType.AnySignal, Position(0.5, -3.5), 4,true),
             Entity(-1, EntityType.AnySignal, Position(2.5, 1.5), 3,false),
         ), 5 to listOf(
             Entity(1, EntityType.Rail, Position(1.0, -5.0), 0),

@@ -34,7 +34,8 @@ fun isSpecialCase(current: Entity, next: Entity): Int {
 
     if (current.entityType == EntityType.CurvedRail && current.direction == 0)
         if (next.entityType == EntityType.Rail && next.direction == 0 ||
-            next.entityType == EntityType.CurvedRail && next.direction == 5)
+            next.entityType == EntityType.CurvedRail && next.direction == 5
+        )
             return -1
     if (current.entityType == EntityType.Rail && current.direction == 0)
         if (next.entityType == EntityType.CurvedRail && next.direction == 0)
@@ -44,7 +45,8 @@ fun isSpecialCase(current: Entity, next: Entity): Int {
             return -1
     if (current.entityType == EntityType.CurvedRail && current.direction == 4)
         if (next.entityType == EntityType.Rail && next.direction == 0 ||
-            next.entityType == EntityType.CurvedRail && next.direction == 1)
+            next.entityType == EntityType.CurvedRail && next.direction == 1
+        )
             return -1
     if (current.entityType == EntityType.Rail && current.direction == 0)
         if (next.entityType == EntityType.CurvedRail && next.direction == 4)
@@ -82,7 +84,13 @@ fun determineEnding(edge: Edge, direction: Int): Edge? {
 
     if (endingSig == null)
         return null
-    val validRail = goodSide.contains(endingSig)
+    var validRail = goodSide.contains(endingSig)
+    var mes1 = (firstLeft != null).toString() + "\t" + (secondLeft != null).toString() + "\n" + "->->->->->->"
+    var mesg2: String = validRail.toString() + "\n" + (firstRight != null).toString() + "\t" + (secondRight != null)
+
+    println(mes1 + mesg2)
+
+    validRail = true
     return edge.finishUpEdge(endingSig, validRail)
 }
 

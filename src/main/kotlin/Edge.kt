@@ -158,16 +158,15 @@ class Edge() {
 
     }
 
-    fun findEnd(first: Boolean): MutableList<Int> {
-        return if (!first && entityList.first().entityType == EntityType.Signal)
-            mutableListOf(belongsToBlock!!.id)
+    fun findEnd(first: Boolean): ArrayList<Block> {
+        return if (!first && belongsToBlock!!.isRelevant)
+            arrayListOf(belongsToBlock!!)
         else {
-            val resultList = mutableListOf<Int>()
+            val resultList = ArrayList<Block>()
             nextEdgeList.forEach { edge ->
                 resultList.addAll(edge.findEnd(false))
             }
             resultList
-
         }
     }
     override fun toString(): String {
