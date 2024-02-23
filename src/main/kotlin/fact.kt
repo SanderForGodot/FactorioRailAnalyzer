@@ -64,8 +64,8 @@ val fact: Map<EntityType, Map<Int, List<Entity>>> = mapOf(
             Entity(-1, EntityType.Rail, Position(-2.0, 0.0), 3),
             Entity(-1, EntityType.CurvedRail, Position(-3.0, 3.0), 1),
 
-            Entity(-1, EntityType.AnySignal, Position(-1.5, -1.5), 1,true),
-            Entity(1, EntityType.AnySignal, Position(0.5, 0.5), 5,false),
+            Entity(-1, EntityType.AnySignal, Position(-1.5, -1.5), 1,false),
+            Entity(1, EntityType.AnySignal, Position(0.5, 0.5), 5,true),
         ),
     ),
     /*
