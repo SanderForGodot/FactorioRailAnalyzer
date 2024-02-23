@@ -1,4 +1,8 @@
 build/
 .gradle/
 input.dot
- output**.svg
+ EntityRelations.svg
+ Edge**.svg
+ Edge**.png
+ graph.svg
+ Blocks.svg

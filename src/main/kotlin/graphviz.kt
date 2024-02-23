@@ -1,29 +1,31 @@
 import factorioBlueprint.Entity
-import graph.Graph
 import java.io.File
 import java.io.IOException
 import java.text.MessageFormat
 
 
 class Graphviz {
-    val OPEN_GRAPH = "digraph G { \n"
-    val NODE = "{0} [label=\"{1}\"]; \n"
-    val NODE2 = "{0} [label=\"{1}\"\npos = \"{2},{3}!\"]; \n"
-    val EDGE = "{0} -> {1}; \n"
-    val CLOSE_GRAPH = "} \n"
+    private val OPEN_GRAPH = "digraph G { \n"
+    private val NODE = "{0} [label=\"{1}\"]; \n"
+    private val NODE2 = "{0} [label=\"{1}\"\npos = \"{2},{3}!\"]; \n"
+    private val EDGE = "{0} -> {1}; \n"
+    private val CLOSE_GRAPH = "} \n"
 
-    var sb = StringBuilder()
 
+    //StringBuilder and genOutput are optional, so that this function can be used for printing the edge independently and
+    //it can be used for printBlocks
     @Throws(IOException::class)
-    fun format(sb: Appendable, edge: Edge) {
-        sb.append(OPEN_GRAPH)
+    fun printEdge(edge: Edge, j: Int, sb: StringBuilder = StringBuilder(), genOutput: Boolean = true) {
+        if (genOutput) {
+            sb.append(OPEN_GRAPH)
+        }
         var i = 0
         while (i < edge.entityList.size - 1) {
             sb.append(
                 MessageFormat.format(
                     NODE2,
                     edge.entityList[i].entityNumber,
-                    edge.entityList[i].entityType.name + edge.entityList[i].direction ,
+                    edge.entityList[i].entityType.name + edge.entityList[i].direction,
                     edge.entityList[i].position.x,
                     edge.entityList[i].position.y
                 )
@@ -31,13 +33,15 @@ class Graphviz {
             sb.append(MessageFormat.format(EDGE, edge.entityList[i].entityNumber, edge.entityList[i + 1].entityNumber))
             i++
         }
-
-        sb.append(CLOSE_GRAPH)
+        if (genOutput) {
+            sb.append(CLOSE_GRAPH)
+            buildFile(sb, "Edge$j")
+        }
     }
 
-    fun appendEntity(entity: Entity) {
+    fun appendEntity(sb: Appendable, entity: Entity) {
         val name = entity.entityType.name + " r:" + entity.direction + " id:" + entity.entityNumber
-        sb.append(MessageFormat.format(NODE2, entity.entityNumber, name,entity.position.x,entity.position.y))
+        sb.append(MessageFormat.format(NODE2, entity.entityNumber, name, entity.position.x, entity.position.y))
         entity.leftNextRail.forEach {
             sb.append(MessageFormat.format(EDGE, entity.entityNumber, it.entityNumber))
         }
@@ -53,66 +57,59 @@ class Graphviz {
 
     }
 
-    fun startGraph() {// gives graphviz syntax error if not called at the start of the graph
-        sb.append(OPEN_GRAPH)
-    }
-
-    fun endGraph() {// gives graphviz syntax error if not called at the end of the graph
-        sb.append(CLOSE_GRAPH)
-    }
-
-    fun createoutput() {// creates the output.svg file of the graph and clears the stringbuilder, so that a new graph can be started
-       buildFile(sb, "output")
-        println("Graphviz output created")
-        sb = StringBuilder()
-    }
-
     fun generateEntityRelations(entityList: ArrayList<Entity>) {
-        startGraph()
+        val stringBuilder = StringBuilder()
+        stringBuilder.append(OPEN_GRAPH)
         entityList.forEach { entity ->
             println(entity.relevantShit())
-            appendEntity(entity)
+            appendEntity(stringBuilder, entity)
         }
-        endGraph()
-        createoutput()
+        stringBuilder.append(CLOSE_GRAPH)
+        buildFile(stringBuilder, "EntityRelations")
+    }
+
+    fun printGraph(graph: MutableMap<Int, MutableList<Int>>) {
+        val stringBuilder = StringBuilder()
+        stringBuilder.append(OPEN_GRAPH)
+        graph.forEach { from ->
+            //point from entry.key to each entry.value
+            stringBuilder.append(MessageFormat.format(NODE, from.key, from.key))
+            from.value.forEach { pointTo ->
+                stringBuilder.append(MessageFormat.format(EDGE, from.key, pointTo))
+            }
+        }
+        stringBuilder.append(CLOSE_GRAPH)
+        buildFile(stringBuilder, "graph")
+    }
+
+    fun printBlocks(blockList: ArrayList<Block>) {
+        val stringBuilder = StringBuilder()
+        stringBuilder.append(OPEN_GRAPH)
+
+        blockList.forEach { block ->
+            stringBuilder.append(MessageFormat.format(NODE, block.id, "Block id:"+block.id+" EdgeCount:"+block.edgeList.size))
+            block.dependingOn.forEach { block2->
+                stringBuilder.append(MessageFormat.format(EDGE, block2.id, block.id))
+            }
+        }
+        stringBuilder.append(CLOSE_GRAPH)
+        buildFile(stringBuilder, "Blocks")
     }
 }
 
-fun printEdge(edge: Edge, i: Int) {
-    val graphviz = Graphviz()
-    val stringBuilder = StringBuilder()
-
-    graphviz.format(stringBuilder, edge)
-    //println(stringBuilder.toString())
-    buildFile(stringBuilder, "output$i")
-
-}
-
-fun printGraf(graph: MutableMap<Int, MutableList<Int>>) {
-    val graphviz = Graphviz()
-    val stringBuilder = StringBuilder()
-    stringBuilder.append(graphviz.OPEN_GRAPH)
-    graph.forEach { from ->
-        //point from entry.key to each entry.value
-
-        stringBuilder.append(MessageFormat.format(graphviz.NODE, from.key, from.key))
-        from.value.forEach { pointTo ->
-            stringBuilder.append(MessageFormat.format(graphviz.EDGE, from.key, pointTo))
-        }
-    }
-    stringBuilder.append(graphviz.CLOSE_GRAPH)
-
-    //println(stringBuilder.toString())
-    buildFile(stringBuilder, "graf")
-}
 
 fun buildFile(stringBuilder: StringBuilder, fileName: String) {
-    File("input.dot").writeText(stringBuilder.toString())
-    val result = ProcessBuilder("dot", "-Kfdp","-n","-Tsvg", "input.dot", "-o $fileName.svg")
-        .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-        .redirectError(ProcessBuilder.Redirect.INHERIT)
-        .start()
-        .waitFor()
+    try {
+        File("input.dot").writeText(stringBuilder.toString())
+        val result = ProcessBuilder("dot", "-Kfdp", "-n", "-Tsvg", "input.dot", "-o $fileName.svg")
+            .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+            .redirectError(ProcessBuilder.Redirect.INHERIT)
+            .start()
+            .waitFor()
+    } catch (e: Exception) {
+        println("Graphviz is not installed, no output pictures generated")
+        //todo: add console output
+    }
 }
 
 
@@ -123,14 +120,4 @@ it will produce one output.svg per edge
  */
 
 
-/* Original Coe copied from   https://stackoverflow.com/questions/25119877/graphviz-with-java
-//Render nodes
-for (node in edge.EntityList) {
-    sb.append(MessageFormat.format(NODE, node.entityNumber, node.getName()))
-    //Render edges for node
-    for (targetEdge in node.getEdges()) {
-        sb.append(MessageFormat.format(EDGE, node.entityNumber, targetEdge))
-    }
-}
-sb.append(CLOSE_GRAPH)
-}*/
+// Original Code copied from   https://stackoverflow.com/questions/25119877/graphviz-with-java

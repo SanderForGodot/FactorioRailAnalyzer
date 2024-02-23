@@ -87,15 +87,15 @@ fun main(args: Array<String>) {
     //debug output
     var i = 0
     listOfEdges.forEach {
-        // println(it)
-        printEdge(it, i)
+       // println(it)
+        Graphviz().printEdge(it, i)
         i++
 
     }
 
     println("joooo")
-    printGraf(graph)
-    printBlockList(blockList)
+    Graphviz().printGraph(graph)
+    Graphviz().printBlocks(blockList)
     blockList.forEach {
         println("id:" + it.id + " center: " + it.calculateCenter())
     }

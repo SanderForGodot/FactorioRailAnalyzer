@@ -2,27 +2,12 @@ package graph
 
 
 class Graph {
-    private val adjVertices: MutableMap<GraphNode, MutableList<GraphNode>> = mutableMapOf()
     private val path: MutableList<Int> = ArrayList()
     private var testGraph: MutableMap<Int, MutableList<Int>> = mutableMapOf()
     private var closedVertices: MutableMap<Int,MutableList<Int>> =  mutableMapOf()
     private var deadlocks: MutableList<MutableList<Int>> = mutableListOf()
 
-    fun addNode(id: Int) {
-        adjVertices.putIfAbsent(GraphNode(id), ArrayList())
-    }
 
-    fun removeNode(id: Int) {
-        val v = GraphNode(id)
-        adjVertices.values.stream().forEach { list -> list.drop(list.indexOf(v)) }
-        adjVertices.remove(GraphNode(id))
-    }
-
-    fun addDirectionalEdge(id1: Int, id2: Int) {
-        val v1 = GraphNode(id1)
-        val v2 = GraphNode(id2)
-        adjVertices.getValue(v1).add(v2)
-    }
 
     fun tiernan() {// important Map must be sorted or the Tiernan will not work
         //testGraph=testGraph.toSortedMap()
