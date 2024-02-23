@@ -23,8 +23,8 @@ fun ArrayList<Entity>.railLinker(matrix: Array<Array<ArrayList<Entity>?>>) {
 fun addEachMatchingEntity(entities: ArrayList<Entity>?, factEntity: Entity, rail: Entity) {
     entities?.filter { entity ->// for each existing Entity E
         // if T and E are equal (except position)
-        (entity.isSignal() == factEntity.isSignal() ||
-                entity.isRail() == factEntity.isRail())  //technically  this check is unnecessary
+        ((entity.isSignal() && factEntity.isSignal()) ||
+                entity.entityType == factEntity.entityType)
                 && entity.direction == factEntity.direction
     }?.forEach { foundEntity ->
         // yes -> Add a reference from R to E to the direction depending on T
