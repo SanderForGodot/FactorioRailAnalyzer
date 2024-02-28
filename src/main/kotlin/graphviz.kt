@@ -41,7 +41,7 @@ class Graphviz {
 
     fun appendEntity(sb: Appendable, entity: Entity) {
         val name = entity.entityType.name + " r:" + entity.direction + " id:" + entity.entityNumber
-        sb.append(MessageFormat.format(NODE2, entity.entityNumber, name, entity.position.x, entity.position.y))
+        sb.append(MessageFormat.format(NODE2, entity.entityNumber, name, entity.position.x, -entity.position.y))
         entity.leftNextRail.forEach {
             sb.append(MessageFormat.format(EDGE, entity.entityNumber, it.entityNumber))
         }
@@ -100,6 +100,8 @@ class Graphviz {
 
 fun buildFile(stringBuilder: StringBuilder, fileName: String) {
     try {
+        // for png: val result = ProcessBuilder("dot", "-Kfdp", "-n", "-Tpng", "input.dot", "-o $fileName.png")
+        // for svg: val result = ProcessBuilder("dot", "-Kfdp", "-n", "-Tsvg", "input.dot", "-o $fileName.svg")
         File("input.dot").writeText(stringBuilder.toString())
         val result = ProcessBuilder("dot", "-Kfdp", "-n", "-Tsvg", "input.dot", "-o $fileName.svg")
             .redirectOutput(ProcessBuilder.Redirect.INHERIT)

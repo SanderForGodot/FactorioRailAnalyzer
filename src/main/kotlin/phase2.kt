@@ -47,7 +47,7 @@ fun setRemoveRelatedRail(foundRail: Entity, factEntity: Entity, rail: Entity): B
         // if bool is not set take the input value
         null -> factVal
         // if the bool and the input have the same value all ok continue
-        (factVal == current) -> current
+        factVal -> current
         // if the rails disagree prioritise the curved rail state
         else -> (rail.entityType == EntityType.CurvedRail) == factVal
 

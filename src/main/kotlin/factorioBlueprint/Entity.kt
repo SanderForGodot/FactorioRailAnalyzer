@@ -9,7 +9,7 @@ data class Entity(
 
     // we re-use the entityNumber as an indication for direction which we only do in the fact.kt
     @SerializedName("entity_number") var entityNumber: Int? = null,
-    @SerializedName("name") var entityType: EntityType = EntityType.Error,
+    @SerializedName("name") var entityType: EntityType = EntityType.Error,//sadly this is overwritten by the serializedName and will be set to null if the name is not part of entityType
     @SerializedName("position") var position: Position = Position(0.0, 0.0),
     @SerializedName("direction") var direction: Int = 0,  // when no direction is provided it is in the default aka 0 direction
     var removeRelatedRail: Boolean?=null
