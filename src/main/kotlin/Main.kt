@@ -1,4 +1,5 @@
 import com.google.gson.Gson
+import factorioBlueprint.BlueprintBook
 import factorioBlueprint.Entity
 import factorioBlueprint.ResultBP
 import graph.Graph
@@ -9,7 +10,12 @@ fun main(args: Array<String>) {
 
     //region Phase0: data decompression
     val jsonString: String = decodeBpSting("decodeTest.txt")
-    val resultBP = Gson().fromJson(jsonString, ResultBP::class.java)
+    val resultBP : ResultBP = if(jsonString.contains("blueprint_book")){
+        println("BlueprintBook as Input, only the First Blueprint will be analysed ") //TODO: change so that all can be analysed or add console output
+        Gson().fromJson(jsonString, BlueprintBook::class.java).blueprint_book.blueprints.first()
+    }else{
+        Gson().fromJson(jsonString, ResultBP::class.java)
+    }
     val entityList = resultBP.blueprint.entities
     //endregion
     //region Phase1: data cleansing and preparation
