@@ -1,5 +1,4 @@
 import com.google.gson.Gson
-import factorioBlueprint.BlueprintBook
 import factorioBlueprint.Entity
 import factorioBlueprint.ResultBP
 import graph.Graph
@@ -10,19 +9,15 @@ fun main(args: Array<String>) {
 
     //region Phase0: data decompression
     val jsonString: String = decodeBpSting("decodeTest.txt")
-    val resultBP : ResultBP = if(jsonString.contains("blueprint_book")){
-        println("BlueprintBook as Input, only the First Blueprint will be analysed ") //TODO: change so that all can be analysed or add console output
-        Gson().fromJson(jsonString, BlueprintBook::class.java).blueprint_book.blueprints.first()
-    }else{
-        Gson().fromJson(jsonString, ResultBP::class.java)
-    }
+    if (jsonString.contains("blueprint_book")){throw Exception("Sorry, a Blueprintbook cannot be parsed by this Programm, please input only Blueprints ")}
+    val resultBP : ResultBP =Gson().fromJson(jsonString, ResultBP::class.java)
     val entityList = resultBP.blueprint.entities
     //endregion
     //region Phase1: data cleansing and preparation
     //filter out entity's we don't care about
     //ordered by (guessed) amount they appear in a BP
     entityList.retainAll {
-        it.entityType != EntityType.Error
+         it.entityType != null //it can be null the ide is lying
     }
     // determinant min and max of BP
     val (min, max) = entityList.determineMinMax()
