@@ -9,6 +9,7 @@ class Graphviz {
     private val NODE = "{0} [label=\"{1}\"]; \n"
     private val NODE2 = "{0} [label=\"{1}\"\npos = \"{2},{3}!\"]; \n"
     private val EDGE = "{0} -> {1}; \n"
+    private val EDGECOLOR = "{0} -> {1}[color=\"{2}\"]; \n"
     private val CLOSE_GRAPH = "} \n"
 
 
@@ -25,7 +26,7 @@ class Graphviz {
                 MessageFormat.format(
                     NODE2,
                     edge.entityList[i].entityNumber,
-                    edge.entityList[i].entityType.name + edge.entityList[i].direction,
+                    edge.entityList[i].entityType.name + " dir:" + edge.entityList[i].direction,
                     edge.entityList[i].position.x,
                     edge.entityList[i].position.y
                 )
@@ -40,19 +41,28 @@ class Graphviz {
     }
 
     fun appendEntity(sb: Appendable, entity: Entity) {
-        val name = entity.entityType.name + " r:" + entity.direction + " id:" + entity.entityNumber
-        sb.append(MessageFormat.format(NODE2, entity.entityNumber, name, entity.position.x, -entity.position.y))
+        val name =
+            entity.entityType.name + " r:" + entity.direction + " id:" + entity.entityNumber//+"pos:"+entity.position.x+";" +entity.position.y
+        sb.append(
+            MessageFormat.format(
+                NODE2,
+                entity.entityNumber,
+                name,
+                (entity.position.x * 2).toString(),
+                (entity.position.y * 2).toString()
+            )
+        )
         entity.leftNextRail.forEach {
-            sb.append(MessageFormat.format(EDGE, entity.entityNumber, it.entityNumber))
+            sb.append(MessageFormat.format(EDGECOLOR, entity.entityNumber, it.entityNumber, "red"))
         }
         entity.rightNextRail.forEach {
-            sb.append(MessageFormat.format(EDGE, entity.entityNumber, it.entityNumber))
+            sb.append(MessageFormat.format(EDGECOLOR, entity.entityNumber, it.entityNumber, "blue"))
         }
         entity.signalOnTheLeft.forEach {
-            sb.append(MessageFormat.format(EDGE, entity.entityNumber, it.entityNumber))
+            sb.append(MessageFormat.format(EDGECOLOR, entity.entityNumber, it.entityNumber, "blue"))
         }
         entity.signalOnTheRight.forEach {
-            sb.append(MessageFormat.format(EDGE, entity.entityNumber, it.entityNumber))
+            sb.append(MessageFormat.format(EDGECOLOR, entity.entityNumber, it.entityNumber, "red"))
         }
 
     }
@@ -87,8 +97,17 @@ class Graphviz {
         stringBuilder.append(OPEN_GRAPH)
 
         blockList.forEach { block ->
-            stringBuilder.append(MessageFormat.format(NODE, block.id, "Block id:"+block.id+" EdgeCount:"+block.edgeList.size))
-            block.dependingOn.forEach { block2->
+            val pos = block.calculateCenter()
+            stringBuilder.append(
+                MessageFormat.format(
+                    NODE2,
+                    block.id,
+                    "Block id:" + block.id + " EdgeCount:" + block.edgeList.size,
+                    pos.x,
+                    pos.y/10
+                )
+            )
+            block.dependingOn?.forEach { block2 ->
                 stringBuilder.append(MessageFormat.format(EDGE, block2.id, block.id))
             }
         }
@@ -103,7 +122,7 @@ fun buildFile(stringBuilder: StringBuilder, fileName: String) {
         // for png: val result = ProcessBuilder("dot", "-Kfdp", "-n", "-Tpng", "input.dot", "-o $fileName.png")
         // for svg: val result = ProcessBuilder("dot", "-Kfdp", "-n", "-Tsvg", "input.dot", "-o $fileName.svg")
         File("input.dot").writeText(stringBuilder.toString())
-        val result = ProcessBuilder("dot", "-Kfdp", "-n", "-Tsvg", "input.dot", "-o $fileName.svg")
+        val result = ProcessBuilder("dot", "-Kfdp", "-y", "-n", "-Tsvg", "input.dot", "-o $fileName.svg")
             .redirectOutput(ProcessBuilder.Redirect.INHERIT)
             .redirectError(ProcessBuilder.Redirect.INHERIT)
             .start()

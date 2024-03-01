@@ -47,4 +47,10 @@ data class Position(
         this.y /= dividend
         return this
     }
+
+    operator fun times(i: Int): Position {
+        this.x *= i
+        this.y *= i
+        return this
+    }
 }

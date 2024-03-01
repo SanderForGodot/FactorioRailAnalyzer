@@ -11,12 +11,13 @@ fun buildEdge(edge: Edge, direction: Int): ArrayList<Edge> {
     }
     val arr: ArrayList<Edge> = arrayListOf()
     val nextRails = edge.last(1).getRailList(direction)
-    if (nextRails.size > 0)
+    if (nextRails.size > 0) {
         nextRails.forEach { entity ->
             val modifier = isSpecialCase(edge.last(1), entity)
             val result = buildEdge(Edge(edge, entity), direction * modifier)
             arr.addAll(result)
-        } else {
+        }
+    } else {
         val blankSignal = Entity(0, EntityType.VirtualSignal, Position(0.0, 0.0), 123, true)
         arr.add(edge.finishUpEdge(blankSignal, true))
     }
@@ -63,7 +64,8 @@ fun determineEnding(edge: Edge, direction: Int): Edge? {
     val wrongSide = edge.last(1).getSignalList(-direction)          // in drive direction on the left  site
 
     // signal name viewed it in drive direction                        // equivalent if you view a Curved Rail of direction 2
-    val firstRight: Entity? = retrieveSignal(goodSide, false)       // untenLinks  (this is how we first thought about the problem)
+    val firstRight: Entity? =
+        retrieveSignal(goodSide, false)       // untenLinks  (this is how we first thought about the problem)
     val secondRight: Entity? = retrieveSignal(goodSide, true)       // untenRechts
     val firstLeft: Entity? = retrieveSignal(wrongSide, true)        // obenLinks
     val secondLeft: Entity? = retrieveSignal(wrongSide, false)      // obenRechts
