@@ -3,13 +3,15 @@ import factorioBlueprint.Entity
 import factorioBlueprint.ResultBP
 
 fun main() {
-    val BlockNumberTest1=16
-    val BlockNumberTest2=16
-    val BlockNumberTest3=16
+    val BlockNumberTest1=8
+    val BlockNumberTest2=4
 
-    test("src/test/resources/testBPs/curvecollision.txt", BlockNumberTest1)
-    //test("src/test/resources/testBPs/curvecollisiondiagonal.txt", BlockNumberTest2)
-    //test("src/test/resources/testBPs/curvecollisionstraight.txt", BlockNumberTest3)
+
+    //test("src/test/resources/testBPs/curvecollisionstraight.txt", BlockNumberTest1)
+    test("src/test/resources/testBPs/curvecollisiondiagonal.txt", BlockNumberTest1)
+    //test("src/test/resources/testBPs/curvecollision.txt", BlockNumberTest2)
+    //test("src/test/resources/testBPs/curvecollisiondoubleside.txt", BlockNumberTest2)
+
 }
 fun test(filename:String, solution:Int){
 

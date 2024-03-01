@@ -100,11 +100,9 @@ class Graphviz {
             val pos = block.calculateCenter()
             stringBuilder.append(
                 MessageFormat.format(
-                    NODE2,
+                    NODE,
                     block.id,
-                    "Block id:" + block.id + " EdgeCount:" + block.edgeList.size,
-                    pos.x,
-                    pos.y/10
+                    "Block id:" + block.id + " EdgeCount:" + block.edgeList.size
                 )
             )
             block.dependingOn?.forEach { block2 ->
