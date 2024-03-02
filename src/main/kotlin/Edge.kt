@@ -1,5 +1,6 @@
 import factorioBlueprint.Entity
 import factorioBlueprint.Position
+import kotlin.math.abs
 import kotlin.math.sqrt
 
 class Edge() {
@@ -94,19 +95,65 @@ class Edge() {
                 collisionShape.add(pointA)
             collisionShape.add(it.position)
             collisionShape.add(pointB)
+
         }
 
         val lastRail = last(2)
-        listRef = collisionPoints[lastRail.entityType]?.get(lastRail.direction)!!.toMutableList()
-        listRef[0] += lastRail.position
-        listRef[1] += lastRail.position
-        val lastPoint = collisionShape[collisionShape.size - 1]
-        listRef.remove(closer(lastPoint, listRef))
-        if (lastPoint != listRef[0])
-            collisionShape.add(listRef[0])
+        if (lastRail.entityType == EntityType.Rail) {
+            listRef = collisionPoints[lastRail.entityType]?.get(lastRail.direction)!!.toMutableList()
+            listRef[0] += lastRail.position
+            listRef[1] += lastRail.position
+            val lastPoint = collisionShape[collisionShape.size - 1]
+            listRef.remove(closer(lastPoint, listRef))
+            collisionShape.addUnique(listRef[0])
+        }
+        collisionShape[0] = shortenEnds(collisionShape[0], collisionShape[1])
+        collisionShape[collisionShape.size - 1] =
+            shortenEnds(collisionShape[collisionShape.size - 1], collisionShape[collisionShape.size - 2])
         println("$collisionShape")
+
     }
 
+
+    private fun shortenEnds(end: Position, second: Position): Position {
+        val deltaX = abs(end.x - second.x)
+        val deltaY = abs(end.y - second.y)
+        val deltaDelta = deltaX - deltaY
+
+        return when {
+            deltaDelta == 0.0 -> {
+                // generate diagonal points
+                val A1 = end + Position(0.1, 0.1)
+                val A2 = end + Position(-0.1, 0.1)
+                val A3 = end + Position(0.1, -0.1)
+                val A4 = end + Position(-0.1, -0.1)
+                val A12 = closer(second, arrayListOf(A1, A2))
+                val A34 = closer(second, arrayListOf(A3, A4))
+                val R = closer(second, arrayListOf(A12, A34))
+                R
+            }
+
+            deltaDelta < 0.0 -> {
+                // Y is bigger
+                // generate Y points
+                val A1 = end + Position(0.0, 0.1)
+                val A2 = end + Position(0.0, -0.1)
+                val R = closer(second, arrayListOf(A1, A2))
+                R
+            }
+
+            deltaDelta > 0.0 -> {
+                // X is bigger
+                // generate X points
+                val A1 = end + Position(0.1, 0.0)
+                val A2 = end + Position(-0.1, 0.0)
+                val R = closer(second, arrayListOf(A1, A2))
+                R
+            }
+
+            else -> throw Exception("actually impossible")
+        }
+    }
 
     //returns the closest of the 2 position to the signal position
     private fun closer(signal: Position, options: List<Position>): Position {

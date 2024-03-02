@@ -14,8 +14,8 @@ val fact: Map<EntityType, Map<Int, List<Entity>>> = mapOf(
 
             Entity(-1, EntityType.AnySignal, Position(-1.5, 0.5), 0 ,true),
             Entity(-1, EntityType.AnySignal, Position(-1.5, -0.5), 0, false),
-            Entity(1, EntityType.AnySignal, Position(1.5, 0.5), 4,true),
-            Entity(1, EntityType.AnySignal, Position(1.5, -0.5), 4,false),
+            Entity(1, EntityType.AnySignal, Position(1.5, 0.5), 4,false),
+            Entity(1, EntityType.AnySignal, Position(1.5, -0.5), 4,true),
         ),
         2 to listOf(
             Entity(1, EntityType.Rail, Position(2.0, 0.0), 2),
@@ -168,12 +168,12 @@ val fact: Map<EntityType, Map<Int, List<Entity>>> = mapOf(
 
 val collisionPoints: Map<EntityType, Map<Int, List<Position>>> = mapOf(
     EntityType.Rail to mapOf(
-        0 to listOf(Position(0.0,-0.9),Position(0.0,0.9)),
-        2 to listOf(Position(-0.9,0.0),Position(0.9,0.0)),
+        0 to listOf(Position(0.0,-1.0),Position(0.0,1.0)),
+        2 to listOf(Position(-1.0,0.0),Position(1.0,0.0)),
         1 to listOf(Position(0.0,-1.0),Position(1.0,0.0)),
         3 to listOf(Position(1.0,0.0),Position(0.0,1.0)),
         5 to listOf(Position(0.0,1.0),Position(-1.0,0.0)),
-        7 to listOf(Position(0.0,-1.0),Position(-1.0,0.0)),
+        7 to listOf(Position(-1.0,0.0),Position(0.0,-1.0)),
     ),
     EntityType.CurvedRail to mapOf(
         0 to listOf(Position(-2.0,-3.0), Position(1.0,4.0)),
