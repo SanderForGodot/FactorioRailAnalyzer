@@ -3,7 +3,7 @@ import factorioBlueprint.Position
 
 class Block(edge: Edge, var id:Int) {
     var edgeList = arrayListOf(edge)
-    lateinit var dependingOn: ArrayList<Block>
+    var dependingOn: ArrayList<Block>?=null
     var isRelevant: Boolean = false
 
 

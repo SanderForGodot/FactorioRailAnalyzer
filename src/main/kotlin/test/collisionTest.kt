@@ -1,14 +1,22 @@
 import com.google.gson.Gson
 import factorioBlueprint.Entity
 import factorioBlueprint.ResultBP
-import graph.Graph
 
-fun main(args: Array<String>) {
+fun main() {
+    val BlockNumberTest1=8
+    val BlockNumberTest2=4
 
-    println("Program arguments: ${args.joinToString()}")
+
+    //test("src/test/resources/testBPs/curvecollisionstraight.txt", BlockNumberTest1)
+    test("src/test/resources/testBPs/curvecollisiondiagonal.txt", BlockNumberTest1)
+    //test("src/test/resources/testBPs/curvecollision.txt", BlockNumberTest2)
+    //test("src/test/resources/testBPs/curvecollisiondoubleside.txt", BlockNumberTest2)
+
+}
+fun test(filename:String, solution:Int){
 
     //region Phase0: data decompression
-    val jsonString: String = decodeBpSting("decodeTest.txt")
+    val jsonString: String = decodeBpSting(filename)
     if (jsonString.contains("blueprint_book")){throw Exception("Sorry, a Blueprintbook cannot be parsed by this Programm, please input only Blueprints ")}
     val resultBP : ResultBP =Gson().fromJson(jsonString, ResultBP::class.java)
     val entityList = resultBP.blueprint.entities
@@ -17,7 +25,7 @@ fun main(args: Array<String>) {
     //filter out entity's we don't care about
     //ordered by (guessed) amount they appear in a BP
     entityList.retainAll {
-         it.entityType != null //it can be null the ide is lying (GSON brakes kotlin null safety)
+        it.entityType != null //it can be null the ide is lying
     }
     // determinant min and max of BP
     val (min, max) = entityList.determineMinMax()
@@ -49,7 +57,7 @@ fun main(args: Array<String>) {
         if(startPoint.rightNextRail.size>0)
             resultEdges.addAll( buildEdge(Edge(startPoint),  1))
         if(startPoint.leftNextRail.size>0)
-           resultEdges.addAll( buildEdge(Edge(startPoint), -1 ))
+            resultEdges.addAll( buildEdge(Edge(startPoint), -1 ))
         if (resultEdges.size>0) {
             relation[startPoint] = resultEdges
             listOfEdges.addAll(resultEdges)
@@ -87,15 +95,10 @@ fun main(args: Array<String>) {
             graph[block.id] = block.dependingOn?.map { it.id }!!.toMutableList()
         }
 
-    //analysing the graph
-    val graphTesting = Graph()
-    graphTesting.setGraph(graph)
-    graphTesting.tiernan()
-
     //debug output
     var i = 0
     listOfEdges.forEach {
-       // println(it)
+        // println(it)
         Graphviz().printEdge(it, i)
         i++
 
@@ -110,4 +113,8 @@ fun main(args: Array<String>) {
 
     println(graph)
     //endregion
+     assert(blockList.size==solution){"Blocksize is not the same as the expected value$solution, but rather:${blockList.size}"}
+
+
 }
+
