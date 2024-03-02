@@ -9,12 +9,13 @@ data class Entity(
 
     // we re-use the entityNumber as an indication for direction which we only do in the fact.kt
     @SerializedName("entity_number") var entityNumber: Int? = null,
-    @SerializedName("name") var entityType: EntityType = EntityType.Error,//sadly this is overwritten by the serializedName and will be set to null if the name is not part of entityType
+    @SerializedName("name") var entityType: EntityType = EntityType.Error,//this is overwritten by the GSON and will be set to null when none is found
     @SerializedName("position") var position: Position = Position(0.0, 0.0),
     @SerializedName("direction") var direction: Int = 0,  // when no direction is provided it is in the default aka 0 direction
-    var removeRelatedRail: Boolean?=null
+    var removeRelatedRail: Boolean? = null
 
 ) {
+
     lateinit var leftNextRail: ArrayList<Entity>  // also reused for signals to reference a connected rail
     lateinit var rightNextRail: ArrayList<Entity>
     lateinit var signalOnTheLeft: ArrayList<Entity>
@@ -25,15 +26,17 @@ data class Entity(
         signalOnTheLeft = arrayListOf()
         signalOnTheRight = arrayListOf()
     }
+
     override fun equals(other: Any?): Boolean {
         if (other !is Entity)
             return false
         @Suppress("NAME_SHADOWING") val other: Entity = other
 
-        val isSameEntityType: Boolean = if (this.entityType == EntityType.AnySignal || other.entityType ==EntityType.AnySignal)
-            (this.isSignal() && other.isSignal())
-        else
-            entityType == other.entityType
+        val isSameEntityType: Boolean =
+            if (this.entityType == EntityType.AnySignal || other.entityType == EntityType.AnySignal)
+                (this.isSignal() && other.isSignal())
+            else
+                entityType == other.entityType
 
         return position == other.position
                 && isSameEntityType
@@ -73,14 +76,13 @@ data class Entity(
         return "Entity(entityType=$entityType, position=$position, direction=$direction)"
     }
 
-    fun isSignal():Boolean{
+    fun isSignal(): Boolean {
         return entityType.isSignal()
     }
 
-    fun isRail():Boolean{
+    fun isRail(): Boolean {
         return entityType.isRail()
     }
-
 
 
 }

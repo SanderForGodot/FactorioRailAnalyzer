@@ -49,7 +49,7 @@ fun <E> ArrayList<E>.addUnique(element: E): Boolean {
 }
 
 
-//TODO : find where we stole this from and add reference
+//refence from https://bryceboe.com/2006/10/23/line-segment-intersection-algorithm/
 fun intersect(A: Position, B: Position, C: Position, D: Position): Boolean {
     return ccw(A, C, D) != ccw(B, C, D) && ccw(A, B, C) != ccw(A, B, D)
 }

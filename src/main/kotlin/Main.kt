@@ -17,7 +17,7 @@ fun main(args: Array<String>) {
     //filter out entity's we don't care about
     //ordered by (guessed) amount they appear in a BP
     entityList.retainAll {
-         it.entityType != null //it can be null the ide is lying
+         it.entityType != null //it can be null the ide is lying (GSON brakes kotlin null safety)
     }
     // determinant min and max of BP
     val (min, max) = entityList.determineMinMax()

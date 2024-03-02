@@ -6,6 +6,7 @@ class Edge() {
     constructor(item: Entity) : this() {
         entityList = arrayListOf(item)
     }
+
     constructor(edge: Edge, entity: Entity) : this() {
         clone(edge)
         if (!entityList.addUnique(entity))
@@ -122,22 +123,13 @@ class Edge() {
             entity.isRail()
         }.forEach { entity ->
             tileLength += when (entity.entityType) {
-                EntityType.Rail -> checkDiagonal(entity)
+                EntityType.Rail -> if (entity.direction % 2 == 0) 2.0 else sqrt(2.0)
                 EntityType.CurvedRail -> 7.843 //rounded value exact value: 8.55-(sqrt(2)/2)
                 else -> throw Exception("Not a rail, should have been caught, how did you get here")
             }
         }
     }
 
-    private fun checkDiagonal(entity: Entity): Double {// returns the length of a straight or diagonal rail
-        return when (entity.direction) {
-            //normal straight rail
-            0, 2 -> 2.0
-            //diagonal rails
-            1, 3, 5, 7 -> sqrt(2.0)
-            else -> throw Exception("Not a straight rail, logically this shouldn't happen, how did you get here")
-        }
-    }
     fun doesCollide(other: Edge): Boolean {
         var pointA: Position
         var pointB: Position
@@ -169,6 +161,7 @@ class Edge() {
             resultList
         }
     }
+
     override fun toString(): String {
         var str = "EdgeStart------------------\n"
 
