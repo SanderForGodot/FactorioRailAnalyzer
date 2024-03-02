@@ -1,5 +1,6 @@
 build/
 .gradle/
+
 input.dot
  EntityRelations.svg
  EntityRelations.png
@@ -9,3 +10,4 @@ input.dot
  graph.png
  Blocks.svg
  Blocks.png
+bin/

@@ -26,7 +26,7 @@ class Graphviz {
                 MessageFormat.format(
                     NODE2,
                     edge.entityList[i].entityNumber,
-                    edge.entityList[i].entityType.name + " dir:" + edge.entityList[i].direction,
+                    edge.entityList[i].entityType.name + " id:"+edge.entityList[i].entityNumber+" dir:" + edge.entityList[i].direction,
                     edge.entityList[i].position.x,
                     edge.entityList[i].position.y
                 )
@@ -41,8 +41,7 @@ class Graphviz {
     }
 
     fun appendEntity(sb: Appendable, entity: Entity) {
-        val name =
-            entity.entityType.name + " r:" + entity.direction + " id:" + entity.entityNumber//+"pos:"+entity.position.x+";" +entity.position.y
+        val name = entity.entityType.name +  " id:" + entity.entityNumber+" r:" + entity.direction +"pos:"+entity.position.x+";" +entity.position.y
         sb.append(
             MessageFormat.format(
                 NODE2,

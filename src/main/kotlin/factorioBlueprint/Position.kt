@@ -53,4 +53,8 @@ data class Position(
         this.y *= i
         return this
     }
+
+    override fun toString(): String {
+        return "($x,-$y)"
+    }
 }

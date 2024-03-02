@@ -37,7 +37,7 @@ class Graph {
                     expandPath(neighbor)
                     closedVertices[node]?.add(neighbor)
                 } else {
-                    if(path.first()==neighbor){
+                    if(path.first()==neighbor){//TODO: maybe change to Path.contains(neighbour), when the analies only starts at the entrypoints
                         println("found deadlock ending in node: $node")
                         println(path)
                         deadlocks.add(path)

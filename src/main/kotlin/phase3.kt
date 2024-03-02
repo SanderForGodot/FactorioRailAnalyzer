@@ -90,7 +90,7 @@ fun determineEnding(edge: Edge, direction: Int): Edge? {
     var mes1 = (firstLeft != null).toString() + "\t" + (secondLeft != null).toString() + "\n" + "->->->->->->"
     var mesg2: String = validRail.toString() + "\n" + (firstRight != null).toString() + "\t" + (secondRight != null)
 
-    println(mes1 + mesg2)
+    //println(mes1 + mesg2)
 
     validRail = true
     return edge.finishUpEdge(endingSig, validRail)
