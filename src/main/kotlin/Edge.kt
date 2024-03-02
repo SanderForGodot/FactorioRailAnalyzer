@@ -103,7 +103,7 @@ class Edge() {
             listRef = collisionPoints[lastRail.entityType]?.get(lastRail.direction)!!.toMutableList()
             listRef[0] += lastRail.position
             listRef[1] += lastRail.position
-            val lastPoint = collisionShape[collisionShape.size - 1]
+            val lastPoint = collisionShape[collisionShape.size- 1]
             listRef.remove(closer(lastPoint, listRef))
             collisionShape.addUnique(listRef[0])
         }

@@ -60,6 +60,15 @@ class Block(edge: Edge, var id:Int) {
         }
         return result / count
     }
+
+    fun edgeListSting():String{
+        var R ="["
+        edgeList.forEach {
+            R += it.entityList.first().entityNumber.toString()+"->"+ it.entityList.last().entityNumber.toString()+", "
+
+        }
+        return  R + "]"
+    }
 }
 
 

@@ -101,7 +101,7 @@ class Graphviz {
                 MessageFormat.format(
                     NODE,
                     block.id,
-                    "Block id:" + block.id + " EdgeCount:" + block.edgeList.size
+                    "Block id:" + block.id + " \nEL:" + block.edgeListSting()
                 )
             )
             block.dependingOn?.forEach { block2 ->
