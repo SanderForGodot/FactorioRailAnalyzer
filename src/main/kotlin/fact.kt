@@ -168,10 +168,10 @@ val fact: Map<EntityType, Map<Int, List<Entity>>> = mapOf(
 
 val collisionPoints: Map<EntityType, Map<Int, List<Position>>> = mapOf(
     EntityType.Rail to mapOf(
-        0 to listOf(Position(0.0,-1.0),Position(0.0,1.0)),
-        2 to listOf(Position(-1.0,0.0),Position(1.0,0.0)),
+        0 to listOf(Position(0.0,-0.9),Position(0.0,0.9)),
+        2 to listOf(Position(-0.9,0.0),Position(0.9,0.0)),
         1 to listOf(Position(0.0,-1.0),Position(1.0,0.0)),
-        3 to listOf(Position(0.0,1.0),Position(1.0,0.0)),
+        3 to listOf(Position(1.0,0.0),Position(0.0,1.0)),
         5 to listOf(Position(0.0,1.0),Position(-1.0,0.0)),
         7 to listOf(Position(0.0,-1.0),Position(-1.0,0.0)),
     ),

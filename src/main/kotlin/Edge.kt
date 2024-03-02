@@ -104,6 +104,7 @@ class Edge() {
         listRef.remove(closer(lastPoint, listRef))
         if (lastPoint != listRef[0])
             collisionShape.add(listRef[0])
+        println("$collisionShape")
     }
 
 
@@ -144,6 +145,9 @@ class Edge() {
                 if (intersect(pointA, pointB, pointC, pointD)) {
                     return true
                 }
+                //if(pointA ==pointC || pointA == pointD || pointB == pointC || pointB==pointD) {
+                //    return true
+                //}
             }
         }
         return false
