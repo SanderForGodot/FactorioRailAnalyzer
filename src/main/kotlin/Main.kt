@@ -90,7 +90,7 @@ fun main(args: Array<String>) {
     //analysing the graph
     val graphTesting = Graph()
     graphTesting.setGraph(graph)
-    graphTesting.tiernan()
+    graphTesting.tiernan(blockList)
 
     //debug output
     var i = 0
@@ -110,4 +110,5 @@ fun main(args: Array<String>) {
 
     println(graph)
     //endregion
+    println("found Deadlocks"+graphTesting.getDeadlocks())
 }

@@ -6,5 +6,5 @@ fun main(args: Array<String>) {
 
 
     Graph.gentestgraph()
-    Graph.tiernan()
+    //Graph.tiernan()
 }

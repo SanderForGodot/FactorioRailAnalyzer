@@ -1,6 +1,7 @@
 build/
 .gradle/
-
+.idea/modules/
+.idea/libraries/
 input.dot
  EntityRelations.svg
  EntityRelations.png

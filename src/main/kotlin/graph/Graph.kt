@@ -1,36 +1,38 @@
 package graph
 
+import Block
+
 
 class Graph {
-    private val path: MutableList<Int> = ArrayList()
+    private val path: MutableList<Block> = ArrayList()
     private var testGraph: MutableMap<Int, MutableList<Int>> = mutableMapOf()
-    private var closedVertices: MutableMap<Int,MutableList<Int>> =  mutableMapOf()
-    private var deadlocks: MutableList<MutableList<Int>> = mutableListOf()
+    private var closedVertices: MutableMap<Block,MutableList<Block>> =  mutableMapOf()
+    private var deadlocks: MutableList<Set<Block>> = mutableListOf()
 
 
 
-    fun tiernan() {// important Map must be sorted or the Tiernan will not work
+    fun tiernan(blocklist:ArrayList<Block>) {// important Map must be sorted or the Tiernan will not work
         //testGraph=testGraph.toSortedMap()
-        println(testGraph)
-        testGraph.iterator().forEach {
-            println("Startet Path: ${it.key}")
-            expandPath(it.key)
+        println(blocklist)
+        blocklist.iterator().forEach {
+            println("Startet Path: ${it.id}")
+            expandPath(it)
             closedVertices =  mutableMapOf()
         }
     }
 
-    private fun expandPath(node: Int) {
+    private fun expandPath(node: Block) {
         path.add(node)
         if(closedVertices[node]==null){
             closedVertices[node] = mutableListOf()
         }
 
 
-        if (testGraph[node] != null) {
-            for (neighbor in testGraph[node]!!) {
+
+            for (neighbor in node.neighbourBlocks()) {
                 closedVertices[node]?.let { println(it.size) }
                 if (!path.contains(neighbor)
-                    and (neighbor > path.first())
+                    and (neighbor.id > path.first().id)
                     and ( (closedVertices[node]?.contains(neighbor) == false))
                 ) {
                     println("Expanding to: $neighbor")
@@ -38,9 +40,14 @@ class Graph {
                     closedVertices[node]?.add(neighbor)
                 } else {
                     if(path.first()==neighbor){//TODO: maybe change to Path.contains(neighbour), when the analies only starts at the entrypoints
-                        println("found deadlock ending in node: $node")
+                        if (path.first().isRelevant){
+                        println("found deadlock with node: ${path.first()}")
                         println(path)
-                        deadlocks.add(path)
+                        deadlocks.add(path.toSet())
+                        }else{
+                            println("found circle, that's not a deadlock")
+                            println(path)
+                        }
                     }else{
                         println("no circuit at path-end: $node")
                     }
@@ -48,9 +55,7 @@ class Graph {
                 }
 
             }
-        } else {
-            println("No neighbours: $node")
-        }
+
         closedVertices[node]=mutableListOf()
         println("removing node:"+ path.last())
         path.removeLast()
@@ -72,27 +77,12 @@ class Graph {
      testGraph[5] = mutableListOf(1)
      */
 
-    private fun dfs(node: Int, visited: BooleanArray, graph: Array<List<Int>>) {
-        //possible algo Depth-First Search
-        // zur Kreiserkennung nutzbar laut https://medium.com/@AlexanderObregon/introduction-to-graph-algorithms-in-java-a-beginners-guide-450cace790d4
-        visited[node] = true
-        println("Visited node: $node")
 
-        for (neighbor in graph[node]) {
-            if (!visited[neighbor]) {
-                dfs(neighbor, visited, graph)
-            } else {
-                println("found deadlock ending in node: $node")
-                println(path)
-            }
-        }
-
-    }
     fun setGraph(graph:MutableMap<Int, MutableList<Int>>){
         testGraph =graph
     }
 
-    fun getDeadlocks(): MutableList<MutableList<Int>> {
+    fun getDeadlocks(): MutableList<Set<Block>> {
         return deadlocks
     }
 }
