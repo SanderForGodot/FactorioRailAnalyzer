@@ -1,4 +1,3 @@
-import factorioBlueprint.Entity
 import factorioBlueprint.Position
 
 class Block(edge: Edge, var id: Int) {

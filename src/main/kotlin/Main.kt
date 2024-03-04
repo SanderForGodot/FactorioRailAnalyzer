@@ -47,7 +47,7 @@ fun main(args: Array<String>) {
     val listOfEdges = arrayListOf<Edge>()
     val relation = mutableMapOf<Entity, ArrayList<Edge>>()
     signalList.forEach { startPoint ->
-        var resultEdges = arrayListOf<Edge>()
+        val resultEdges = arrayListOf<Edge>()
         if (startPoint.rightNextRail.size > 0)
             resultEdges.addAll(buildEdge(Edge(startPoint), 1))
         if (startPoint.leftNextRail.size > 0)

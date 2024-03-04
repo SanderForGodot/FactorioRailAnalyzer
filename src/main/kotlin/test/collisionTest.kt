@@ -2,6 +2,7 @@ import com.google.gson.Gson
 import factorioBlueprint.Entity
 import factorioBlueprint.ResultBP
 
+/*
 fun main() {
     val BlockNumberTest1=8
     val BlockNumberTest2=4
@@ -117,4 +118,4 @@ fun test(filename:String, solution:Int){
 
 
 }
-
+*/
