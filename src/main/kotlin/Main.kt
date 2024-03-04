@@ -9,15 +9,17 @@ fun main(args: Array<String>) {
 
     //region Phase0: data decompression
     val jsonString: String = decodeBpSting("decodeTest.txt")
-    if (jsonString.contains("blueprint_book")){throw Exception("Sorry, a Blueprintbook cannot be parsed by this Programm, please input only Blueprints ")}
-    val resultBP : ResultBP =Gson().fromJson(jsonString, ResultBP::class.java)
+    if (jsonString.contains("blueprint_book")) {
+        throw Exception("Sorry, a Blueprintbook cannot be parsed by this Programm, please input only Blueprints ")
+    }
+    val resultBP: ResultBP = Gson().fromJson(jsonString, ResultBP::class.java)
     val entityList = resultBP.blueprint.entities
     //endregion
     //region Phase1: data cleansing and preparation
     //filter out entity's we don't care about
     //ordered by (guessed) amount they appear in a BP
     entityList.retainAll {
-         it.entityType != null //it can be null the ide is lying (GSON brakes kotlin null safety)
+        it.entityType != null //it can be null the ide is lying (GSON brakes kotlin null safety)
     }
     // determinant min and max of BP
     val (min, max) = entityList.determineMinMax()
@@ -46,11 +48,11 @@ fun main(args: Array<String>) {
     val relation = mutableMapOf<Entity, ArrayList<Edge>>()
     signalList.forEach { startPoint ->
         var resultEdges = arrayListOf<Edge>()
-        if(startPoint.rightNextRail.size>0)
-            resultEdges.addAll( buildEdge(Edge(startPoint),  1))
-        if(startPoint.leftNextRail.size>0)
-           resultEdges.addAll( buildEdge(Edge(startPoint), -1 ))
-        if (resultEdges.size>0) {
+        if (startPoint.rightNextRail.size > 0)
+            resultEdges.addAll(buildEdge(Edge(startPoint), 1))
+        if (startPoint.leftNextRail.size > 0)
+            resultEdges.addAll(buildEdge(Edge(startPoint), -1))
+        if (resultEdges.size > 0) {
             relation[startPoint] = resultEdges
             listOfEdges.addAll(resultEdges)
         }
@@ -95,7 +97,7 @@ fun main(args: Array<String>) {
     //debug output
     var i = 0
     listOfEdges.forEach {
-       // println(it)
+        // println(it)
         Graphviz().printEdge(it, i)
         i++
 

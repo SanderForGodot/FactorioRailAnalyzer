@@ -106,7 +106,7 @@ fun test(filename:String, solution:Int){
 
     println("joooo")
     Graphviz().printGraph(graph)
-    Graphviz().printBlocks(blockList)
+    //Graphviz().printBlocks(blockList)
     blockList.forEach {
         println("id:" + it.id + " center: " + it.calculateCenter())
     }

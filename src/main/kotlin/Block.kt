@@ -63,7 +63,7 @@ class Block(edge: Edge, var id: Int) {
         val neighbours = arrayListOf<Block>()
         edgeList.forEach { edge ->
             edge.nextEdgeList.forEach { nextEdge ->
-                nextEdge.belongsToBlock?.let { neighbours.add(it) }
+                neighbours.add(nextEdge.belongsToBlock!!)
             }
         }
         return neighbours
