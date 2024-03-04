@@ -38,7 +38,7 @@ class Graph {
                 visited[node]?.add(neighbor)
             } else {
                 if (path.first() == neighbor) {
-                    if(path.any{it.isRelevant}){
+                    if(path.any{it.hasRailSignal()}){
                         println("found deadlock with node: ${path.first()}")
                         println(path)
                         deadlocks.add(path.toSet())

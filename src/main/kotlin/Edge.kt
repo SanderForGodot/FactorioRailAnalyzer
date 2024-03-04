@@ -201,18 +201,6 @@ class Edge() {
 
     }
 
-    fun findEnd(first: Boolean): ArrayList<Block> {
-        return if (!first && belongsToBlock!!.isRelevant)
-            arrayListOf(belongsToBlock!!)
-        else {
-            val resultList = ArrayList<Block>()
-            nextEdgeList.forEach { edge ->
-                resultList.addAll(edge.findEnd(false))
-            }
-            resultList
-        }
-    }
-
     override fun toString(): String {
         var str = "EdgeStart--\n"
 

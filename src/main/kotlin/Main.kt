@@ -92,12 +92,7 @@ fun main(args: Array<String>) {
     val startSignals = signalList.toSet() - notStartSignalList.toSet()
 
     val graph: MutableMap<Int, MutableList<Int>> = mutableMapOf()
-    blockList.forEach { block -> block.markRelevant(startSignals) }
-    blockList.filter { block -> block.isRelevant }
-        .forEach { block ->
-            block.findEnd()
-            graph[block.id] = block.dependingOn?.map { it.id }!!.toMutableList()
-        }
+
 
     //analysing the graph
     val graphTesting = Graph()

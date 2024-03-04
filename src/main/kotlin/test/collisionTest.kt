@@ -86,7 +86,7 @@ fun test(filename:String, solution:Int){
     // creating the Graph out of the Blocks and edges
     println("relevante blöcke")
     val startSignals = signalList.toSet() - notStartSignalList.toSet()
-
+/* // this was the only place wich pointed to deprecaded code
     val graph: MutableMap<Int, MutableList<Int>> = mutableMapOf()
     blockList.forEach { block -> block.markRelevant(startSignals) }
     blockList.filter { block -> block.isRelevant }
@@ -94,7 +94,7 @@ fun test(filename:String, solution:Int){
             block.findEnd()
             graph[block.id] = block.dependingOn?.map { it.id }!!.toMutableList()
         }
-
+*/
     //debug output
     var i = 0
     listOfEdges.forEach {
@@ -105,13 +105,13 @@ fun test(filename:String, solution:Int){
     }
 
     println("joooo")
-    Graphviz().printGraph(graph)
+   // Graphviz().printGraph(graph)
     //Graphviz().printBlocks(blockList)
     blockList.forEach {
         println("id:" + it.id + " center: " + it.calculateCenter())
     }
 
-    println(graph)
+   // println(graph)
     //endregion
      assert(blockList.size==solution){"Blocksize is not the same as the expected value$solution, but rather:${blockList.size}"}
 
