@@ -72,7 +72,7 @@ class Block(edge: Edge, var id: Int) {
     fun edgeListSting(): String {
         var R = "["
         edgeList.forEach {
-            R += it.entityList.first().entityNumber.toString() + "->" + it.entityList.last().entityNumber.toString() + ", "
+            R +=it.aToB()+", "
 
         }
         return R + "]"

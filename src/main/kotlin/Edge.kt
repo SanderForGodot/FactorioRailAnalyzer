@@ -214,7 +214,7 @@ class Edge() {
     }
 
     override fun toString(): String {
-        var str = "EdgeStart------------------\n"
+        var str = "EdgeStart--\n"
 
         entityList.forEach {
             val int: String = (it.entityNumber ?: 0).toString()
@@ -223,6 +223,10 @@ class Edge() {
         }
         str += "tile length:$tileLength"
         return str
+    }
+
+    fun aToB(): String {
+        return   entityList.first().entityNumber.toString()+"->"+ entityList.last().entityNumber.toString()
     }
 
     fun debugPrint(): Pair<Boolean, Entity> {

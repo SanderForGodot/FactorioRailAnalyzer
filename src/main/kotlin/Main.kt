@@ -58,6 +58,7 @@ fun main(args: Array<String>) {
         }
     }
 
+
     val notStartSignalList = arrayListOf<Entity>()
 
     listOfEdges.filter { edge ->
@@ -69,6 +70,15 @@ fun main(args: Array<String>) {
         edge.nextEdgeList = relation[endingSignal]!!
         notStartSignalList.addUnique(endingSignal)
     }
+    println("x points to y")
+    listOfEdges.forEach { edge ->
+        print("\n"+edge.aToB() + "  to  ")
+        edge.nextEdgeList.forEach{
+            print(it.aToB()+", ")
+        }
+
+    }
+    println("\nx points to y")
     //endregion
     // guard check point
     if (listOfEdges.size == 0) {
