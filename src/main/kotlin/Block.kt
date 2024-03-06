@@ -38,7 +38,7 @@ class Block(edge: Edge, var id: Int) {
         return result / count
     }
 
-    fun neighbourBlocks(): ArrayList<Block> {
+        fun neighbourBlocks(): ArrayList<Block> {
         val neighbours = arrayListOf<Block>()
         edgeList.forEach { edge ->
             edge.nextEdgeList.forEach { nextEdge ->

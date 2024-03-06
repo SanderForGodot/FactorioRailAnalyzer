@@ -3,6 +3,14 @@ import java.io.File
 import java.io.IOException
 import java.text.MessageFormat
 
+/* How to use:
+have graphviz installed, possible by downloading the installer from here:
+https://graphviz.org/download/
+it will produce one output.svg per edge
+ */
+
+
+// Original Code copied from   https://stackoverflow.com/questions/25119877/graphviz-with-java
 
 class Graphviz {
     private val OPEN_GRAPH = "digraph G { \n"
@@ -111,31 +119,18 @@ class Graphviz {
         stringBuilder.append(CLOSE_GRAPH)
         buildFile(stringBuilder, "Blocks")
     }
-}
-
-
-fun buildFile(stringBuilder: StringBuilder, fileName: String) {
-    try {
-        // for png: val result = ProcessBuilder("dot", "-Kfdp", "-n", "-Tpng", "input.dot", "-o $fileName.png")
-        // for svg: val result = ProcessBuilder("dot", "-Kfdp", "-n", "-Tsvg", "input.dot", "-o $fileName.svg")
-        File("input.dot").writeText(stringBuilder.toString())
-        val result = ProcessBuilder("dot", "-Kfdp", "-y", "-n", "-Tsvg", "input.dot", "-o $fileName.svg")
-            .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-            .redirectError(ProcessBuilder.Redirect.INHERIT)
-            .start()
-            .waitFor()
-    } catch (e: Exception) {
-        println("Graphviz is not installed, no output pictures generated")
-        //todo: add console output
+    fun buildFile(stringBuilder: StringBuilder, fileName: String) {
+        try {
+            // for png: val result = ProcessBuilder("dot", "-Kfdp", "-n", "-Tpng", "input.dot", "-o $fileName.png")
+            // for svg: val result = ProcessBuilder("dot", "-Kfdp", "-n", "-Tsvg", "input.dot", "-o $fileName.svg")
+            File("input.dot").writeText(stringBuilder.toString())
+            val result = ProcessBuilder("dot", "-Kfdp", "-y", "-n", "-Tsvg", "input.dot", "-o $fileName.svg")
+                .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+                .redirectError(ProcessBuilder.Redirect.INHERIT)
+                .start()
+                .waitFor()
+        } catch (e: Exception) {
+            println("Graphviz is not installed, no output pictures generated")
+        }
     }
 }
-
-
-/* How to use:
-have graphviz installed, possible by downloading the installer from here:
-https://graphviz.org/download/
-it will produce one output.svg per edge
- */
-
-
-// Original Code copied from   https://stackoverflow.com/questions/25119877/graphviz-with-java
