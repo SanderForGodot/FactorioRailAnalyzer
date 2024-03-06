@@ -96,7 +96,6 @@ fun main(args: Array<String>) {
 
     //analysing the graph
     val graphTesting = Graph()
-    graphTesting.setGraph(graph)
     graphTesting.tiernan(blockList)
 
     //debug output
