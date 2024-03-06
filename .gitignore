@@ -2,13 +2,5 @@ build/
 .gradle/
 .idea/modules/
 .idea/libraries/
-input.dot
- EntityRelations.svg
- EntityRelations.png
- Edge**.svg
- Edge**.png
- graph.svg
- graph.png
- Blocks.svg
- Blocks.png
+GraphvizOutput/
 bin/
