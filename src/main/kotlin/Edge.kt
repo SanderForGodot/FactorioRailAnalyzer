@@ -103,7 +103,7 @@ class Edge() {
             listRef = collisionPoints[lastRail.entityType]?.get(lastRail.direction)!!.toMutableList()
             listRef[0] += lastRail.position
             listRef[1] += lastRail.position
-            val lastPoint = collisionShape[collisionShape.size- 1]
+            val lastPoint = collisionShape[collisionShape.size - 1]
             listRef.remove(closer(lastPoint, listRef))
             collisionShape.addUnique(listRef[0])
         }
@@ -214,10 +214,27 @@ class Edge() {
     }
 
     fun aToB(): String {
-        return   entityList.first().entityNumber.toString()+"->"+ entityList.last().entityNumber.toString()
+        return entityList.first().entityNumber.toString() + "->" + entityList.last().entityNumber.toString()
     }
 
     fun debugPrint(): Pair<Boolean, Entity> {
         return Pair(validRail!!, last(1))
+    }
+
+    var wasIchBeobachte = ArrayList<Edge>()
+    fun setzteBeobachtendeEdges() {
+        var toCheck = nextEdgeList.toMutableList()
+        var tCI = toCheck.iterator()
+        var nextEdge: Edge = Edge()
+        while (tCI.hasNext()) {
+            nextEdge = tCI.next()
+            when ( nextEdge.entityList.first().entityType) {
+                EntityType.Rail -> wasIchBeobachte.add(nextEdge)
+                EntityType.ChainSignal -> toCheck.addAll(nextEdge.nextEdgeList)
+                else -> throw Exception("unexpected entityType: " + nextEdge.entityList.first().entityType +"\n Full Obj:"+ nextEdge)
+            }
+
+        }
+
     }
 }

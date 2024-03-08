@@ -70,11 +70,13 @@ fun main(args: Array<String>) {
         edge.nextEdgeList = relation[endingSignal]!!
         notStartSignalList.addUnique(endingSignal)
     }
+
+
     println("x points to y")
     listOfEdges.forEach { edge ->
-        print("\n"+edge.aToB() + "  to  ")
-        edge.nextEdgeList.forEach{
-            print(it.aToB()+", ")
+        print("\n" + edge.aToB() + "  to  ")
+        edge.nextEdgeList.forEach {
+            print(it.aToB() + ", ")
         }
 
     }
@@ -91,7 +93,24 @@ fun main(args: Array<String>) {
     println("relevante blöcke")
     val startSignals = signalList.toSet() - notStartSignalList.toSet()
 
-    val graph: MutableMap<Int, MutableList<Int>> = mutableMapOf()
+    var cnt = 0
+    startSignals.forEach { startSig ->
+        cnt--
+        var virtualSig = Entity(0, EntityType.VirtualSignal)
+        var startEdge = Edge(Edge(virtualSig), startSig)
+        startEdge.nextEdgeList = relation[startSig]!!
+        listOfEdges.add(startEdge)
+        var startBlock = Block(startEdge, cnt)
+        blockList.add(startBlock)
+    }
+    listOfEdges.filter { edge ->
+        edge.belongsToBlock!!.id < 0 //aka ist start block
+                || edge.entityList.first().entityType == EntityType.VirtualSignal // ggf eine bessere alternaive start edges fest zustellen
+                || edge.entityList.first().entityType == EntityType.Rail
+    }.forEach{
+        edge->
+        edge.setzteBeobachtendeEdges()
+    }
 
 
     //analysing the graph
@@ -108,13 +127,11 @@ fun main(args: Array<String>) {
     }
 
     println("joooo")
-    Graphviz().printGraph(graph)
     Graphviz().printBlocks(blockList)
     blockList.forEach {
         println("id:" + it.id + " center: " + it.calculateCenter())
     }
 
-    println(graph)
     //endregion
-    println("found Deadlocks"+graphTesting.getDeadlocks())
+    println("found Deadlocks" + graphTesting.getDeadlocks())
 }
