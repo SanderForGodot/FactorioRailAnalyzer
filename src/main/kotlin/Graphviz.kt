@@ -1,6 +1,8 @@
 import factorioBlueprint.Entity
 import java.io.File
 import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Path
 import java.text.MessageFormat
 
 /* How to use:
@@ -34,7 +36,7 @@ class Graphviz {
                 MessageFormat.format(
                     NODE2,
                     edge.entityList[i].entityNumber,
-                    edge.entityList[i].entityType.name + " id:"+edge.entityList[i].entityNumber+" dir:" + edge.entityList[i].direction,
+                    edge.entityList[i].entityType.name + " id:" + edge.entityList[i].entityNumber + " dir:" + edge.entityList[i].direction,
                     edge.entityList[i].position.x,
                     edge.entityList[i].position.y
                 )
@@ -49,7 +51,8 @@ class Graphviz {
     }
 
     fun appendEntity(sb: Appendable, entity: Entity) {
-        val name = entity.entityType.name +  " id:" + entity.entityNumber+" r:" + entity.direction +"pos:"+entity.position.x+";" +entity.position.y
+        val name =
+            entity.entityType.name + " id:" + entity.entityNumber + " r:" + entity.direction + "pos:" + entity.position.x + ";" + entity.position.y
         sb.append(
             MessageFormat.format(
                 NODE2,
@@ -119,18 +122,31 @@ class Graphviz {
         stringBuilder.append(CLOSE_GRAPH)
         buildFile(stringBuilder, "Blocks")
     }
-    fun buildFile(stringBuilder: StringBuilder, fileName: String) {
-        try {
-            // for png: val result = ProcessBuilder("dot", "-Kfdp", "-n", "-Tpng", "input.dot", "-o $fileName.png")
-            // for svg: val result = ProcessBuilder("dot", "-Kfdp", "-n", "-Tsvg", "input.dot", "-o $fileName.svg")
-            File("input.dot").writeText(stringBuilder.toString())
-            val result = ProcessBuilder("dot", "-Kfdp", "-y", "-n", "-Tsvg", "input.dot", "-o $fileName.svg")
-                .redirectOutput(ProcessBuilder.Redirect.INHERIT)
-                .redirectError(ProcessBuilder.Redirect.INHERIT)
-                .start()
-                .waitFor()
-        } catch (e: Exception) {
-            println("Graphviz is not installed, no output pictures generated")
-        }
+}
+
+
+fun buildFile(stringBuilder: StringBuilder, fileName: String) {
+    try {
+        // for png: val result = ProcessBuilder("dot", "-Kfdp", "-n", "-Tpng", "input.dot", "-o $fileName.png")
+        // for svg: val result = ProcessBuilder("dot", "-Kfdp", "-n", "-Tsvg", "input.dot", "-o $fileName.svg")
+        Files.createDirectory(Path.of("GraphvizOutput"))
+        File("GraphvizOutput/input.dot").writeText(stringBuilder.toString())
+        val result = ProcessBuilder(
+            "dot",
+            "-Kfdp",
+            "-y",
+            "-n",
+            "-Tsvg",
+            "GraphvizOutput/input.dot",
+            "-oGraphvizOutput/$fileName.svg"
+        )
+            .redirectOutput(ProcessBuilder.Redirect.INHERIT)
+            .redirectError(ProcessBuilder.Redirect.INHERIT)
+            .start()
+            .waitFor()
+    } catch (e: Exception) {
+        //println(e)
+        println("Graphviz is not installed, no output pictures generated")
+        //todo: add console output
     }
 }
