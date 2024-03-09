@@ -11,13 +11,14 @@ class Graph {
 
 
     fun tiernan(blocklist: ArrayList<Block>) {// important Map must be sorted or the Tiernan will not work
+        return
         println(blocklist)
         blocklist.forEach {
             println("Startet Path: ${it.id}")
             expandPath(it)
             visited = mutableMapOf()
         }
-        funfunfun()
+        //funfunfun()
     }
 
 

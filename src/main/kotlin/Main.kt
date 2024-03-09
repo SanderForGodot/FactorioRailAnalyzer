@@ -34,7 +34,7 @@ fun main(args: Array<String>) {
     //region Phase2: rail Linker: connected rails point to each other with pointer list does the same with signals
     entityList.railLinker(matrix)
     //endregion
-    Graphviz().generateEntityRelations(entityList)
+    //Graphviz().generateEntityRelations(entityList)
     //region Phase3: create
     //prepare
     val signalList: List<Entity> = entityList.filter { entity ->
@@ -57,7 +57,7 @@ fun main(args: Array<String>) {
             listOfEdges.addAll(resultEdges)
         }
     }
-
+    svgFromPoints(listOfEdges)
 
     val notStartSignalList = arrayListOf<Entity>()
 
@@ -98,19 +98,21 @@ fun main(args: Array<String>) {
         cnt--
         var virtualSig = Entity(0, EntityType.VirtualSignal)
         var startEdge = Edge(Edge(virtualSig), startSig)
-        startEdge.nextEdgeList = relation[startSig]!!
+        startEdge.nextEdgeList = relation[startSig]?: return@forEach
         listOfEdges.add(startEdge)
         var startBlock = Block(startEdge, cnt)
+        startEdge.belongsToBlock = startBlock
         blockList.add(startBlock)
     }
     listOfEdges.filter { edge ->
         edge.belongsToBlock!!.id < 0 //aka ist start block
                 || edge.entityList.first().entityType == EntityType.VirtualSignal // ggf eine bessere alternaive start edges fest zustellen
-                || edge.entityList.first().entityType == EntityType.Rail
+                || edge.entityList.first().entityType == EntityType.Signal
     }.forEach{
         edge->
         edge.setzteBeobachtendeEdges()
     }
+   // Graphviz().printBlocksFromEdgeRelations(listOfEdges)
 
 
     //analysing the graph
@@ -121,17 +123,19 @@ fun main(args: Array<String>) {
     var i = 0
     listOfEdges.forEach {
         // println(it)
-        Graphviz().printEdge(it, i)
+       // Graphviz().printEdge(it, i)
         i++
 
     }
 
     println("joooo")
-    Graphviz().printBlocks(blockList)
+    //Graphviz().printBlocks(blockList)
     blockList.forEach {
         println("id:" + it.id + " center: " + it.calculateCenter())
     }
 
     //endregion
     println("found Deadlocks" + graphTesting.getDeadlocks())
+
+
 }

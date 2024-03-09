@@ -14,8 +14,8 @@ val fact: Map<EntityType, Map<Int, List<Entity>>> = mapOf(
 
             Entity(-1, EntityType.AnySignal, Position(-1.5, 0.5), 0 ,true),
             Entity(-1, EntityType.AnySignal, Position(-1.5, -0.5), 0, false),
-            Entity(1, EntityType.AnySignal, Position(1.5, 0.5), 4,false),
-            Entity(1, EntityType.AnySignal, Position(1.5, -0.5), 4,true),
+            Entity(1, EntityType.AnySignal, Position(1.5, 0.5), 4,true),
+            Entity(1, EntityType.AnySignal, Position(1.5, -0.5), 4,false),
         ),
         2 to listOf(
             Entity(1, EntityType.Rail, Position(2.0, 0.0), 2),
@@ -27,8 +27,8 @@ val fact: Map<EntityType, Map<Int, List<Entity>>> = mapOf(
 
             Entity(-1, EntityType.AnySignal, Position(-0.5, -1.5), 2,true),
             Entity(-1, EntityType.AnySignal, Position(0.5, -1.5), 2,false),
-            Entity(1, EntityType.AnySignal, Position(-0.5, 1.5), 6,false),
-            Entity(1, EntityType.AnySignal, Position(0.5, 1.5), 6,true),
+            Entity(1, EntityType.AnySignal, Position(-0.5, 1.5), 6,true),
+            Entity(1, EntityType.AnySignal, Position(0.5, 1.5), 6,false),
         ),
         1 to listOf(
             Entity(1, EntityType.Rail, Position(2.0, 0.0), 5),

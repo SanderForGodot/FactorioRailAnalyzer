@@ -16,7 +16,7 @@ class Edge() {
     }
 
     lateinit var entityList: ArrayList<Entity>
-    private var collisionShape: ArrayList<Position> = arrayListOf()
+    var collisionShape: ArrayList<Position> = arrayListOf()
     var belongsToBlock: Block? = null
     var validRail: Boolean? = null
     var nextEdgeList: List<Edge> = arrayListOf()
@@ -202,6 +202,10 @@ class Edge() {
     }
 
     override fun toString(): String {
+        return aToB()
+    }
+
+    fun oldToString(): String {
         var str = "EdgeStart--\n"
 
         entityList.forEach {
@@ -223,18 +227,35 @@ class Edge() {
 
     var wasIchBeobachte = ArrayList<Edge>()
     fun setzteBeobachtendeEdges() {
-        var toCheck = nextEdgeList.toMutableList()
-        var tCI = toCheck.iterator()
+        var toCheck: MutableList<Edge> = nextEdgeList.toMutableList()
+        var tCI: MutableListIterator<Edge> = toCheck.listIterator()
         var nextEdge: Edge = Edge()
         while (tCI.hasNext()) {
             nextEdge = tCI.next()
-            when ( nextEdge.entityList.first().entityType) {
-                EntityType.Rail -> wasIchBeobachte.add(nextEdge)
-                EntityType.ChainSignal -> toCheck.addAll(nextEdge.nextEdgeList)
-                else -> throw Exception("unexpected entityType: " + nextEdge.entityList.first().entityType +"\n Full Obj:"+ nextEdge)
+            when (nextEdge.entityList.first().entityType) {
+                EntityType.Signal -> wasIchBeobachte.addUnique(nextEdge)
+                EntityType.ChainSignal -> {
+                    nextEdge.nextEdgeList
+                        .filter { !toCheck.contains(it) }
+                        .forEach {
+                            tCI.add(it)
+                            tCI.previous()
+                        }
+                }
+
+                else -> throw Exception("unexpected entityType: " + nextEdge.entityList.first().entityType + "\n Full Obj:" + nextEdge)
             }
 
         }
 
+    }
+
+    fun byListIterator(list: MutableList<String>) {
+        val it = list.listIterator()
+        for (e in it) {
+            if (e.length > 1) {
+                it.add("<- a long one")
+            }
+        }
     }
 }

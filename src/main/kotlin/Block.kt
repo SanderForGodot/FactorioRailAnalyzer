@@ -41,7 +41,7 @@ class Block(edge: Edge, var id: Int) {
         fun neighbourBlocks(): ArrayList<Block> {
         val neighbours = arrayListOf<Block>()
         edgeList.forEach { edge ->
-            edge.nextEdgeList.forEach { nextEdge ->
+            edge.wasIchBeobachte.forEach { nextEdge ->
                 neighbours.add(nextEdge.belongsToBlock!!)
             }
         }
