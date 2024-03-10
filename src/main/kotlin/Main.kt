@@ -80,15 +80,6 @@ fun factorioRailAnalyzer(blueprint: String){
     }
 
 
-    println("x points to y")
-    listOfEdges.forEach { edge ->
-        print("\n" + edge.aToB() + "  to  ")
-        edge.nextEdgeList.forEach {
-            print(it.aToB() + ", ")
-        }
-
-    }
-    println("\nx points to y")
     //endregion
     // guard check point
     if (listOfEdges.size == 0) {
