@@ -18,7 +18,7 @@ class Edge() {
     lateinit var entityList: ArrayList<Entity>
     var collisionShape: ArrayList<Position> = arrayListOf()
     var belongsToBlock: Block? = null
-    var validRail: Boolean? = null
+    var validRail: Boolean = false
     var nextEdgeList: List<Edge> = arrayListOf()
     private var tileLength: Double = 0.0 // how many tiles the edge is long
 

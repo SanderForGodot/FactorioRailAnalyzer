@@ -1,6 +1,7 @@
 import com.google.gson.Gson
 import factorioBlueprint.Blueprint
 import factorioBlueprint.Entity
+import factorioBlueprint.Position
 import factorioBlueprint.ResultBP
 import graph.Graph
 
@@ -64,7 +65,7 @@ fun factorioRailAnalyzer(blueprint: String){
             listOfEdges.addAll(resultEdges)
         }
     }
-    svgFromPoints(listOfEdges)
+
 
     val notStartSignalList = arrayListOf<Entity>()
 
@@ -96,6 +97,7 @@ fun factorioRailAnalyzer(blueprint: String){
     //region Phase4: creating the blocks that are defined by the signals in factorio
 
     val blockList = connectEdgesToBlocks(listOfEdges)
+    svgFromPoints( max,listOfEdges, signalList)
     // creating the Graph out of the Blocks and edges
     println("relevante blöcke")
     val startSignals = signalList.toSet() - notStartSignalList.toSet()
