@@ -4,6 +4,9 @@ import factorioBlueprint.Position
 fun buildEdge(edge: Edge, direction: Int): ArrayList<Edge> {
 
     if (edge.last(1).hasSignal()) {
+        if (edge.last(1).toMannySignals()) {
+            throw Exception("toMannySignals on strait rail")// todo: add to InvalidSignalList exception
+        }
         val end = determineEnding(edge, direction)
         if (end != null)
             return arrayListOf(end)
@@ -91,8 +94,6 @@ fun determineEnding(edge: Edge, direction: Int): Edge? {
     var mesg2: String = validRail.toString() + "\n" + (firstRight != null).toString() + "\t" + (secondRight != null)
 
     //println(mes1 + mesg2)
-
-    validRail = true
     return edge.finishUpEdge(endingSig, validRail)
 }
 

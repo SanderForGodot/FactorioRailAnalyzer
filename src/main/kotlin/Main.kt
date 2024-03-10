@@ -1,4 +1,5 @@
 import com.google.gson.Gson
+import factorioBlueprint.Blueprint
 import factorioBlueprint.Entity
 import factorioBlueprint.ResultBP
 import graph.Graph
@@ -7,8 +8,14 @@ fun main(args: Array<String>) {
 
     println("Program arguments: ${args.joinToString()}")
 
+    //TODO: @Leos task
+
+    factorioRailAnalyzer("decodeTest.txt" /*,options*/) //please document the options before coding
+
+}
+fun factorioRailAnalyzer(blueprint: String){
     //region Phase0: data decompression
-    val jsonString: String = decodeBpSting("decodeTest.txt")
+    val jsonString: String = decodeBpSting(blueprint)
     if (jsonString.contains("blueprint_book")) {
         throw Exception("Sorry, a Blueprintbook cannot be parsed by this Programm, please input only Blueprints ")
     }
@@ -42,7 +49,7 @@ fun main(args: Array<String>) {
     }
 
     if (signalList.isEmpty())
-        throw Exception("No Edges Found, because there are no signals in the blueprint")
+        throw Exception("No Edges Found, because there are no signals in the blueprint") //todo: construction error
 
     val listOfEdges = arrayListOf<Edge>()
     val relation = mutableMapOf<Entity, ArrayList<Edge>>()
@@ -84,7 +91,7 @@ fun main(args: Array<String>) {
     //endregion
     // guard check point
     if (listOfEdges.size == 0) {
-        throw Exception("No Edges Found, but there are some signals ")
+        throw Exception("No Edges Found, but there are some signals ")  //todo: unexpected  error
     }
     //region Phase4: creating the blocks that are defined by the signals in factorio
 
@@ -108,9 +115,10 @@ fun main(args: Array<String>) {
         edge.belongsToBlock!!.id < 0 //aka ist start block
                 || edge.entityList.first().entityType == EntityType.VirtualSignal // ggf eine bessere alternaive start edges fest zustellen
                 || edge.entityList.first().entityType == EntityType.Signal
+    }.filter {
+        edge ->  edge.validRail!!
     }.forEach{
-        edge->
-        edge.setzteBeobachtendeEdges()
+        edge->edge.setzteBeobachtendeEdges()
     }
    // Graphviz().printBlocksFromEdgeRelations(listOfEdges)
 
