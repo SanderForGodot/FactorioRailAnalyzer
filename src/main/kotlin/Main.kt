@@ -1,22 +1,45 @@
 import com.google.gson.Gson
-import factorioBlueprint.Blueprint
 import factorioBlueprint.Entity
-import factorioBlueprint.Position
 import factorioBlueprint.ResultBP
 import graph.Graph
+import java.nio.file.Files
+import java.nio.file.Path
+
+//Boolean Options TODO:Implement those fuckers
+var GraphvizOutput = false
+var InstantShowOutput = false
+var showdebug = true
+var edgesGetRandomColor = true
+var usesInputFile = true
+
 
 fun main(args: Array<String>) {
 
     println("Program arguments: ${args.joinToString()}")
 
-    //TODO: @Leos task
+    val options = args.filter { it.startsWith("-") }
+    val inputBlueprintString = args.filter { it.startsWith("0") }
+    if (inputBlueprintString.size > 1) {
+        println("Too Many Blueprints provided")
+        return
+    }/*else if (inputBlueprintString.size<1){ // Add for CLI Builds
+        println("No Blueprint provided")
+        return
+    }*/
 
-    factorioRailAnalyzer("decodeTest.txt" /*,options*/) //please document the options before coding
-
+    var jsonString: String = ""
+    if (inputBlueprintString.size == 1) {
+        jsonString = decodeBpString(inputBlueprintString.first())
+    }
+    if (Files.exists(Path.of("decodeTest.txt"))) {
+        //TODO: @Leos task
+        factorioRailAnalyzer("decodeTest.txt" /*,options*/) //please document the options before coding
+    }
 }
-fun factorioRailAnalyzer(blueprint: String){
+
+fun factorioRailAnalyzer(blueprint: String) {
     //region Phase0: data decompression
-    val jsonString: String = decodeBpSting(blueprint)
+    val jsonString = decodeBpStringFromFilename(blueprint)
     if (jsonString.contains("blueprint_book")) {
         throw Exception("Sorry, a Blueprintbook cannot be parsed by this Programm, please input only Blueprints ")
     }
@@ -107,7 +130,7 @@ fun factorioRailAnalyzer(blueprint: String){
         cnt--
         var virtualSig = Entity(0, EntityType.VirtualSignal)
         var startEdge = Edge(Edge(virtualSig), startSig)
-        startEdge.nextEdgeList = relation[startSig]?: return@forEach
+        startEdge.nextEdgeList = relation[startSig] ?: return@forEach
         listOfEdges.add(startEdge)
         var startBlock = Block(startEdge, cnt)
         startEdge.belongsToBlock = startBlock
@@ -117,12 +140,12 @@ fun factorioRailAnalyzer(blueprint: String){
         edge.belongsToBlock!!.id < 0 //aka ist start block
                 || edge.entityList.first().entityType == EntityType.VirtualSignal // ggf eine bessere alternaive start edges fest zustellen
                 || edge.entityList.first().entityType == EntityType.Signal
-    }.filter {
-        edge ->  edge.validRail!!
-    }.forEach{
-        edge->edge.setzteBeobachtendeEdges()
+    }.filter { edge ->
+        edge.validRail!!
+    }.forEach { edge ->
+        edge.setzteBeobachtendeEdges()
     }
-   // Graphviz().printBlocksFromEdgeRelations(listOfEdges)
+    // Graphviz().printBlocksFromEdgeRelations(listOfEdges)
 
 
     //analysing the graph
@@ -133,7 +156,7 @@ fun factorioRailAnalyzer(blueprint: String){
     var i = 0
     listOfEdges.forEach {
         // println(it)
-       // Graphviz().printEdge(it, i)
+        // Graphviz().printEdge(it, i)
         i++
 
     }

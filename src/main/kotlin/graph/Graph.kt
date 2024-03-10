@@ -11,7 +11,7 @@ class Graph {
 
 
     fun tiernan(blocklist: ArrayList<Block>) {// important Map must be sorted or the Tiernan will not work
-        return
+
         println(blocklist)
         blocklist.forEach {
             println("Startet Path: ${it.id}")
@@ -29,12 +29,12 @@ class Graph {
         }
 
         for (neighbor in node.neighbourBlocks()) {
-            visited[node]?.let { println(it.size) }
+            //visited[node]?.let { println(it.size) }
             //addDependingOn(node,neighbor)//for the Graphviz Output
             if (!path.contains(neighbor)
                 and (neighbor.id > path.first().id)
                 and ((visited[node]?.contains(neighbor) == false))) {
-                println("Expanding to: $neighbor")
+                //println("Expanding to: $neighbor")
                 expandPath(neighbor)
                 visited[node]?.add(neighbor)
             } else {
@@ -45,7 +45,7 @@ class Graph {
         }
 
         visited[node] = mutableListOf()
-        println("removing node:" + path.last())
+        //println("removing node:" + path.last())
         path.removeLast()
     }
 

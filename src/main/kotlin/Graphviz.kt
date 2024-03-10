@@ -1,4 +1,5 @@
 import factorioBlueprint.Entity
+import java.awt.Desktop
 import factorioBlueprint.Position
 import java.awt.Color
 
@@ -221,8 +222,12 @@ fun svgFromPoints( size: Position,edgeList: ArrayList<Edge>,signalList:List<Enti
     }
 
     stringBuilder.append("</svg>")
+    if (!Files.exists(Path.of("GraphvizOutput"))) {
+        Files.createDirectory(Path.of("GraphvizOutput"))
+    }
     File("GraphvizOutput/sandersSpecial.svg").writeText(stringBuilder.toString())
-
+    val dt = Desktop.getDesktop()
+    dt.open(File("GraphvizOutput/sandersSpecial.svg"))
 
 }
 
@@ -236,8 +241,14 @@ fun buildFile(stringBuilder: StringBuilder, fileName: String) {
     try {
         // for png: val result = ProcessBuilder("dot", "-Kfdp", "-n", "-Tpng", "input.dot", "-o $fileName.png")
         // for svg: val result = ProcessBuilder("dot", "-Kfdp", "-n", "-Tsvg", "input.dot", "-o $fileName.svg")
-        //Files.createDirectory(Path.of("GraphvizOutput"))
+        if (!Files.exists(Path.of("GraphvizInput"))) {
+            Files.createDirectory(Path.of("GraphvizInput"))
+        }
+        if (!Files.exists(Path.of("GraphvizOutput"))) {
+            Files.createDirectory(Path.of("GraphvizOutput"))
+        }
         File("GraphvizInput/$fileName.dot").writeText(stringBuilder.toString())
+        File("GraphvizOutput/input.dot").writeText(stringBuilder.toString())
         val result = ProcessBuilder(
             "dot",
             "-Glabel=Generated@${LocalTime.now()}",

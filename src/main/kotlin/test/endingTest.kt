@@ -46,7 +46,7 @@ fun main() {
 }
 fun test(filename:String, solution:ArrayList<Any?>){
     //region Setup
-    val jsonString: String = decodeBpSting(filename)
+    val jsonString: String = decodeBpStringFromFilename(filename)
 
     val resultBP = Gson().fromJson(jsonString, ResultBP::class.java)
     val listOben = resultBP.blueprint.entities

@@ -27,9 +27,16 @@ fun ByteArray.zlibDecompress(): String {
     }
 }
 
-fun decodeBpSting(filename: String): String {
+fun decodeBpStringFromFilename(filename: String): String {
     val base64String: String = File(filename).readText(Charsets.UTF_8)
-    val decoded = Base64.getDecoder().decode(base64String.substring(1))
+    val decoded = Base64.getDecoder().decode(base64String.substring(1))//TODO: Check for Empty String/File
+    val str: String = decoded.zlibDecompress()
+    println(str)
+    return str
+}
+fun decodeBpString(Blueprint: String): String {
+    val base64String: String =Blueprint
+    val decoded = Base64.getDecoder().decode(base64String.substring(1))//TODO: Check for Empty String/File
     val str: String = decoded.zlibDecompress()
     println(str)
     return str
