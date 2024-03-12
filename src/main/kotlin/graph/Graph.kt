@@ -30,16 +30,24 @@ class Graph {
 
         for (neighbor in node.neighbourBlocks()) {
             //visited[node]?.let { println(it.size) }
-            //addDependingOn(node,neighbor)//for the Graphviz Output
+            addDependingOn(node, neighbor)//for the Graphviz Output
             if (!path.contains(neighbor)
                 and (neighbor.id > path.first().id)
-                and ((visited[node]?.contains(neighbor) == false))) {
+                and ((visited[node]?.contains(neighbor) == false))
+            ) {
                 //println("Expanding to: $neighbor")
                 expandPath(neighbor)
                 visited[node]?.add(neighbor)
             } else {
                 if (path.first() == neighbor) {
-                    circularDependencies.add(path.toSet())
+                    println("Found Deadlock: $path")
+                    if (circularDependencies.isEmpty()) {//needs to done, so that .last() call works
+                        circularDependencies.add(path.toSet())
+                    } else {
+                        if (!arePDlsTheSame(circularDependencies.last(), path.toSet())) {//Don't add the same deadlock twice
+                            circularDependencies.add(path.toSet())
+                        }
+                    }
                 }
             }
         }
@@ -77,9 +85,9 @@ class Graph {
     fun arePDlsTheSame(pDl1: Set<Block>, pDl2: Set<Block>): Boolean {
         var str1: String = pDl1.map { block -> block.id }.joinToString { int -> int.toString() }
         val str2: String = pDl2.map { block -> block.id }.joinToString { int -> int.toString() }
-        str1 += str1
-        return str1.contains(str2)
+        return str1.contains(str2) and str2.contains(str1)
     }
+
 
     private fun isDrivable(potentialDeadlock: MutableList<Block>): Boolean {
         assert(potentialDeadlock.size > 2) { "a potentialDeadlock requires to have 2 elements" }
@@ -116,7 +124,29 @@ class Graph {
         if (node.dependingOn.isNullOrEmpty()) {
             node.dependingOn = arrayListOf(neighbor)
         } else {
-            node.dependingOn!!.add(neighbor)
+            if (!node.dependingOn!!.contains(neighbor)) {
+                node.dependingOn!!.add(neighbor)
+            }
         }
     }
+
+    fun determineDeadlocks() {
+        circularDependencies.forEach { potentialDeadlock ->
+            if (potentialDeadlock.any { block -> block.hasRailSignal() }) {
+                potentialDeadlock.filter { block -> block.hasRailSignal() }.forEach inner@{ block ->
+                    if (block.hasMixedSignals()) {
+                        println("Sorry we can't determine if the Deadlock is absolute, but there is a big possibility for one$potentialDeadlock")
+                        return@forEach
+                    } else {
+                        println("found Deadlock$potentialDeadlock")
+                        return@forEach
+                    }
+                }
+            } else {
+                println("Deadlock prevented by Chain Signals$potentialDeadlock")
+            }
+        }
+    }
+
+
 }

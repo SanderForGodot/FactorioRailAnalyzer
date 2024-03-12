@@ -1,4 +1,5 @@
 import factorioBlueprint.Position
+import factorioBlueprint.Signal
 
 class Block(edge: Edge, var id: Int) {
     var edgeList = arrayListOf(edge)
@@ -21,6 +22,16 @@ class Block(edge: Edge, var id: Int) {
         return edgeList.any { edge ->
             (edge.entityList.first().entityType == EntityType.Signal)
         }
+    }
+
+    fun hasMixedSignals(): Boolean {
+        var signalExists= edgeList.any { edge ->
+            (edge.entityList.first().entityType == EntityType.Signal)
+        }
+        var chainSignalExists= edgeList.any { edge ->
+            (edge.entityList.first().entityType == EntityType.ChainSignal)
+        }
+        return signalExists and chainSignalExists;
     }
 
 

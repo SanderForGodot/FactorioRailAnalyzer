@@ -153,13 +153,13 @@ fun factorioRailAnalyzer(blueprint: String) {
     }
 
     println("joooo")
-    //Graphviz().printBlocks(blockList)
+    Graphviz().printBlocks(blockList)
     blockList.forEach {
         println("id:" + it.id + " center: " + it.calculateCenter())
     }
 
     //endregion
     println("found Deadlocks" + graphTesting.getDeadlocks())
-
+    graphTesting.determineDeadlocks()
 
 }
