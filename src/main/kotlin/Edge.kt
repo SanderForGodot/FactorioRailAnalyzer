@@ -20,7 +20,7 @@ class Edge() {
     var belongsToBlock: Block? = null
     var validRail: Boolean = false
     var nextEdgeList: List<Edge> = arrayListOf()
-    private var tileLength: Double = 0.0 // how many tiles the edge is long
+    var tileLength: Double = 0.0 // how many tiles the edge is long
 
     private fun clone(edge: Edge) {
         entityList = edge.entityList.clone() as ArrayList<Entity>

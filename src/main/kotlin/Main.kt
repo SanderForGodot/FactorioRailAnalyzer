@@ -1,5 +1,6 @@
 import com.google.gson.Gson
 import factorioBlueprint.Entity
+import factorioBlueprint.Position
 import factorioBlueprint.ResultBP
 import graph.Graph
 import java.nio.file.Files
@@ -111,10 +112,14 @@ fun factorioRailAnalyzer(blueprint: String) {
     //region Phase4: creating the blocks that are defined by the signals in factorio
 
     val blockList = connectEdgesToBlocks(listOfEdges)
-    svgFromPoints( max,listOfEdges, signalList)
+    var pos =  simpleCheck(listOfEdges)
+    svgFromPoints(max, listOfEdges, signalList,pos)
+
     // creating the Graph out of the Blocks and edges
     println("relevante blöcke")
     val startSignals = signalList.toSet() - notStartSignalList.toSet()
+
+
 
     var cnt = 0
     startSignals.forEach { startSig ->
@@ -161,5 +166,31 @@ fun factorioRailAnalyzer(blueprint: String) {
     //endregion
     println("found Deadlocks" + graphTesting.getDeadlocks())
     graphTesting.determineDeadlocks()
+
+}
+
+
+fun simpleCheck(listOfEdges: ArrayList<Edge>): Position{
+    if (!listOfEdges.filter { edge ->
+            edge.last(1).entityType != EntityType.VirtualSignal
+        }.any { edge ->
+            edge.entityList.first().entityType == EntityType.Signal
+        }) {
+        //all signals are chain signals with exception to ending signals
+        // this guaranties no deadlock
+        // return ""
+        println("simple check concluded: no deadlock")
+    } else {
+        println("simple check concluded: potential deadlock")
+        var minSize = listOfEdges.filter { edge ->
+            edge.entityList.first().entityType == EntityType.Signal
+                    && edge.last(1).entityType != EntityType.VirtualSignal
+        }.minBy { edge ->
+            edge.tileLength
+        }
+        println("max tile length: ${minSize.tileLength} or ${Math.floor(minSize.tileLength/6.5)} train cars")
+        return minSize.entityList.first().position
+    }
+return Position(-1.0, -1.0)
 
 }
