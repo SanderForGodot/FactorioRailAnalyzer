@@ -112,12 +112,20 @@ fun factorioRailAnalyzer(blueprint: String) {
     //region Phase4: creating the blocks that are defined by the signals in factorio
 
     val blockList = connectEdgesToBlocks(listOfEdges)
-    var pos =  simpleCheck(listOfEdges)
-    svgFromPoints(max, listOfEdges, signalList,pos)
+    var pos = simpleCheck(listOfEdges)
+    svgFromPoints(max, listOfEdges, signalList, pos)
 
     // creating the Graph out of the Blocks and edges
     println("relevante blöcke")
     val startSignals = signalList.toSet() - notStartSignalList.toSet()
+
+    listOfEdges.forEach { edge ->
+        edge.wasIchBeobachte.forEach {
+            edge.belongsToBlock!!.dependingOn.addUnique(it.belongsToBlock!!)
+
+        }
+
+    }
 
 
 
@@ -170,7 +178,7 @@ fun factorioRailAnalyzer(blueprint: String) {
 }
 
 
-fun simpleCheck(listOfEdges: ArrayList<Edge>): Position{
+fun simpleCheck(listOfEdges: ArrayList<Edge>): Position {
     if (!listOfEdges.filter { edge ->
             edge.last(1).entityType != EntityType.VirtualSignal
         }.any { edge ->
@@ -188,9 +196,9 @@ fun simpleCheck(listOfEdges: ArrayList<Edge>): Position{
         }.minBy { edge ->
             edge.tileLength
         }
-        println("max tile length: ${minSize.tileLength} or ${Math.floor(minSize.tileLength/6.5)} train cars")
+        println("max tile length: ${minSize.tileLength} or ${Math.floor(minSize.tileLength / 6.5)} train cars")
         return minSize.entityList.first().position
     }
-return Position(-1.0, -1.0)
+    return Position(-1.0, -1.0)
 
 }

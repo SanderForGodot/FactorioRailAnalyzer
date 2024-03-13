@@ -3,7 +3,7 @@ import factorioBlueprint.Signal
 
 class Block(edge: Edge, var id: Int) {
     var edgeList = arrayListOf(edge)
-    var dependingOn: ArrayList<Block>? = null
+    var dependingOn: ArrayList<Block> = arrayListOf()
 
     fun doesCollide(toTest: Edge): Boolean {
         return edgeList.any {

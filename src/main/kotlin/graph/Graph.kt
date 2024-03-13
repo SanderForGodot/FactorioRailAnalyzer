@@ -2,6 +2,7 @@ package graph
 
 import Block
 import Edge
+import addUnique
 
 
 class Graph {
@@ -30,7 +31,6 @@ class Graph {
 
         for (neighbor in node.neighbourBlocks()) {
             //visited[node]?.let { println(it.size) }
-            addDependingOn(node, neighbor)//for the Graphviz Output
             if (!path.contains(neighbor)
                 and (neighbor.id > path.first().id)
                 and ((visited[node]?.contains(neighbor) == false))
@@ -44,7 +44,11 @@ class Graph {
                     if (circularDependencies.isEmpty()) {//needs to done, so that .last() call works
                         circularDependencies.add(path.toSet())
                     } else {
-                        if (!arePDlsTheSame(circularDependencies.last(), path.toSet())) {//Don't add the same deadlock twice
+                        if (!arePDlsTheSame(
+                                circularDependencies.last(),
+                                path.toSet()
+                            )
+                        ) {//Don't add the same deadlock twice
                             circularDependencies.add(path.toSet())
                         }
                     }
@@ -121,13 +125,6 @@ class Graph {
     }
 
     fun addDependingOn(node: Block, neighbor: Block) {
-        if (node.dependingOn.isNullOrEmpty()) {
-            node.dependingOn = arrayListOf(neighbor)
-        } else {
-            if (!node.dependingOn!!.contains(neighbor)) {
-                node.dependingOn!!.add(neighbor)
-            }
-        }
     }
 
     fun determineDeadlocks() {
