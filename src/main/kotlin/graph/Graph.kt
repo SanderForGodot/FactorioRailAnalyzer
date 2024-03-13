@@ -104,7 +104,7 @@ class Graph {
 
         // find the first (and only) edge that connects the first 2 blocks
         var firstEdge: Edge = firstBlock.edgeList.firstOrNull { edgeOfTheBlock ->
-            edgeOfTheBlock.nextEdgeList.any { nextPossible ->
+            edgeOfTheBlock.nextEdgeList!!.any { nextPossible ->  //todo: null force not save checking required
                 nextPossible.belongsToBlock == nextBlock
             }
         } ?: return false
@@ -112,7 +112,7 @@ class Graph {
         //for every following block check if we cn get there from the current Edge
         while (pdIterator.hasNext()) {
             nextBlock = pdIterator.next()
-            currentEdge = currentEdge.nextEdgeList.firstOrNull { nextPossible ->
+            currentEdge = currentEdge.nextEdgeList!!.firstOrNull { nextPossible ->  //todo: null force not save checking required
                 nextPossible.belongsToBlock == nextBlock
             } ?: return false
         }

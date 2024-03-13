@@ -1,23 +1,28 @@
 import factorioBlueprint.Entity
 import factorioBlueprint.Position
 
-fun buildEdge(edge: Edge, direction: Int): ArrayList<Edge> {
-
+fun buildEdge(edge: Edge, direction: Int, inverseSearch: Boolean): ArrayList<Edge> {
+    var inverse = inverseSearch
     if (edge.last(1).hasSignal()) {
-        if (edge.last(1).toMannySignals()) {
-            throw Exception("toMannySignals on strait rail")// todo: add to InvalidSignalList exception
+        if (inverse) {
+            inverse = false
+
+        } else {
+            if (edge.last(1).toMannySignals()) {
+                throw Exception("toMannySignals on strait rail")// todo: add to InvalidSignalList exception
+            }
+            val end = determineEnding(edge, direction)
+            if (end != null)
+                return arrayListOf(end)
+            //otherwise continue and ignore (happens once at the start of every edg to ignore the starting signal)
         }
-        val end = determineEnding(edge, direction)
-        if (end != null)
-            return arrayListOf(end)
-        //otherwise continue and ignore (happens once at the start of every edg to ignore the starting signal)
     }
     val arr: ArrayList<Edge> = arrayListOf()
-    val nextRails = edge.last(1).getRailList(direction)
+    val nextRails = edge.last(1).getRailList(direction * (if (inverse) -1 else 1))
     if (nextRails.size > 0) {
         nextRails.forEach { entity ->
             val modifier = isSpecialCase(edge.last(1), entity)
-            val result = buildEdge(Edge(edge, entity), direction * modifier)
+            val result = buildEdge(Edge(edge, entity), direction * modifier, inverse)
             arr.addAll(result)
         }
     } else {

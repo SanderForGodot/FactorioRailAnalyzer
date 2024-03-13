@@ -19,7 +19,7 @@ class Edge() {
     var collisionShape: ArrayList<Position> = arrayListOf()
     var belongsToBlock: Block? = null
     var validRail: Boolean = false
-    var nextEdgeList: List<Edge> = arrayListOf()
+    var nextEdgeList: List<Edge>? =null
     var tileLength: Double = 0.0 // how many tiles the edge is long
 
     private fun clone(edge: Edge) {
@@ -40,12 +40,15 @@ class Edge() {
     }
 
     fun finishUpEdge(signal: Entity, validRail: Boolean): Edge {
+
         entityList.add(signal)
         this.validRail = validRail
+        return this
+    }
+    fun cleanAndCalc(){
         cleanUpEndings()
         generateCollision()
         calcTileLength()
-        return this
     }
 
     private fun cleanUpEndings() {
@@ -227,7 +230,9 @@ class Edge() {
 
     var wasIchBeobachte = ArrayList<Edge>()
     fun setzteBeobachtendeEdges() {
-        var toCheck: MutableList<Edge> = nextEdgeList.toMutableList()
+        if (nextEdgeList == null) println("nextEdgeList was null")
+        var toCheck: MutableList<Edge> = nextEdgeList?.toMutableList()?:return
+        //todo: null force not save checking required
         var tCI: MutableListIterator<Edge> = toCheck.listIterator()
         var nextEdge: Edge = Edge()
         while (tCI.hasNext()) {
@@ -235,7 +240,8 @@ class Edge() {
             when (nextEdge.entityList.first().entityType) {
                 EntityType.Signal -> wasIchBeobachte.addUnique(nextEdge)
                 EntityType.ChainSignal -> {
-                    nextEdge.nextEdgeList
+
+                    nextEdge.nextEdgeList!!  //todo: null force not save checking required
                         .filter { !toCheck.contains(it) }
                         .forEach {
                             tCI.add(it)
