@@ -3,7 +3,7 @@ import factorioBlueprint.Position
 import kotlin.math.abs
 import kotlin.math.sqrt
 
-class Edge() {
+class Edge():Grafabel {
     constructor(item: Entity) : this() {
         entityList = arrayListOf(item)
     }
@@ -19,7 +19,7 @@ class Edge() {
     var collisionShape: ArrayList<Position> = arrayListOf()
     var belongsToBlock: Block? = null
     var validRail: Boolean = false
-    var nextEdgeList: List<Edge>? =null
+    var nextEdgeList: List<Edge>? = null
     var tileLength: Double = 0.0 // how many tiles the edge is long
 
     private fun clone(edge: Edge) {
@@ -29,6 +29,10 @@ class Edge() {
         validRail = edge.validRail
     }
 
+    fun nextEdgeListAL():ArrayList<Edge>
+    {
+        return nextEdgeList!! as ArrayList<Edge>
+    }
 
     fun last(n: Int): Entity {
         // return EntityList.last();
@@ -45,7 +49,8 @@ class Edge() {
         this.validRail = validRail
         return this
     }
-    fun cleanAndCalc(){
+
+    fun cleanAndCalc() {
         cleanUpEndings()
         generateCollision()
         calcTileLength()
@@ -204,6 +209,19 @@ class Edge() {
 
     }
 
+    override fun uniqueID(): Int {
+       var start = entityList.first().entityNumber!!
+       var end = last(1).entityNumber!!
+        return start * 7 + end *13 //todo: give edges a bedder unique id
+    }
+
+    override fun hasNextOptions(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+
+
+
     override fun toString(): String {
         return aToB()
     }
@@ -231,7 +249,7 @@ class Edge() {
     var wasIchBeobachte = ArrayList<Edge>()
     fun setzteBeobachtendeEdges() {
         if (nextEdgeList == null) println("nextEdgeList was null")
-        var toCheck: MutableList<Edge> = nextEdgeList?.toMutableList()?:return
+        var toCheck: MutableList<Edge> = nextEdgeList?.toMutableList() ?: return
         //todo: null force not save checking required
         var tCI: MutableListIterator<Edge> = toCheck.listIterator()
         var nextEdge: Edge = Edge()
@@ -264,4 +282,31 @@ class Edge() {
             }
         }
     }
+
+    var rarwIchBinGefärlich = false
+    fun setDanger() {
+        rarwIchBinGefärlich = true
+        if (last(1).entityType == EntityType.Signal) {
+            nextEdgeList?.forEach { it.setDanger() }
+        }
+    }
+
+    //uncertainty if inline is good /bad / required
+    //https://kotlinlang.org/docs/inline-functions.html
+
+
+
+
+    fun eins(s:String): List<String> {
+        return listOf(s)
+    }
+
+    fun zwei(s:String): List<String> {
+        return listOf(s,s)
+    }
+
+    fun drei(s:String): List<String> {
+        return listOf(s,s,s)
+    }
 }
+

@@ -3,6 +3,7 @@ import factorioBlueprint.Entity
 import factorioBlueprint.Position
 import factorioBlueprint.ResultBP
 import graph.Graph
+import graph.tmTm
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -14,7 +15,10 @@ var edgesGetRandomColor = true
 var usesInputFile = true
 
 
+
 fun main(args: Array<String>) {
+
+
 
     println("Program arguments: ${args.joinToString()}")
 
@@ -123,6 +127,7 @@ fun factorioRailAnalyzer(blueprint: String) {
     }
     listOfEdges.addAll(backwardsEdges)
     listOfEdges.forEach { it.cleanAndCalc() }
+    backwardsEdges.forEach { it.setDanger() }
 
 //add relations for everything
     listOfEdges.filter { edge ->
@@ -204,6 +209,16 @@ fun factorioRailAnalyzer(blueprint: String) {
     println("found Deadlocks" + graphTesting.getDeadlocks())
     graphTesting.determineDeadlocks()
 
+    listOfEdges.tmTm {
+        it.wasIchBeobachte
+    }
+    listOfEdges.tmTm {
+        it.nextEdgeListAL()
+    }
+    blockList.tmTm {
+        it.neighbourBlocks()
+    }
+
 }
 
 
@@ -229,5 +244,4 @@ fun simpleCheck(listOfEdges: ArrayList<Edge>): Position {
         return minSize.entityList.first().position
     }
     return Position(-1.0, -1.0)
-
 }

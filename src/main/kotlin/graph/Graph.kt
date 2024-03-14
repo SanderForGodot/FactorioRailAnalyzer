@@ -2,8 +2,75 @@ package graph
 
 import Block
 import Edge
-import addUnique
+import Grafabel
 
+fun main() {
+    var g = Graph()
+    var e = Edge()
+    var b = Block(e, 1)
+
+
+    e.nextEdgeListAL().tmTm {
+        it.wasIchBeobachte
+    }
+
+
+}
+
+fun <T : Grafabel> ArrayList<T>.tmTm(fn: (T) -> ArrayList<T>?): Boolean {
+    val g = grafCompanianCube<T>()
+    this.sorted()
+    this.forEach {
+        it.exP(g, fn)
+    }
+    return g.DOwEhAVEapROBLEMpRIVATE()
+}
+
+fun <T : Grafabel> T.exP(graf: grafCompanianCube<T>, fn: (T) -> ArrayList<T>?) {
+    graf.path.add(this)
+    fn.invoke(this)?.forEach { neighbor ->
+        /*1. The extension vertex cannot be in P.*/
+        if (graf.path.contains(neighbor)
+            /*2. The extension vertex value must be larger than that of the first vertex of P.*/
+            && (neighbor.uniqueID() > this.uniqueID())
+            /*3. The extension vertex cannot be closed to the last vertex in P.
+                 H contains the list of vertices closed to each vertex*/
+            && (graf.visited[this]?.contains(neighbor) == false)
+        ) {
+            neighbor.exP(graf, fn)
+            graf.visited(this, neighbor)
+        } else {
+            if (graf.path.first() == neighbor) {
+                graf.addPath()
+            }
+        }
+    }
+    graf.visited.remove(this)
+    graf.path.removeLast()
+}
+
+class grafCompanianCube<T> {
+    val path: MutableList<T> = ArrayList()
+    var visited: MutableMap<T, MutableList<T>> = mutableMapOf()
+    var circularDependencies: MutableList<Set<T>> = mutableListOf()
+    fun visited(node: T, neighbor: T) {
+        if (visited[node] == null) {
+            visited[node] = mutableListOf(neighbor)
+        } else {
+            visited[node]!!.add(neighbor)
+        }
+    }
+
+    fun addPath() {
+        circularDependencies.add(path.toSet())
+    }
+
+    fun DOwEhAVEapROBLEMpRIVATE(): Boolean {
+        return circularDependencies.size == 0; //NO SIR NO
+    }
+
+
+}
 
 class Graph {
     private val path: MutableList<Block> = ArrayList()
@@ -32,6 +99,7 @@ class Graph {
         for (neighbor in node.neighbourBlocks()) {
             //visited[node]?.let { println(it.size) }
             if (!path.contains(neighbor)
+
                 and (neighbor.id > path.first().id)
                 and ((visited[node]?.contains(neighbor) == false))
             ) {
@@ -112,9 +180,10 @@ class Graph {
         //for every following block check if we cn get there from the current Edge
         while (pdIterator.hasNext()) {
             nextBlock = pdIterator.next()
-            currentEdge = currentEdge.nextEdgeList!!.firstOrNull { nextPossible ->  //todo: null force not save checking required
-                nextPossible.belongsToBlock == nextBlock
-            } ?: return false
+            currentEdge =
+                currentEdge.nextEdgeList!!.firstOrNull { nextPossible ->  //todo: null force not save checking required
+                    nextPossible.belongsToBlock == nextBlock
+                } ?: return false
         }
         return true
     }

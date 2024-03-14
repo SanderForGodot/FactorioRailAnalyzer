@@ -1,7 +1,6 @@
 import factorioBlueprint.Position
-import factorioBlueprint.Signal
 
-class Block(edge: Edge, var id: Int) {
+class Block(edge: Edge, var id: Int):Grafabel {
     var edgeList = arrayListOf(edge)
     var dependingOn: ArrayList<Block> = arrayListOf()
 
@@ -67,6 +66,16 @@ class Block(edge: Edge, var id: Int) {
         }
         return R + "]"
     }
+
+    override fun uniqueID(): Int {
+        return id
+    }
+
+    override fun hasNextOptions(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+
 
     override fun toString(): String {
         return "(id=$id,size=${edgeList.size}, Relevant=${hasRailSignal()})"
