@@ -14,6 +14,7 @@ fun main(args: Array<String>) {
     val options = args.filter { it.startsWith("-") }
     setCLIOptions(options)
     val inputBlueprintString = args.filter { it.startsWith("0") }
+    val BlueprintFile = args.filter { !it.startsWith("-") }
     if (inputBlueprintString.size > 1) {
         println("Too Many Blueprints provided")
         return
@@ -25,20 +26,34 @@ fun main(args: Array<String>) {
     var jsonString: String = ""
     if (inputBlueprintString.size == 1) {
         jsonString = decodeBpString(inputBlueprintString.first())
+    } else {
+        if (BlueprintFile.isNotEmpty()) {
+            if (Files.exists(Path.of(BlueprintFile.first()))) {
+                jsonString = decodeBpStringFromFilename(BlueprintFile.first())
+
+            } else {
+                println("File not Found")
+                return
+            }
+        } else {
+            if (Files.exists(Path.of("decodeTest.txt"))) {
+                jsonString = decodeBpStringFromFilename("decodeTest.txt")//default
+            }else{
+                println("No Blueprint provided")
+                return
+            }
+        }
     }
-    if (Files.exists(Path.of("decodeTest.txt"))) {
-        //TODO: @Leos task
-        factorioRailAnalyzer("decodeTest.txt" /*,options*/) //please document the options before coding
-    }
+   factorioRailAnalyzer(jsonString)
+
 }
 
-fun factorioRailAnalyzer(blueprint: String) {
+fun factorioRailAnalyzer(blueprint: String):Boolean {
     //region Phase0: data decompression
-    val jsonString = decodeBpStringFromFilename(blueprint)
-    if (jsonString.contains("blueprint_book")) {
+    if (blueprint.contains("blueprint_book")) {
         throw Exception("Sorry, a Blueprintbook cannot be parsed by this Programm, please input only Blueprints ")
     }
-    val resultBP: ResultBP = Gson().fromJson(jsonString, ResultBP::class.java)
+    val resultBP: ResultBP = Gson().fromJson(blueprint, ResultBP::class.java)
     val entityList = resultBP.blueprint.entities
     //endregion
     //region Phase1: data cleansing and preparation
@@ -107,6 +122,7 @@ fun factorioRailAnalyzer(blueprint: String) {
 
     val blockList = connectEdgesToBlocks(listOfEdges)
     var pos = simpleCheck(listOfEdges)
+    //pos = entityList.find { it.entityNumber ==20 }?.position ?: Position(0.0,0.0)
     svgFromPoints(max, listOfEdges, signalList, pos)
 
     // creating the Graph out of the Blocks and edges
@@ -174,6 +190,8 @@ fun factorioRailAnalyzer(blueprint: String) {
     println("found Deadlocks" + graphTesting.getDeadlocks())
     graphTesting.determineDeadlocks()
 
+    // Edit here to Test different systems
+    return graphTesting.getDeadlocks().size>0
 }
 
 
