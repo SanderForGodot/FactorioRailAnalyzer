@@ -28,6 +28,7 @@ fun <T : Grafabel> ArrayList<T>.tmTm(fn: (T) -> ArrayList<T>?): Boolean {
 
 fun <T : Grafabel> T.exP(graf: grafCompanianCube<T>, fn: (T) -> ArrayList<T>?) {
     graf.path.add(this)
+
     fn.invoke(this)?.forEach { neighbor ->
         /*1. The extension vertex cannot be in P.*/
         if (graf.path.contains(neighbor)
@@ -68,8 +69,6 @@ class grafCompanianCube<T> {
     fun DOwEhAVEapROBLEMpRIVATE(): Boolean {
         return circularDependencies.size == 0; //NO SIR NO
     }
-
-
 }
 
 class Graph {

@@ -295,18 +295,5 @@ class Edge():Grafabel {
     //https://kotlinlang.org/docs/inline-functions.html
 
 
-
-
-    fun eins(s:String): List<String> {
-        return listOf(s)
-    }
-
-    fun zwei(s:String): List<String> {
-        return listOf(s,s)
-    }
-
-    fun drei(s:String): List<String> {
-        return listOf(s,s,s)
-    }
 }
 
