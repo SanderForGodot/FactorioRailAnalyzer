@@ -3,7 +3,7 @@ import factorioBlueprint.Position
 import kotlin.math.abs
 import kotlin.math.sqrt
 
-class Edge():Grafabel {
+class Edge() : Grafabel {
     constructor(item: Entity) : this() {
         entityList = arrayListOf(item)
     }
@@ -29,8 +29,7 @@ class Edge():Grafabel {
         validRail = edge.validRail
     }
 
-    fun nextEdgeListAL():ArrayList<Edge>
-    {
+    fun nextEdgeListAL(): ArrayList<Edge> {
         return nextEdgeList!! as ArrayList<Edge>
     }
 
@@ -118,9 +117,8 @@ class Edge():Grafabel {
         collisionShape[0] = shortenEnds(collisionShape[0], collisionShape[1])
         collisionShape[collisionShape.size - 1] =
             shortenEnds(collisionShape[collisionShape.size - 1], collisionShape[collisionShape.size - 2])
-        if (CLIOptions[CLIFlags.ShowDebug]!!) {
-            println("$collisionShape")
-        }
+        dbgPrintln("$collisionShape")
+
     }
 
 
@@ -211,16 +209,14 @@ class Edge():Grafabel {
     }
 
     override fun uniqueID(): Int {
-       var start = entityList.first().entityNumber!!
-       var end = last(1).entityNumber!!
-        return start * 7 + end *13 //todo: give edges a bedder unique id
+        var start = entityList.first().entityNumber!!
+        var end = last(1).entityNumber!!
+        return start * 7 + end * 13 //todo: give edges a bedder unique id
     }
 
     override fun hasNextOptions(): Boolean {
         TODO("Not yet implemented")
     }
-
-
 
 
     override fun toString(): String {

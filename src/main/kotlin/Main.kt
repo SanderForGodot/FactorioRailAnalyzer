@@ -8,13 +8,10 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 
-
 fun main(args: Array<String>) {
 
+    dbgPrintln("Program arguments: ${args.joinToString()}")
 
-if (CLIOptions[CLIFlags.ShowDebug]!!) {
-        println("Program arguments: ${args.joinToString()}")
-    }
     val options = args.filter { it.startsWith("-") }
     setCLIOptions(options)
     val inputBlueprintString = args.filter { it.startsWith("0") }
@@ -146,8 +143,6 @@ fun factorioRailAnalyzer(blueprint: String) {
     svgFromPoints(max, listOfEdges, signalList, pos)
 
     // creating the Graph out of the Blocks and edges
-    val startSignals = signalList.toSet() - notStartSignalList.toSet()
-
 
     listOfEdges.forEach { edge ->
         edge.wasIchBeobachte.forEach {
@@ -201,7 +196,8 @@ fun factorioRailAnalyzer(blueprint: String) {
     if (CLIOptions[CLIFlags.GraphvizOutput]!!) {
         Graphviz().printBlocks(blockList)
     }
-    if (CLIOptions[CLIFlags.ShowDebug]!!) {
+
+    dbgPrintln {
         blockList.forEach {
             println("id:" + it.id + " center: " + it.calculateCenter())
         }

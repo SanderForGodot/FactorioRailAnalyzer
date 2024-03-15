@@ -25,19 +25,31 @@ fun setCLIOptions(options:List<String>){
         CLIOptions[CLIFlags.GraphvizOutput]=true
         i++
     }
-    if(options.contains("-i")){
-        CLIOptions[CLIFlags.InstantShowOutput]=false
+    if (options.contains("-i")) {
+        CLIOptions[CLIFlags.InstantShowOutput] = false
         i++
     }
-    if(options.contains("-e")){
-        CLIOptions[CLIFlags.EdgesGetRandomColor]=false
+    if (options.contains("-e")) {
+        CLIOptions[CLIFlags.EdgesGetRandomColor] = false
         i++
     }
-    if(options.contains("-h")){
-       //TODO:make help output
+    if (options.contains("-h")) {
+        //TODO:make help output
         i++
     }
-    if(i!=options.size){
+    if (i != options.size) {
         println("unknown CLI option ignored")
+    }
+}
+
+fun dbgPrintln(string: Any) {
+    if (CLIOptions[CLIFlags.ShowDebug]!!) {
+        println(string.toString())
+    }
+}
+
+fun dbgPrintln(fn: () -> Unit) {
+    if (CLIOptions[CLIFlags.ShowDebug]!!) {
+        fn.invoke()
     }
 }

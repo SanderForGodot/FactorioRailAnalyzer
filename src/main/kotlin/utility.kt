@@ -31,21 +31,17 @@ fun decodeBpStringFromFilename(filename: String): String {
     val base64String: String = File(filename).readText(Charsets.UTF_8)
     val decoded = Base64.getDecoder().decode(base64String.substring(1))//TODO: Check for Empty String/File
     val str: String = decoded.zlibDecompress()
-    if (CLIOptions[CLIFlags.ShowDebug]!!) {
-        println(str)
-    }
-    return str
-}
-fun decodeBpString(Blueprint: String): String {
-    val base64String: String =Blueprint
-    val decoded = Base64.getDecoder().decode(base64String.substring(1))//TODO: Check for Empty String/File
-    val str: String = decoded.zlibDecompress()
-    if (CLIOptions[CLIFlags.ShowDebug]!!) {
-        println(str)
-    }
+    dbgPrintln(str)
     return str
 }
 
+fun decodeBpString(Blueprint: String): String {
+    val base64String: String = Blueprint
+    val decoded = Base64.getDecoder().decode(base64String.substring(1))//TODO: Check for Empty String/File
+    val str: String = decoded.zlibDecompress()
+    dbgPrintln(str)
+    return str
+}
 
 
 // addes an ellement to a list only if that item isn`t altreddy in the list
@@ -62,7 +58,7 @@ fun <E> ArrayList<E>.addUnique(element: E): Boolean {
 
 //refence from https://bryceboe.com/2006/10/23/line-segment-intersection-algorithm/
 fun intersect(A: Position, B: Position, C: Position, D: Position): Boolean {
-    if (A == C ||  A == D|| B ==C || B == D)
+    if (A == C || A == D || B == C || B == D)
         return true
     return ccw(A, C, D) != ccw(B, C, D) && ccw(A, B, C) != ccw(A, B, D)
 }

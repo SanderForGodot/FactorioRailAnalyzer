@@ -1,10 +1,9 @@
 package graph
 
 import Block
-import CLIFlags
-import CLIOptions
 import Edge
 import Grafabel
+import dbgPrintln
 
 fun main() {
     var g = Graph()
@@ -80,13 +79,11 @@ class Graph {
 
 
     fun tiernan(blocklist: ArrayList<Block>) {// important Map must be sorted or the Tiernan will not work
-        if (CLIOptions[CLIFlags.ShowDebug]!!) {
-            println(blocklist)
-        }
+        dbgPrintln(blocklist)
+
         blocklist.forEach {
-            if (CLIOptions[CLIFlags.ShowDebug]!!) {
-                println("Startet Path: ${it.id}")
-            }
+            dbgPrintln("Startet Path: ${it.id}")
+
             expandPath(it)
             visited = mutableMapOf()
         }
@@ -112,9 +109,8 @@ class Graph {
                 visited[node]?.add(neighbor)
             } else {
                 if (path.first() == neighbor) {
-                    if (CLIOptions[CLIFlags.ShowDebug]!!) {
-                        println("Found Deadlock: $path")
-                    }
+                    dbgPrintln("Found Deadlock: $path")
+
                     if (circularDependencies.isEmpty()) {//needs to done, so that .last() call works
                         circularDependencies.add(path.toSet())
                     } else {
