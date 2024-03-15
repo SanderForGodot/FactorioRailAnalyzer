@@ -183,11 +183,9 @@ fun factorioRailAnalyzer(blueprint: String) {
     //debug output
     var i = 0
     listOfEdges.forEach {
-        if (CLIOptions[CLIFlags.ShowDebug]!!) {
-            // println(it)
-        }
+        dbgPrintln(it)
         if (CLIOptions[CLIFlags.GraphvizOutput]!!) {
-            // Graphviz().printEdge(it, i)
+            Graphviz().printEdge(it, i)
         }
         i++
 

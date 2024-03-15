@@ -47,7 +47,6 @@ fun dbgPrintln(string: Any) {
         println(string.toString())
     }
 }
-
 fun dbgPrintln(fn: () -> Unit) {
     if (CLIOptions[CLIFlags.ShowDebug]!!) {
         fn.invoke()
