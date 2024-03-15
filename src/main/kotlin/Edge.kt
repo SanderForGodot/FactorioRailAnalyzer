@@ -118,8 +118,9 @@ class Edge():Grafabel {
         collisionShape[0] = shortenEnds(collisionShape[0], collisionShape[1])
         collisionShape[collisionShape.size - 1] =
             shortenEnds(collisionShape[collisionShape.size - 1], collisionShape[collisionShape.size - 2])
-        println("$collisionShape")
-
+        if (CLIOptions[CLIFlags.ShowDebug]!!) {
+            println("$collisionShape")
+        }
     }
 
 

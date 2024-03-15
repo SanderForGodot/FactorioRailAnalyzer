@@ -7,22 +7,16 @@ import graph.tmTm
 import java.nio.file.Files
 import java.nio.file.Path
 
-//Boolean Options TODO:Implement those fuckers
-var GraphvizOutput = false
-var InstantShowOutput = false
-var showdebug = true
-var edgesGetRandomColor = true
-var usesInputFile = true
-
 
 
 fun main(args: Array<String>) {
 
 
-
-    println("Program arguments: ${args.joinToString()}")
-
+if (CLIOptions[CLIFlags.ShowDebug]!!) {
+        println("Program arguments: ${args.joinToString()}")
+    }
     val options = args.filter { it.startsWith("-") }
+    setCLIOptions(options)
     val inputBlueprintString = args.filter { it.startsWith("0") }
     if (inputBlueprintString.size > 1) {
         println("Too Many Blueprints provided")
@@ -152,7 +146,8 @@ fun factorioRailAnalyzer(blueprint: String) {
     svgFromPoints(max, listOfEdges, signalList, pos)
 
     // creating the Graph out of the Blocks and edges
-    println("relevante blöcke")
+    val startSignals = signalList.toSet() - notStartSignalList.toSet()
+
 
     listOfEdges.forEach { edge ->
         edge.wasIchBeobachte.forEach {
@@ -193,16 +188,23 @@ fun factorioRailAnalyzer(blueprint: String) {
     //debug output
     var i = 0
     listOfEdges.forEach {
-        // println(it)
-        // Graphviz().printEdge(it, i)
+        if (CLIOptions[CLIFlags.ShowDebug]!!) {
+            // println(it)
+        }
+        if (CLIOptions[CLIFlags.GraphvizOutput]!!) {
+            // Graphviz().printEdge(it, i)
+        }
         i++
 
     }
 
-    println("joooo")
-    Graphviz().printBlocks(blockList)
-    blockList.forEach {
-        println("id:" + it.id + " center: " + it.calculateCenter())
+    if (CLIOptions[CLIFlags.GraphvizOutput]!!) {
+        Graphviz().printBlocks(blockList)
+    }
+    if (CLIOptions[CLIFlags.ShowDebug]!!) {
+        blockList.forEach {
+            println("id:" + it.id + " center: " + it.calculateCenter())
+        }
     }
 
     //endregion
