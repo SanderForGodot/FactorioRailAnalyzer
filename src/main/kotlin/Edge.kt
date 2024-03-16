@@ -10,8 +10,7 @@ class Edge() : Grafabel {
 
     constructor(edge: Edge, entity: Entity) : this() {
         clone(edge)
-        if (!entityList.addUnique(entity))
-            throw Exception("an Edge is not expected to have the same rail twice")
+        if (!entityList.addUnique(entity)) throw Exception("an Edge is not expected to have the same rail twice")
 
     }
 
@@ -30,6 +29,7 @@ class Edge() : Grafabel {
     }
 
     fun nextEdgeListAL(): ArrayList<Edge> {
+        if (nextEdgeList == null) return arrayListOf<Edge>()
         return nextEdgeList!! as ArrayList<Edge>
     }
 
@@ -98,8 +98,7 @@ class Edge() : Grafabel {
                 pointA = pointB
                 pointB = tmp
             }
-            if (collisionShape[collisionShape.size - 1] != pointA)
-                collisionShape.add(pointA)
+            if (collisionShape[collisionShape.size - 1] != pointA) collisionShape.add(pointA)
             collisionShape.add(it.position)
             collisionShape.add(pointB)
 
@@ -214,8 +213,12 @@ class Edge() : Grafabel {
         return start * 7 + end * 13 //todo: give edges a bedder unique id
     }
 
-    override fun hasNextOptions(): Boolean {
-        TODO("Not yet implemented")
+    override fun pos(): Position {
+        val posList = entityList
+            .filter { it.entityType == EntityType.VirtualSignal }
+            .map { it.position }
+        return posList
+            .fold(Position(0.0, 0.0), Position::plus) / posList.size
     }
 
 
@@ -245,30 +248,37 @@ class Edge() : Grafabel {
 
     var wasIchBeobachte = ArrayList<Edge>()
     fun setzteBeobachtendeEdges() {
-        if (nextEdgeList == null) println("nextEdgeList was null")
-        var toCheck: MutableList<Edge> = nextEdgeList?.toMutableList() ?: return
-        //todo: null force not save checking required
-        var tCI: MutableListIterator<Edge> = toCheck.listIterator()
+        if (nextEdgeList == null) dbgPrintln("nextEdgeList was null")
+        val toCheck: MutableList<Edge> = nextEdgeList?.toMutableList() ?: return
+
+        val tCI: MutableListIterator<Edge> = toCheck.listIterator()
         var nextEdge: Edge = Edge()
         while (tCI.hasNext()) {
             nextEdge = tCI.next()
-            when (nextEdge.entityList.first().entityType) {
-                EntityType.Signal -> wasIchBeobachte.addUnique(nextEdge)
-                EntityType.ChainSignal -> {
+            if (nextEdge.belongsToBlock!!.istjemandrarwIchBinGefärlich()) wasIchBeobachte.addUnique(nextEdge)
+            else {
+                when (nextEdge.entityList.first().entityType) {
+                    EntityType.Signal -> wasIchBeobachte.addUnique(nextEdge)
 
-                    nextEdge.nextEdgeList!!  //todo: null force not save checking required
-                        .filter { !toCheck.contains(it) }
-                        .forEach {
+                    EntityType.ChainSignal -> {
+                        if (nextEdge.nextEdgeList == null) {
+                            // edge is a final edge
+                            wasIchBeobachte.addUnique(nextEdge)
+                            continue
+
+                        }
+                        nextEdge.nextEdgeList!!.filter { !toCheck.contains(it) }.forEach {
                             tCI.add(it)
                             tCI.previous()
                         }
-                }
 
-                else -> throw Exception("unexpected entityType: " + nextEdge.entityList.first().entityType + "\n Full Obj:" + nextEdge)
+                    }
+
+                    else -> throw Exception("unexpected entityType: " + nextEdge.entityList.first().entityType + "\n Full Obj:" + nextEdge)
+                }
             }
 
         }
-
     }
 
     fun byListIterator(list: MutableList<String>) {
@@ -284,7 +294,9 @@ class Edge() : Grafabel {
     fun setDanger() {
         rarwIchBinGefärlich = true
         if (last(1).entityType == EntityType.Signal) {
-            nextEdgeList?.forEach { it.setDanger() }
+            nextEdgeList?.forEach {
+                it.setDanger()
+            }
         }
     }
 

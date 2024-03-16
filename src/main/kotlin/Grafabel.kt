@@ -1,10 +1,11 @@
-interface Grafabel:Comparable<Grafabel> {
+import factorioBlueprint.Position
 
-
-
-    fun uniqueID():Int
-    fun hasNextOptions():Boolean
+interface Grafabel : Comparable<Grafabel> {
+    fun uniqueID(): Int
+    fun pos(): Position
     override fun compareTo(other: Grafabel): Int {
-        return uniqueID()-other.uniqueID()
+        return uniqueID() - other.uniqueID()
     }
+
+
 }

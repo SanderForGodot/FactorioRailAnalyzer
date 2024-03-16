@@ -1,6 +1,6 @@
 import factorioBlueprint.Position
 
-class Block(edge: Edge, var id: Int):Grafabel {
+class Block(edge: Edge, var id: Int) : Grafabel {
     var edgeList = arrayListOf(edge)
     var dependingOn: ArrayList<Block> = arrayListOf()
 
@@ -24,10 +24,10 @@ class Block(edge: Edge, var id: Int):Grafabel {
     }
 
     fun hasMixedSignals(): Boolean {
-        var signalExists= edgeList.any { edge ->
+        var signalExists = edgeList.any { edge ->
             (edge.entityList.first().entityType == EntityType.Signal)
         }
-        var chainSignalExists= edgeList.any { edge ->
+        var chainSignalExists = edgeList.any { edge ->
             (edge.entityList.first().entityType == EntityType.ChainSignal)
         }
         return signalExists and chainSignalExists;
@@ -39,7 +39,7 @@ class Block(edge: Edge, var id: Int):Grafabel {
         var count = 0
         edgeList.forEach { edge ->
             edge.entityList.filter { entity ->
-                entity.isRail()
+                entity.entityType != EntityType.VirtualSignal
             }.forEach { rail ->
                 result += rail.position
                 count++
@@ -48,7 +48,14 @@ class Block(edge: Edge, var id: Int):Grafabel {
         return result / count
     }
 
-        fun neighbourBlocks(): ArrayList<Block> {
+    /*
+        fun calculateCenter(): Position {
+            val posList = edgeList.map {
+                it.pos()
+            }
+            return posList.fold(Position(0.0,0.0),Position::plus) /posList.size
+        }*/
+    fun neighbourBlocks(): ArrayList<Block> {
         val neighbours = arrayListOf<Block>()
         edgeList.forEach { edge ->
             edge.wasIchBeobachte.forEach { nextEdge ->
@@ -71,14 +78,17 @@ class Block(edge: Edge, var id: Int):Grafabel {
         return id
     }
 
-    override fun hasNextOptions(): Boolean {
-        TODO("Not yet implemented")
+    override fun pos(): Position {
+        return calculateCenter()
     }
-
 
 
     override fun toString(): String {
         return "(id=$id,size=${edgeList.size}, Relevant=${hasRailSignal()})"
+    }
+
+    fun istjemandrarwIchBinGefärlich(): Boolean {
+        return edgeList.any { it.rarwIchBinGefärlich }
     }
 }
 

@@ -2,18 +2,17 @@ import com.google.gson.Gson
 import factorioBlueprint.Entity
 import factorioBlueprint.Position
 import factorioBlueprint.ResultBP
-import graph.Graph
-import graph.tmTm
+import graph.tiernan
+import graph.tiernanWithref
 import java.nio.file.Files
 import java.nio.file.Path
 
 
 fun main(args: Array<String>) {
 
-    dbgPrintln("Program arguments: ${args.joinToString()}")
-
     val options = args.filter { it.startsWith("-") }
     setCLIOptions(options)
+    dbgPrintln("Program arguments: ${args.joinToString()}")
     val inputBlueprintString = args.filter { it.startsWith("0") }
     val BlueprintFile = args.filter { !it.startsWith("-") }
     if (inputBlueprintString.size > 1) {
@@ -39,17 +38,17 @@ fun main(args: Array<String>) {
         } else {
             if (Files.exists(Path.of("decodeTest.txt"))) {
                 jsonString = decodeBpStringFromFilename("decodeTest.txt")//default
-            }else{
+            } else {
                 println("No Blueprint provided")
                 return
             }
         }
     }
-   factorioRailAnalyzer(jsonString)
+    factorioRailAnalyzer(jsonString)
 
 }
 
-fun factorioRailAnalyzer(blueprint: String):Boolean {
+fun factorioRailAnalyzer(blueprint: String): Boolean {
     //region Phase0: data decompression
     if (blueprint.contains("blueprint_book")) {
         throw Exception("Sorry, a Blueprintbook cannot be parsed by this Programm, please input only Blueprints ")
@@ -127,30 +126,28 @@ fun factorioRailAnalyzer(blueprint: String):Boolean {
 
         edge.entityList.reverse()
         edge.entityList.first().entityType = EntityType.Signal
-        //edge.entityList.first().removeRelatedRail = false
-        //edge.last(1).removeRelatedRail = !edge.last(1).removeRelatedRail!!
 
     }
     listOfEdges.addAll(backwardsEdges)
     listOfEdges.forEach { it.cleanAndCalc() }
-    backwardsEdges.forEach { it.setDanger() }
 
-//add relations for everything
-    listOfEdges.filter { edge ->
-        edge.last(1).entityType != EntityType.VirtualSignal
-                && edge.validRail
-        edge.last(1).entityNumber != null
-    }.forEach { edge ->
-        val endingSignal = edge.last(1)
-        edge.nextEdgeList = relation[endingSignal.entityNumber]
-    }
-
-
-    //endregion
     // guard check point
     if (listOfEdges.size == 0) {
         throw Exception("No Edges Found, but there are some signals ")  //todo: unexpected  error
     }
+    //set next posible edges per edge
+    listOfEdges.filter { edge ->
+        edge.last(1).entityType != EntityType.VirtualSignal
+                && edge.validRail
+    }.forEach { edge ->
+        val endingSignal = edge.last(1)
+        edge.nextEdgeList = relation[endingSignal.entityNumber]
+    }
+    backwardsEdges.forEach { it.setDanger() }
+
+
+    //endregion
+
     //region Phase4: creating the blocks that are defined by the signals in factorio
 
     val blockList = connectEdgesToBlocks(listOfEdges)
@@ -160,41 +157,22 @@ fun factorioRailAnalyzer(blueprint: String):Boolean {
 
     // creating the Graph out of the Blocks and edges
 
-    listOfEdges.forEach { edge ->
-        edge.wasIchBeobachte.forEach {
-            edge.belongsToBlock!!.dependingOn.addUnique(it.belongsToBlock!!)
 
-        }
-
-    }
-
-
-    var cnt = 0
-    startSignals.forEach { startSig ->
-        cnt--
-        var virtualSig = Entity(0, EntityType.VirtualSignal)
-        var startEdge = Edge(Edge(virtualSig), startSig)
-        startEdge.nextEdgeList = relation[startSig.entityNumber] ?: return@forEach
-        listOfEdges.add(startEdge)
-        var startBlock = Block(startEdge, cnt)
-        startEdge.belongsToBlock = startBlock
-        blockList.add(startBlock)
-    }
     listOfEdges.filter { edge ->
-        edge.belongsToBlock!!.id < 0 //aka ist start block
-                || edge.entityList.first().entityType == EntityType.VirtualSignal // ggf eine bessere alternaive start edges fest zustellen
-                || edge.entityList.first().entityType == EntityType.Signal
-    }.filter { edge ->
-        edge.validRail!!
+        (edge.belongsToBlock?.istjemandrarwIchBinGefärlich() == true ||
+                edge.entityList.first().entityType == EntityType.Signal)
+                && edge.validRail
     }.forEach { edge ->
         edge.setzteBeobachtendeEdges()
     }
+
+    listOfEdges.forEach { edge ->
+        edge.wasIchBeobachte.forEach {
+            edge.belongsToBlock!!.dependingOn.addUnique(it.belongsToBlock!!)
+        }
+    }
     // Graphviz().printBlocksFromEdgeRelations(listOfEdges)
 
-
-    //analysing the graph
-    val graphTesting = Graph()
-    graphTesting.tiernan(blockList)
 
     //debug output
     var i = 0
@@ -204,7 +182,6 @@ fun factorioRailAnalyzer(blueprint: String):Boolean {
             Graphviz().printEdge(it, i)
         }
         i++
-
     }
 
     if (CLIOptions[CLIFlags.GraphvizOutput]!!) {
@@ -218,21 +195,32 @@ fun factorioRailAnalyzer(blueprint: String):Boolean {
     }
 
     //endregion
-    println("found Deadlocks" + graphTesting.getDeadlocks())
-    graphTesting.determineDeadlocks()
 
-    listOfEdges.tmTm {
+
+    println("tmTm:")
+    listOfEdges.visualize("wasIchBeobachte", { it.wasIchBeobachte }, { it.belongsToBlock })
+    //listOfEdges.visualize("nextEdgeListAL"){it.nextEdgeListAL()}
+    //blockList.visualize("neighbourBlocks"){it.neighbourBlocks()}
+    val a = listOfEdges.tiernanWithref({
         it.wasIchBeobachte
-    }
-    listOfEdges.tmTm {
+    }, {
+        it.belongsToBlock!!
+    })
+
+
+    println(a)
+    val b = listOfEdges.tiernan {
         it.nextEdgeListAL()
     }
-    blockList.tmTm {
+    println(b)
+    val c = blockList.tiernan {
         it.neighbourBlocks()
     }
 
+    println(c)
+
     // Edit here to Test different systems
-    return graphTesting.getDeadlocks().size>0
+    return a.hasCircutes() || b.hasCircutes() || c.hasCircutes()
 }
 
 
@@ -254,7 +242,7 @@ fun simpleCheck(listOfEdges: ArrayList<Edge>): Position {
         }.minBy { edge ->
             edge.tileLength
         }
-        println("max tile length: ${minSize.tileLength} or ${Math.floor(minSize.tileLength / 6.5)} train cars")
+        println("max tile length: ${minSize.tileLength} or ${Math.floor((minSize.tileLength + 1) / 7)} train cars")
         return minSize.entityList.first().position
     }
     return Position(-1.0, -1.0)
