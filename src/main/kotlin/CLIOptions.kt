@@ -34,10 +34,22 @@ fun setCLIOptions(options:List<String>){
         i++
     }
     if(options.contains("-h")){
-       //TODO:make help output
+       //TODO:Show when no
+        showCLIHelp()
         i++
     }
     if(i!=options.size){
         println("unknown CLI option ignored")
     }
+}
+
+fun showCLIHelp(){
+    println("This Program takes a Blueprint and analyses it, to find Deadlocks.\n " +
+            "A Blueprint-string can be given directly in the CLI or by giving a Path to a Textfile with a Blueprint-string in it.\n" +
+            "Options:\n" +
+            "-h : Show this help\n"+
+            "-d : Show Debug Information\n" +
+            "-g : Create Graphviz Output\n" +
+            "-i : Don't open the Output automatically\n" +
+            "-e : Don't color in the Blocks in the Output\n")
 }
