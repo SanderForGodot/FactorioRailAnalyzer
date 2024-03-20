@@ -2,10 +2,12 @@ import com.google.gson.Gson
 import factorioBlueprint.Entity
 import factorioBlueprint.Position
 import factorioBlueprint.ResultBP
+import graph.Graf
 import graph.tiernan
-import graph.tiernanWithref
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 fun main(args: Array<String>) {
@@ -75,8 +77,7 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
     //region Phase2: rail Linker: connected rails point to each other with pointer list does the same with signals
     entityList.railLinker(matrix)
     //endregion
-    if (entityList.size < 100)
-        Graphviz().generateEntityRelations(entityList)
+    if (entityList.size < 100) Graphviz().generateEntityRelations(entityList)
     //region Phase3: create
     //prepare
     val signalList: List<Entity> = entityList.filter { entity ->
@@ -84,18 +85,15 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
     }
 
 
-    if (signalList.isEmpty())
-        throw Exception("No Edges Found, because there are no signals in the blueprint") //todo: construction error
+    if (signalList.isEmpty()) throw Exception("No Edges Found, because there are no signals in the blueprint") //todo: construction error
 
     //create forward facing edgedges
     val listOfEdges = arrayListOf<Edge>()
     val relation = mutableMapOf<Int, ArrayList<Edge>>()
     signalList.forEach { startPoint ->
         val resultEdges = arrayListOf<Edge>()
-        if (startPoint.rightNextRail.size > 0)
-            resultEdges.addAll(buildEdge(Edge(startPoint), 1, false))
-        if (startPoint.leftNextRail.size > 0)
-            resultEdges.addAll(buildEdge(Edge(startPoint), -1, false))
+        if (startPoint.rightNextRail.size > 0) resultEdges.addAll(buildEdge(Edge(startPoint), 1, false))
+        if (startPoint.leftNextRail.size > 0) resultEdges.addAll(buildEdge(Edge(startPoint), -1, false))
         if (resultEdges.size > 0) {
             relation[startPoint.entityNumber!!] = resultEdges
             listOfEdges.addAll(resultEdges)
@@ -114,10 +112,8 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
     var backwardsEdges = arrayListOf<Edge>()
     startSignals.forEach { startPoint ->
         val resultEdges = arrayListOf<Edge>()
-        if (startPoint.rightNextRail.size > 0)
-            resultEdges.addAll(buildEdge(Edge(startPoint), -1, true))
-        if (startPoint.leftNextRail.size > 0)
-            resultEdges.addAll(buildEdge(Edge(startPoint), 1, true))
+        if (startPoint.rightNextRail.size > 0) resultEdges.addAll(buildEdge(Edge(startPoint), -1, true))
+        if (startPoint.leftNextRail.size > 0) resultEdges.addAll(buildEdge(Edge(startPoint), 1, true))
         if (resultEdges.size > 0) {
             backwardsEdges.addAll(resultEdges)
         }
@@ -137,8 +133,7 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
     }
     //set next posible edges per edge
     listOfEdges.filter { edge ->
-        edge.last(1).entityType != EntityType.VirtualSignal
-                && edge.validRail
+        edge.last(1).entityType != EntityType.VirtualSignal && edge.validRail
     }.forEach { edge ->
         val endingSignal = edge.last(1)
         edge.nextEdgeList = relation[endingSignal.entityNumber]
@@ -159,8 +154,8 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
 
 
     listOfEdges.filter { edge ->
-        (edge.belongsToBlock?.istjemandrarwIchBinGefärlich() == true ||
-                edge.entityList.first().entityType == EntityType.Signal)
+        (edge.belongsToBlock?.istjemandrarwIchBinGefärlich() == true
+                || edge.hasRailSignal())
                 && edge.validRail
     }.forEach { edge ->
         edge.setzteBeobachtendeEdges()
@@ -171,6 +166,7 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
             edge.belongsToBlock!!.dependingOn.addUnique(it.belongsToBlock!!)
         }
     }
+
     // Graphviz().printBlocksFromEdgeRelations(listOfEdges)
 
 
@@ -198,9 +194,7 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
 
 
     println("tmTm:")
-    listOfEdges.visualize("wasIchBeobachte", { it.wasIchBeobachte }, { it.belongsToBlock })
-    //listOfEdges.visualize("nextEdgeListAL"){it.nextEdgeListAL()}
-    //blockList.visualize("neighbourBlocks"){it.neighbourBlocks()}
+/*
     val a = listOfEdges.tiernanWithref({
         it.wasIchBeobachte
     }, {
@@ -213,14 +207,83 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
         it.nextEdgeListAL()
     }
     println(b)
+    */
+
     val c = blockList.tiernan {
-        it.neighbourBlocks()
+        it.directNeighbours()
+    }.reduceBasic().anylasis()
+    val d = blockList.tiernan {
+        it.dependingOn
     }
 
-    println(c)
 
+
+    println(c)
+    println(d)
+
+    blockList.visualize("neighborBlocks", c) { it.directNeighbours() }
+    blockList.visualize("blockDependency", d) { it.dependingOn }
+    listOfEdges.visualizeWithRef("wasIchBeobachte", { it.wasIchBeobachte }) { it.belongsToBlock }
+    //listOfEdges.visualizeWithRef("nextEdgeListAL"){it.nextEdgeListAL()}
+    //blockList.visualizeWithRef("neighbourBlocks"){it.neighbourBlocks()}
     // Edit here to Test different systems
-    return a.hasCircutes() || b.hasCircutes() || c.hasCircutes()
+    return /*a.hasCircutes() || b.hasCircutes()  ||*/ c.hasCircutes()
+}
+
+private fun Graf<Block>.anylasis(): Graf<Block> {
+
+    this.circularDependencies.retainAll {
+        it.analysis()
+    }
+    return this
+}
+
+private fun List<Block>.analysis(): Boolean {
+
+    var transEdge = ArrayList<Set<Edge>>()
+    for (i in this.indices) {
+        transEdge.add(intersect(this[i], this[i + 1 % this.size]))
+    }
+    if (!transEdge.all {
+            it.size == 1
+        }) throw Exception("unexpeected")
+    //Collections.rotate(transEdge, 1) // this alinges the block list wih th edge lsit
+    var trans: MutableList<Edge> = transEdge.flatten().toMutableList()
+
+    var pathIndex = ArrayList<Int>()
+    for (i in trans.indices) {
+        if (trans[i].nextEdgeList!!.contains(trans[(i + 1) % trans.size])) {
+            pathIndex.add(i)
+        }
+    }
+    if (pathIndex.size == 0) return true // if everything is one continues path then this is conlusive
+    // this is a konequense that priusely all dls without any rail signals where filterd
+    Collections.rotate(trans, -1 * pathIndex[0])
+    for (i in pathIndex.indices) {
+        var lastOfPrevius = trans[(pathIndex[i] + i - 1) % trans.size]
+        var curentStart = trans[pathIndex[i] + i]
+        var newStart =
+            (lastOfPrevius.belongsToBlock!!.edgeList.toSet()
+                    subtract setOf(lastOfPrevius)).toList().first {
+                it.nextEdgeList?.contains(curentStart) == true
+            }
+        trans.add(pathIndex[i] + i, newStart)
+    }
+    for (i in pathIndex.indices)
+        if (trans.subList(pathIndex[i] + i, pathIndex[i + 1] + i + 1).all {
+                it.entityList.first().entityType != EntityType.Signal
+            })
+            return false
+    return true
+}
+
+fun intersect(from: Block, to: Block): Set<Edge> {
+    var von: Set<Edge> = from.edgeList.flatMap {
+        it.nextEdgeList!! // todo: this is not save
+    }.toSet()
+    var nach: Set<Edge> = to.edgeList.toSet()
+
+    return von intersect nach
 }
 
 
@@ -228,7 +291,7 @@ fun simpleCheck(listOfEdges: ArrayList<Edge>): Position {
     if (!listOfEdges.filter { edge ->
             edge.last(1).entityType != EntityType.VirtualSignal
         }.any { edge ->
-            edge.entityList.first().entityType == EntityType.Signal
+            edge.hasRailSignal()
         }) {
         //all signals are chain signals with exception to ending signals
         // this guaranties no deadlock
@@ -237,8 +300,7 @@ fun simpleCheck(listOfEdges: ArrayList<Edge>): Position {
     } else {
         println("simple check concluded: potential deadlock")
         var minSize = listOfEdges.filter { edge ->
-            edge.entityList.first().entityType == EntityType.Signal
-                    && edge.last(1).entityType != EntityType.VirtualSignal
+            edge.hasRailSignal() && edge.last(1).entityType != EntityType.VirtualSignal
         }.minBy { edge ->
             edge.tileLength
         }

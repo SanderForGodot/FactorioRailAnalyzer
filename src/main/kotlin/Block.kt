@@ -17,15 +17,15 @@ class Block(edge: Edge, var id: Int) : Grafabel {
         }
     }
 
-    fun hasRailSignal(): Boolean {
+    override fun hasRailSignal(): Boolean {
         return edgeList.any { edge ->
-            (edge.entityList.first().entityType == EntityType.Signal)
+            (edge.hasRailSignal())
         }
     }
 
     fun hasMixedSignals(): Boolean {
         var signalExists = edgeList.any { edge ->
-            (edge.entityList.first().entityType == EntityType.Signal)
+            (edge.hasRailSignal())
         }
         var chainSignalExists = edgeList.any { edge ->
             (edge.entityList.first().entityType == EntityType.ChainSignal)
@@ -55,6 +55,7 @@ class Block(edge: Edge, var id: Int) : Grafabel {
             }
             return posList.fold(Position(0.0,0.0),Position::plus) /posList.size
         }*/
+    /*
     fun neighbourBlocks(): ArrayList<Block> {
         val neighbours = arrayListOf<Block>()
         edgeList.forEach { edge ->
@@ -64,6 +65,26 @@ class Block(edge: Edge, var id: Int) : Grafabel {
         }
         return neighbours
     }
+    */
+
+    fun directNeighbours(): ArrayList<Block> {
+        var result = ArrayList<Block>()
+        // bruh des ist dumm und geht way besser
+        //  todo rework this code
+        edgeList.map { edge ->
+            edge.nextEdgeList?.map {
+                it.belongsToBlock
+            }
+        }.forEach outer@{ outer ->
+            if (outer == null) return@outer
+            outer.forEach inner@{ inneer ->
+                if (inneer == null) return@inner
+                result.addUnique(inneer)
+            }
+        }
+        return result
+    }
+
 
     fun edgeListSting(): String {
         var R = "["
@@ -84,7 +105,7 @@ class Block(edge: Edge, var id: Int) : Grafabel {
 
 
     override fun toString(): String {
-        return "(id=$id,size=${edgeList.size}, Relevant=${hasRailSignal()})"
+        return " id:$id "
     }
 
     fun istjemandrarwIchBinGefärlich(): Boolean {

@@ -1,5 +1,6 @@
 import factorioBlueprint.Entity
 import factorioBlueprint.Position
+import graph.Graf
 import java.awt.Color
 import java.awt.Desktop
 import java.io.File
@@ -185,9 +186,43 @@ class Graphviz {
 
 
 }
-
 fun <T : Grafabel> ArrayList<T>.visualize(
     fileName: String,
+graph: Graf<T>,
+    fn: (T) -> ArrayList<T>?,
+): ArrayList<T> {
+    val stringBuilder = StringBuilder()
+    val g = Graphviz()
+    stringBuilder.append(g.OPEN_GRAPH)
+    var masterList = arrayListOf<String>()
+    val haveDoneIt = ArrayList<Int>()
+
+    for (item in this) {
+        if (fn.invoke(item)?.size ==0) continue ?:continue
+        var pos = item.pos().div(5).rounded()
+        if (!haveDoneIt.contains(item.uniqueID())) {
+            haveDoneIt.add(item.uniqueID())
+            stringBuilder.append(MessageFormat.format(g.NODEXY, item.uniqueID(), item.uniqueID(), pos.x, pos.y * -1))
+        }
+        fn.invoke(item)?.forEach {
+
+            masterList.addUnique(
+                MessageFormat.format(g.EDGE, item.uniqueID(), it.uniqueID())
+            )
+        }
+    }
+    masterList.forEach {
+        stringBuilder.append(it)
+    }
+    stringBuilder.append(g.CLOSE_GRAPH)
+    buildFile(stringBuilder, fileName)
+    return this
+}
+
+
+fun <T : Grafabel> ArrayList<T>.visualizeWithRef(
+    fileName: String,
+
     fn: (T) -> ArrayList<T>?,
     ref: (T) -> Grafabel?
 ): ArrayList<T> {
@@ -200,7 +235,7 @@ fun <T : Grafabel> ArrayList<T>.visualize(
         var id = ref.invoke(item)!!
         var pos = id.pos()
         if (!haveDoneIt.contains(id.uniqueID())) {
-            println("${id.uniqueID()}:$pos")
+            dbgPrintln("${id.uniqueID()}:$pos")
             haveDoneIt.add(id.uniqueID())
             stringBuilder.append(MessageFormat.format(g.NODE, id.uniqueID(), id.uniqueID(), pos.x, pos.y * -1))
         }

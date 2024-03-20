@@ -221,6 +221,10 @@ class Edge() : Grafabel {
             .fold(Position(0.0, 0.0), Position::plus) / posList.size
     }
 
+    override fun hasRailSignal(): Boolean {
+        return entityList.first().entityType == EntityType.Signal
+    }
+
 
     override fun toString(): String {
         return aToB()
