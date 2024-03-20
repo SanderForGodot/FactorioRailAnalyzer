@@ -94,17 +94,7 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
         val resultEdges = arrayListOf<Edge>()
         if (startPoint.rightNextRail.size > 0) resultEdges.addAll(buildEdge(Edge(startPoint), 1, false))
         if (startPoint.leftNextRail.size > 0) resultEdges.addAll(buildEdge(Edge(startPoint), -1, false))
-
-        //remove duplicates
-        // this is aproblem of core arichtechture and depredly neads a rework
-        // but bc my partner dosent do alot i am runing out of time to fix
-        for (i in resultEdges)
-            if (listOfEdges.addUnique(i)) //returns true if added
-                relation[startPoint.entityNumber!!] = resultEdges
-
-
     }
-    listOfEdges.countDuplicates()
 
 // get all start signals
     val notStartSignalList = listOfEdges.map { edge ->
@@ -131,7 +121,6 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
 
     }
     listOfEdges.addAll(backwardsEdges)
-
     listOfEdges.forEach { it.cleanAndCalc() }
     listOfEdges = listOfEdges.distinct() as ArrayList<Edge>
 
@@ -174,7 +163,6 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
             edge.belongsToBlock!!.dependingOn.addUnique(it.belongsToBlock!!)
         }
     }
-
     // Graphviz().printBlocksFromEdgeRelations(listOfEdges)
 
 
@@ -202,7 +190,7 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
 
 
     println("tmTm:")
-/*
+ //blockList.visualize("neighbourBlocks"){it.neighbourBlocks()}
     val a = listOfEdges.tiernanWithref({
         it.wasIchBeobachte
     }, {
@@ -215,16 +203,12 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
         it.nextEdgeListAL()
     }
     println(b)
-    */
-
     val c = blockList.tiernan {
         it.directNeighbours()
     }.reduceBasic().anylasis()
     val d = blockList.tiernan {
         it.dependingOn
     }
-
-
 
     println(c)
     println(d)

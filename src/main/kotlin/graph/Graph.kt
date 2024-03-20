@@ -41,7 +41,7 @@ fun <T : Grafabel> T.expandPath(graf: Graf<T>, fn: (T) -> ArrayList<T>?) {
     graf.path.removeLast()
 }
 
-class Graf<T : Grafabel> {
+class Graf<T> {
     val path: MutableList<T> = ArrayList()
     var visited: MutableMap<T, MutableList<T>> = mutableMapOf()
     var circularDependencies: MutableList<List<T>> = mutableListOf()
@@ -91,6 +91,35 @@ class Graf<T : Grafabel> {
         }
         return this
     }
+}
+
+
+fun <T : Grafabel> ArrayList<T>.tiernanWithref(fn: (T) -> ArrayList<T>?, ref: (T) -> Grafabel): Graf<Grafabel> {
+    val g = Graf<Grafabel>()
+    this.sorted()
+    this.forEach {
+        it.expandPathWithRef(g, fn, ref)
+    }
+    return g
+}
+
+fun <T : Grafabel> T.expandPathWithRef(graf: Graf<Grafabel>, fn: (T) -> ArrayList<T>?, ref: (T) -> Grafabel) {
+    graf.path.add(ref.invoke(this))
+    fn.invoke(this)?.forEach { neighbor ->
+        if (!graf.path.contains(ref.invoke(neighbor))
+            && (ref.invoke(neighbor).uniqueID() > ref.invoke(this).uniqueID())
+            && graf.visited[ref.invoke(this)]?.contains(ref.invoke(neighbor)) != true
+        ) {
+            neighbor.expandPathWithRef(graf, fn, ref)
+            graf.visited(ref.invoke(this), ref.invoke(neighbor))
+        } else {
+            if (graf.path.first() == ref.invoke(neighbor)) {
+                graf.addPath()
+            }
+        }
+    }
+    graf.visited.remove(ref.invoke(this))
+    graf.path.removeLast()
 }
 
 
