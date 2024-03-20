@@ -19,12 +19,12 @@ fun <T : Grafabel> T.expandPath(graf: Graf<T>, fn: (T) -> ArrayList<T>?) {
 
     fn.invoke(this)?.forEach { neighbor ->
         /*1. The extension vertex cannot be in P.*/
-        if (graf.path.contains(neighbor)
+        if (!graf.path.contains(neighbor)
             /*2. The extension vertex value must be larger than that of the first vertex of P.*/
             && (neighbor.uniqueID() > this.uniqueID())
             /*3. The extension vertex cannot be closed to the last vertex in P.
                  H contains the list of vertices closed to each vertex*/
-            && (graf.visited[this]?.contains(neighbor) == false)
+            && graf.visited[this]?.contains(neighbor) != true
         ) {
             neighbor.expandPath(graf, fn)
             graf.visited(this, neighbor)
@@ -65,8 +65,6 @@ class Graf<T> {
 
 
 fun <T : Grafabel> ArrayList<T>.tiernanWithref(fn: (T) -> ArrayList<T>?, ref: (T) -> Grafabel): Graf<Grafabel> {
-
-
     val g = Graf<Grafabel>()
     this.sorted()
     this.forEach {
@@ -77,25 +75,20 @@ fun <T : Grafabel> ArrayList<T>.tiernanWithref(fn: (T) -> ArrayList<T>?, ref: (T
 
 fun <T : Grafabel> T.expandPathWithRef(graf: Graf<Grafabel>, fn: (T) -> ArrayList<T>?, ref: (T) -> Grafabel) {
     graf.path.add(ref.invoke(this))
-
     fn.invoke(this)?.forEach { neighbor ->
-        /*1. The extension vertex cannot be in P.*/
-        if (graf.path.contains(neighbor)
-            /*2. The extension vertex value must be larger than that of the first vertex of P.*/
-            && (neighbor.uniqueID() > this.uniqueID())
-            /*3. The extension vertex cannot be closed to the last vertex in P.
-                 H contains the list of vertices closed to each vertex*/
-            && (graf.visited[this]?.contains(neighbor) == false)
+        if (!graf.path.contains(ref.invoke(neighbor))
+            && (ref.invoke(neighbor).uniqueID() > ref.invoke(this).uniqueID())
+            && graf.visited[ref.invoke(this)]?.contains(ref.invoke(neighbor)) != true
         ) {
             neighbor.expandPathWithRef(graf, fn, ref)
-            graf.visited(this, neighbor)
+            graf.visited(ref.invoke(this), ref.invoke(neighbor))
         } else {
-            if (graf.path.first() == neighbor) {
+            if (graf.path.first() == ref.invoke(neighbor)) {
                 graf.addPath()
             }
         }
     }
-    graf.visited.remove(this)
+    graf.visited.remove(ref.invoke(this))
     graf.path.removeLast()
 }
 

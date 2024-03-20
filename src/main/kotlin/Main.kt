@@ -199,7 +199,8 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
 
     println("tmTm:")
     listOfEdges.visualize("wasIchBeobachte", { it.wasIchBeobachte }, { it.belongsToBlock })
-    //listOfEdges.visualize("nextEdgeListAL"){it.nextEdgeListAL()}
+    blockList.visualize("neighbourBlocks", { it.neighbourBlocks() }, { it })
+    listOfEdges.visualize("nextEdgeListAL", { it.nextEdgeListAL() }, { it.belongsToBlock })
     //blockList.visualize("neighbourBlocks"){it.neighbourBlocks()}
     val a = listOfEdges.tiernanWithref({
         it.wasIchBeobachte
@@ -209,18 +210,15 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
 
 
     println(a)
-    val b = listOfEdges.tiernan {
-        it.nextEdgeListAL()
-    }
-    println(b)
+    // val b = listOfEdges.tiernan {        it.nextEdgeListAL() }
+    //println(b)
     val c = blockList.tiernan {
         it.neighbourBlocks()
     }
-
     println(c)
 
     // Edit here to Test different systems
-    return a.hasCircutes() || b.hasCircutes() || c.hasCircutes()
+    return a.hasCircutes() || /*b.hasCircutes() || */c.hasCircutes()
 }
 
 

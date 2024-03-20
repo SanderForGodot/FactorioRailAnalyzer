@@ -195,22 +195,27 @@ fun <T : Grafabel> ArrayList<T>.visualize(
     val g = Graphviz()
     stringBuilder.append(g.OPEN_GRAPH)
     var masterList = arrayListOf<String>()
-    val haveDoneIt = ArrayList<Int>()
-    for (item in this) {
-        var id = ref.invoke(item)!!
-        var pos = id.pos()
-        if (!haveDoneIt.contains(id.uniqueID())) {
-            println("${id.uniqueID()}:$pos")
-            haveDoneIt.add(id.uniqueID())
-            stringBuilder.append(MessageFormat.format(g.NODE, id.uniqueID(), id.uniqueID(), pos.x, pos.y * -1))
-        }
-        fn.invoke(item)?.forEach {
 
+    var relevant = ArrayList<Grafabel>()
+    for (item in this) {
+        var node = ref.invoke(item)!!
+        if (fn.invoke(item) == null) continue
+        if (fn.invoke(item)!!.size == 0) continue
+        fn.invoke(item)!!.forEach {
+            relevant.addUnique(node)
+            relevant.addUnique(ref.invoke(it)!!)
             masterList.addUnique(
-                MessageFormat.format(g.EDGE, id.uniqueID(), ref.invoke(it)!!.uniqueID())
+                MessageFormat.format(g.EDGE, node.uniqueID(), ref.invoke(it)!!.uniqueID())
             )
         }
     }
+    relevant.forEach { node ->
+        val pos = node.pos().div(5).rounded()
+        dbgPrintln("${node.uniqueID()}:$pos")
+        stringBuilder.append(MessageFormat.format(g.NODEXY, node.uniqueID(), node.label(), pos.x, pos.y * -1))
+    }
+
+
     masterList.forEach {
         stringBuilder.append(it)
     }
@@ -324,7 +329,10 @@ fun buildFile(stringBuilder: StringBuilder, fileName: String) {
             "-Kfdp",
             "-y",
             "-n",
+            "-Gstart=250 ",
             "-Tsvg",
+
+            //"gvpr -c \"N[\$.degree==0]{delete(NULL, \$)}\" GraphvizInput/$fileName.dot",
             "GraphvizInput/$fileName.dot",
             "-oGraphvizOutput/$fileName.svg"
         )

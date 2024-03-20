@@ -2,6 +2,7 @@ package factorioBlueprint
 
 import com.google.gson.annotations.SerializedName
 import kotlin.math.pow
+import kotlin.math.round
 import kotlin.math.sqrt
 
 
@@ -56,5 +57,9 @@ data class Position(
 
     override fun toString(): String {
         return "($x,-$y)"
+    }
+
+    fun rounded(): Position {
+        return Position(round(x), round(y))
     }
 }

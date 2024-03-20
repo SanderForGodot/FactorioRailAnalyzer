@@ -7,5 +7,9 @@ interface Grafabel : Comparable<Grafabel> {
         return uniqueID() - other.uniqueID()
     }
 
+    fun label(): String {
+        return "id:${uniqueID()}"
+    }
+
 
 }
