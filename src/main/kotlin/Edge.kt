@@ -304,6 +304,21 @@ class Edge() : Grafabel {
         }
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Edge
+
+        if (entityList != other.entityList) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return entityList.hashCode()
+    }
+
     //uncertainty if inline is good /bad / required
     //https://kotlinlang.org/docs/inline-functions.html
 

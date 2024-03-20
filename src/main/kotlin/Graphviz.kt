@@ -10,6 +10,7 @@ import java.nio.file.Path
 import java.text.MessageFormat
 import java.time.LocalTime
 import kotlin.math.roundToInt
+import kotlin.random.Random.Default.nextInt
 
 /* How to use:
 have graphviz installed, possible by downloading the installer from here:
@@ -186,9 +187,10 @@ class Graphviz {
 
 
 }
+
 fun <T : Grafabel> ArrayList<T>.visualize(
     fileName: String,
-graph: Graf<T>,
+    graph: Graf<T>,
     fn: (T) -> ArrayList<T>?,
 ): ArrayList<T> {
     val stringBuilder = StringBuilder()
@@ -198,7 +200,7 @@ graph: Graf<T>,
     val haveDoneIt = ArrayList<Int>()
 
     for (item in this) {
-        if (fn.invoke(item)?.size ==0) continue ?:continue
+        if (fn.invoke(item)?.size == 0) continue ?: continue
         var pos = item.pos().div(5).rounded()
         if (!haveDoneIt.contains(item.uniqueID())) {
             haveDoneIt.add(item.uniqueID())
@@ -213,6 +215,13 @@ graph: Graf<T>,
     }
     masterList.forEach {
         stringBuilder.append(it)
+    }
+
+    graph.circularDependencies.forEach {dl->
+        val color :Color = Color(nextInt(255),nextInt(255),nextInt(255))
+
+        for (i in dl.indices )
+            stringBuilder.append(MessageFormat.format(g.EDGECOLOR,dl[i],dl[(i+1)%dl.size],color))
     }
     stringBuilder.append(g.CLOSE_GRAPH)
     buildFile(stringBuilder, fileName)

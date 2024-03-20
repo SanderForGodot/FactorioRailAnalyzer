@@ -88,17 +88,23 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
     if (signalList.isEmpty()) throw Exception("No Edges Found, because there are no signals in the blueprint") //todo: construction error
 
     //create forward facing edgedges
-    val listOfEdges = arrayListOf<Edge>()
+    var listOfEdges = arrayListOf<Edge>()
     val relation = mutableMapOf<Int, ArrayList<Edge>>()
     signalList.forEach { startPoint ->
         val resultEdges = arrayListOf<Edge>()
         if (startPoint.rightNextRail.size > 0) resultEdges.addAll(buildEdge(Edge(startPoint), 1, false))
         if (startPoint.leftNextRail.size > 0) resultEdges.addAll(buildEdge(Edge(startPoint), -1, false))
-        if (resultEdges.size > 0) {
-            relation[startPoint.entityNumber!!] = resultEdges
-            listOfEdges.addAll(resultEdges)
-        }
+
+        //remove duplicates
+        // this is aproblem of core arichtechture and depredly neads a rework
+        // but bc my partner dosent do alot i am runing out of time to fix
+        for (i in resultEdges)
+            if (listOfEdges.addUnique(i)) //returns true if added
+                relation[startPoint.entityNumber!!] = resultEdges
+
+
     }
+    listOfEdges.countDuplicates()
 
 // get all start signals
     val notStartSignalList = listOfEdges.map { edge ->
@@ -125,7 +131,9 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
 
     }
     listOfEdges.addAll(backwardsEdges)
+
     listOfEdges.forEach { it.cleanAndCalc() }
+    listOfEdges = listOfEdges.distinct() as ArrayList<Edge>
 
     // guard check point
     if (listOfEdges.size == 0) {
@@ -230,6 +238,21 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
     return /*a.hasCircutes() || b.hasCircutes()  ||*/ c.hasCircutes()
 }
 
+private fun ArrayList<Edge>.countDuplicates() {
+    println("dupes:")
+    for (i in this.indices)
+        for (j in i + 1 until this.size)
+            if (this[i].toString() == this[j].toString()) {
+                println("index $i und $j sind gleich: ${this[i]}")
+                if(this[i] != this[j]) {
+                    println(this[i].entityList)
+                    println(this[j].entityList)
+                    println("dif${this[i].entityList.toSet() subtract  this[j].entityList.toSet()}")
+                }
+            }
+
+}
+
 private fun Graf<Block>.anylasis(): Graf<Block> {
 
     this.circularDependencies.retainAll {
@@ -242,11 +265,16 @@ private fun List<Block>.analysis(): Boolean {
 
     var transEdge = ArrayList<Set<Edge>>()
     for (i in this.indices) {
-        transEdge.add(intersect(this[i], this[i + 1 % this.size]))
+        transEdge.add(intersect(this[i], this[(i + 1) % this.size]))
     }
     if (!transEdge.all {
             it.size == 1
-        }) throw Exception("unexpeected")
+        }) {
+        transEdge.forEach {
+            println(it.size)
+        }
+        throw Exception("unexpeected")
+    }
     //Collections.rotate(transEdge, 1) // this alinges the block list wih th edge lsit
     var trans: MutableList<Edge> = transEdge.flatten().toMutableList()
 

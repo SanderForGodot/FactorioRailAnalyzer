@@ -32,10 +32,10 @@ data class Entity(
 
     override fun equals(other: Any?): Boolean {
         if (other !is Entity) return false
-        @Suppress("NAME_SHADOWING") val other: Entity = other
 
         val isSameEntityType: Boolean =
-            if (this.entityType == EntityType.AnySignal || other.entityType == EntityType.AnySignal) (this.isSignal() && other.isSignal())
+            if (this.entityType == EntityType.AnySignal || other.entityType == EntityType.AnySignal)
+                (this.isSignal() && other.isSignal())
             else entityType == other.entityType
 
         return position == other.position && isSameEntityType && direction == other.direction
@@ -106,6 +106,13 @@ data class Entity(
 
     fun isRail(): Boolean {
         return entityType.isRail()
+    }
+
+    override fun hashCode(): Int {
+        var result = entityType.hashCode()
+        result = 31 * result + position.hashCode()
+        result = 31 * result + direction
+        return result
     }
 
 
