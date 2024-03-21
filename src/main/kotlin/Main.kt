@@ -16,7 +16,7 @@ fun main(args: Array<String>) {
     setCLIOptions(options)
     dbgPrintln("Program arguments: ${args.joinToString()}")
     val inputBlueprintString = args.filter { it.startsWith("0") }
-    val BlueprintFile = args.filter { !it.startsWith("-") }
+    val blueprintFile = args.filter { !it.startsWith("-") }
     if (inputBlueprintString.size > 1) {
         println("Too Many Blueprints provided")
         return
@@ -25,13 +25,13 @@ fun main(args: Array<String>) {
         return
     }*/
 
-    var jsonString: String = ""
+    val jsonString: String
     if (inputBlueprintString.size == 1) {
         jsonString = decodeBpString(inputBlueprintString.first())
     } else {
-        if (BlueprintFile.isNotEmpty()) {
-            if (Files.exists(Path.of(BlueprintFile.first()))) {
-                jsonString = decodeBpStringFromFilename(BlueprintFile.first())
+        if (blueprintFile.isNotEmpty()) {
+            if (Files.exists(Path.of(blueprintFile.first()))) {
+                jsonString = decodeBpStringFromFilename(blueprintFile.first())
 
             } else {
                 println("File not Found")
@@ -107,7 +107,7 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
     }
     val startSignals = signalList.toSet() - notStartSignalList.toSet()
 // do a backwards seach
-    var backwardsEdges = arrayListOf<Edge>()
+    val backwardsEdges = arrayListOf<Edge>()
     startSignals.forEach { startPoint ->
         val resultEdges = arrayListOf<Edge>()
         if (startPoint.rightNextRail.size > 0) resultEdges.addAll(buildEdge(Edge(startPoint), -1, true))
@@ -124,17 +124,17 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
     }
     listOfEdges.addAll(backwardsEdges)
     listOfEdges.forEach { it.cleanAndCalc() }
-    var distict = ArrayList<Edge>()
+    val distict = ArrayList<Edge>()
 
     for (i in listOfEdges) {
-        var s = distict.firstOrNull {
+        val s = distict.firstOrNull {
             i.toString() == it.toString()
         }
         if (s == null) distict.add(i)
         else removed.add(i)
     }
     //relation
-    relation.forEach { t, u ->
+    relation.forEach { (_, u) ->
         u.retainAll {
             distict.contains(it)
         }
@@ -157,7 +157,7 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
         val endingSignal = edge.last(1)
         edge.nextEdgeList = relation[endingSignal.entityNumber]
     }
-    backwardsEdges.forEach { it.setDanger() }
+    backwardsEdges.forEach { it.setEntry() }
 
 
 //endregion
@@ -165,7 +165,7 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
 //region Phase4: creating the blocks that are defined by the signals in factorio
 
     val blockList = connectEdgesToBlocks(listOfEdges)
-    listOfEdges
+
     //var pos = simpleCheck(listOfEdges)
 //pos = entityList.find { it.entityNumber ==20 }?.position ?: Position(0.0,0.0)
     svgFromPoints(max, listOfEdges, signalList, Position(-10.0, -10.0))
@@ -174,15 +174,15 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
 
 
     listOfEdges.filter { edge ->
-        (edge.belongsToBlock?.istjemandrarwIchBinGefärlich() == true
+        (edge.belongsToBlock?.anyEntryFlag() == true
                 || edge.hasRailSignal())
                 && edge.validRail
     }.forEach { edge ->
-        edge.setzteBeobachtendeEdges()
+        edge.monitor()
     }
 
     listOfEdges.forEach { edge ->
-        edge.wasIchBeobachte.forEach {
+        edge.monitoredEdgeList.forEach {
             edge.belongsToBlock!!.dependingOn.addUnique(it.belongsToBlock!!)
         }
     }
@@ -214,7 +214,7 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
 
 //blockList.visualize("neighbourBlocks"){it.neighbourBlocks()}
     val a = listOfEdges.tiernanWithref({
-        it.wasIchBeobachte
+        it.monitoredEdgeList
     }, {
         it.belongsToBlock!!
     })
@@ -236,26 +236,11 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
 
     blockList.visualize("neighborBlocks", c) { it.directNeighbours() }
     blockList.visualize("blockDependency", d) { it.dependingOn }
-    listOfEdges.visualizeWithRef("wasIchBeobachte", { it.wasIchBeobachte }) { it.belongsToBlock }
+    listOfEdges.visualizeWithRef("wasIchBeobachte", { it.monitoredEdgeList }) { it.belongsToBlock }
 //listOfEdges.visualizeWithRef("nextEdgeListAL"){it.nextEdgeListAL()}
 //blockList.visualizeWithRef("neighbourBlocks"){it.neighbourBlocks()}
 // Edit here to Test different systems
     return /*a.hasCircutes() || b.hasCircutes()  ||*/ c.hasCircutes()
-}
-
-private fun ArrayList<Edge>.countDuplicates() {
-    println("dupes:")
-    for (i in this.indices)
-        for (j in i + 1 until this.size)
-            if (this[i].toString() == this[j].toString()) {
-                println("index $i und $j sind gleich: ${this[i]}")
-                if (this[i] != this[j]) {
-                    println(this[i].entityList)
-                    println(this[j].entityList)
-                    println("dif${this[i].entityList.toSet() subtract this[j].entityList.toSet()}")
-                }
-            }
-
 }
 
 private fun Graf<Block>.anylasis(): Graf<Block> {
@@ -272,15 +257,15 @@ private fun <E> List<E>.at(i: Int): E {
 }
 
 private fun List<Block>.analysisDieDrite(): Boolean {
-    var transSetList = ArrayList<Set<Edge>>()
-    var indexList = ArrayList<Int>()
+    val transSetList = ArrayList<Set<Edge>>()
+    val indexList = ArrayList<Int>()
     for (i in this.indices) {
-        var r = this.at(i).getEdge(this.at(i - 1), this.at(i + 1))
+        val r = this.at(i).getEdge(this.at(i - 1), this.at(i + 1))
         transSetList.add(r)
         if (r.size == 2)
             indexList.add(i)
     }
-    var transList = transSetList.flatten()
+    val transList = transSetList.flatten()
     if (indexList.size == 0)
         return true
     Collections.rotate(transList, -1 * indexList[0])
@@ -297,26 +282,26 @@ private fun List<Block>.analysisDieDrite(): Boolean {
 
 fun Block.getEdge(form: Block, to: Block): Set<Edge> {
 
-    var firstOptions = this.edgeList.filter { edge ->
+    val firstOptions = this.edgeList.filter { edge ->
         form.edgeList.mapNotNull { it.nextEdgeList }.flatten()
             .contains(edge)
     }
-    var secondOptions = this.edgeList.filter {
+    val secondOptions = this.edgeList.filter { edge ->
 
-        it.nextEdgeList?.mapNotNull { it.belongsToBlock }
+        edge.nextEdgeList?.mapNotNull { it.belongsToBlock }
             ?.contains(to) == true
     }
-    var intersect = firstOptions intersect secondOptions
+    val intersect = firstOptions intersect secondOptions.toSet()
     var union = firstOptions union secondOptions
     if (intersect.size == 1) return intersect
     if (union.size == 2) return union
-    var a = firstOptions.toMutableList()
+    val a = firstOptions.toMutableList()
     a.retainAll { edge ->
         secondOptions.any {
             edge.doesCollide(it)
         }
     }
-    var b = secondOptions.toMutableList()
+    val b = secondOptions.toMutableList()
     b.retainAll { edge ->
         firstOptions.any {
             edge.doesCollide(it)
@@ -328,25 +313,3 @@ fun Block.getEdge(form: Block, to: Block): Set<Edge> {
 }
 
 
-fun simpleCheck(listOfEdges: ArrayList<Edge>): Position {
-    if (!listOfEdges.filter { edge ->
-            edge.last(1).entityType != EntityType.VirtualSignal
-        }.any { edge ->
-            edge.hasRailSignal()
-        }) {
-        //all signals are chain signals with exception to ending signals
-        // this guaranties no deadlock
-        // return ""
-        println("simple check concluded: no deadlock")
-    } else {
-        println("simple check concluded: potential deadlock")
-        var minSize = listOfEdges.filter { edge ->
-            edge.hasRailSignal() && edge.last(1).entityType != EntityType.VirtualSignal
-        }.minBy { edge ->
-            edge.tileLength
-        }
-        println("max tile length: ${minSize.tileLength} or ${Math.floor((minSize.tileLength + 1) / 7)} train cars")
-        return minSize.entityList.first().position
-    }
-    return Position(-1.0, -1.0)
-}

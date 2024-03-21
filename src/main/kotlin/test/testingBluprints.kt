@@ -1,3 +1,9 @@
+package test
+
+import decodeBpStringFromFilename
+import factorioRailAnalyzer
+import setCLIOptions
+
 fun main() {
     toTest.forEach {
         setCLIOptions(listOf("-i"))
@@ -13,10 +19,10 @@ fun main() {
 }
 
 val toTest: MutableMap<String, Boolean> = mutableMapOf(
-    "src/test/resources/testBPs/keisOhneDeadlock.txt" to true,
-    "src/test/resources/testBPs/minimalDeadlock.txt" to true,
-    "src/test/resources/testBPs/minimalNonDeadlock.txt" to false,
-    "src/test/resources/testBPs/silpleCrosing.txt" to false,
-    "src/test/resources/testBPs/thenotoriusYESdl.txt" to true,
-    "src/test/resources/testBPs/keisMitDeadlock.txt" to true,
+    "src/test.test/resources/testBPs/keisOhneDeadlock.txt" to true,
+    "src/test.test/resources/testBPs/minimalDeadlock.txt" to true,
+    "src/test.test/resources/testBPs/minimalNonDeadlock.txt" to false,
+    "src/test.test/resources/testBPs/silpleCrosing.txt" to false,
+    "src/test.test/resources/testBPs/thenotoriusYESdl.txt" to true,
+    "src/test.test/resources/testBPs/keisMitDeadlock.txt" to true,
 )

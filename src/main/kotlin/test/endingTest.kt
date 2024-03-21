@@ -1,6 +1,16 @@
+package test
+
+import Edge
+import EntityType
 import com.google.gson.Gson
+import decodeBpStringFromFilename
+import determineEnding
+import determineMinMax
+import fact
 import factorioBlueprint.Entity
 import factorioBlueprint.ResultBP
+import filedMatrix
+import railLinker
 
 fun main() {
     val solutionOben: ArrayList<Any?> =
@@ -77,11 +87,11 @@ fun test(filename:String, solution:ArrayList<Any?>){
         it.position.y
     }.sortedBy {
         it.position.x
-    }.forEach { ChailSig ->
-        var edge = Edge(ChailSig)
-        edge = Edge(edge, ChailSig.rightNextRail.first())
+    }.forEach { chainSig ->
+        var edge = Edge(chainSig)
+        edge = Edge(edge, chainSig.rightNextRail.first())
         if (filename =="unten.txt" )
-            edge = Edge(edge,edge.last(1).rightNextRail.first())
+            edge = Edge(edge, edge.last(1).rightNextRail.first())
 
         edgeListOben.add(edge)
     }
@@ -99,7 +109,7 @@ fun test(filename:String, solution:ArrayList<Any?>){
         i++
         if (solution[i] == null) {
             if (ergebnise[i] == null)
-                println("Erfolg case:" + i)
+                println("Erfolg case:$i")
             else {
                 val t = (ergebnise[i] as Edge).debugPrint()
                 println("Fail case:" + i + " should be " + solution[i] + " but is" + t)
@@ -114,7 +124,7 @@ fun test(filename:String, solution:ArrayList<Any?>){
         val correct = solution[i] as Pair<Boolean, Entity>
         correct.second.position += edge.last(2).position
         if (edge.validRail == correct.first && edge.last(1).direction == correct.second.direction)
-            println("Erfolg case:" + i)
+            println("Erfolg case:$i")
         else
             println("Fail case:" + i + " should be " + solution[i] + " but is" + edge.debugPrint())
     }

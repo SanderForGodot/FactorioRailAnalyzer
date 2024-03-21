@@ -60,7 +60,7 @@ class Graf<T : Grafabel> {
         val dl = circularDependencies
         for (x in 0 until dl.size) {
             for (y in (x + 1) until (dl.size)) {
-                val joinAt = dl[x] intersect dl[y]
+                val joinAt = dl[x] intersect dl[y].toSet()
                 if (joinAt.size == 1) {
                     val inset = dl[y].toMutableList()
                     Collections.rotate(inset, -1 * (dl[y].indexOf(joinAt.first())))
@@ -75,7 +75,7 @@ class Graf<T : Grafabel> {
     }
 
     fun hasCircutes(): Boolean {
-        return circularDependencies.size != 0; //NO SIR NO
+        return circularDependencies.size != 0 //NO SIR NO
     }
 
     override fun toString(): String {

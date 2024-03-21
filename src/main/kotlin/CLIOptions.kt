@@ -1,8 +1,8 @@
-enum class CLIFlags() {
-    GraphvizOutput() {},
-    InstantShowOutput() {},
-    ShowDebug() {},
-    EdgesGetRandomColor() {},
+enum class CLIFlags {
+    GraphvizOutput,
+    InstantShowOutput,
+    ShowDebug,
+    EdgesGetRandomColor,
 
 }
 

@@ -12,6 +12,13 @@ data class Position(
     @SerializedName("y") var y: Double
 
 ) {
+    fun distanceTo(position: Position): Double {
+        val yDifference = (position.y - this.y).pow(2)
+        val xDifference = (position.x - this.x).pow(2)
+        return sqrt((yDifference + xDifference))
+    }
+
+    //region Math functions
     operator fun plus(position: Position): Position {
         return Position(
             x + position.x,
@@ -24,19 +31,6 @@ data class Position(
             x - position.x,
             y - position.y
         )
-    }
-
-    fun distanceTo(position: Position): Double {
-        val yDifference = (position.y - this.y).pow(2)
-        val xDifference = (position.x - this.x).pow(2)
-        return sqrt((yDifference + xDifference))
-    }
-
-    override fun equals(other: Any?): Boolean {
-        if (other !is Position)
-            return false
-        @Suppress("NAME_SHADOWING") val other: Position = other
-        return x == other.x && y == other.y
     }
 
     operator fun minusAssign(other: Position) {
@@ -56,11 +50,27 @@ data class Position(
         return this
     }
 
-    override fun toString(): String {
-        return "($x,-$y)"
+    fun round(): Position {
+        return Position(round(x), round(y))
     }
 
-    fun rounded(): Position {
-        return Position(round(x), round(y))
+    //endregion
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Position
+
+        return (x == other.x) && (y == other.y)
+    }
+
+    override fun hashCode(): Int {
+        var result = x.hashCode()
+        result = 31 * result + y.hashCode()
+        return result
+    }
+
+    override fun toString(): String {
+        return "($x,$y)"
     }
 }

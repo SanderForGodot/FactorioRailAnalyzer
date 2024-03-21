@@ -57,7 +57,7 @@ class Graphviz {
         }
     }
 
-    fun appendEntity(sb: Appendable, entity: Entity) {
+    private fun appendEntity(sb: Appendable, entity: Entity) {
         val name =
             entity.entityType.name + " id:" + entity.entityNumber + " r:" + entity.direction + "pos:" + entity.position.x + ";" + entity.position.y
         sb.append(
@@ -113,11 +113,11 @@ class Graphviz {
         val stringBuilder = StringBuilder()
         stringBuilder.append(OPEN_GRAPH)
         edgeList.forEach { edge ->
-            var from = edge.belongsToBlock!!.id
+            val from = edge.belongsToBlock!!.id
             var pos = edge.belongsToBlock!!.calculateCenter()
 
-            edge.wasIchBeobachte.forEach { innerEdge ->
-                var to = innerEdge.belongsToBlock!!.id
+            edge.monitoredEdgeList.forEach { innerEdge ->
+                val to = innerEdge.belongsToBlock!!.id
 
                 stringBuilder.append(
                     MessageFormat.format(
@@ -127,7 +127,7 @@ class Graphviz {
             }
             if (pos.x.isNaN())
                 pos = edge.entityList[1].position
-            var name = from.toString() + " | " + edge.entityList[1].position
+            val name = from.toString() + " | " + edge.entityList[1].position
             stringBuilder.append(
                 MessageFormat.format(
                     NODE, from, name //, pos.x, pos.y
@@ -154,7 +154,7 @@ class Graphviz {
                     "Block id:" + block.id + " \nEL:" + block.edgeListSting()
                 )
             )
-            block.dependingOn?.forEach { block2 ->
+            block.dependingOn.forEach { block2 ->
                 stringBuilder.append(MessageFormat.format(EDGE, block2.id, block.id))
             }
         }
@@ -162,21 +162,21 @@ class Graphviz {
         buildFile(stringBuilder, "Blocks")
     }
 
-    fun printDeadlocks(Deadlock: Set<Block>, j: Int, sb: StringBuilder = StringBuilder(), genOutput: Boolean = true) {
+    fun printDeadlocks(deadlock: Set<Block>, j: Int, sb: StringBuilder = StringBuilder(), genOutput: Boolean = true) {
         if (genOutput) {
             sb.append(OPEN_GRAPH)
         }
         var i = 0
 
-        while (i < Deadlock.size - 1) {
+        while (i < deadlock.size - 1) {
             sb.append(
                 MessageFormat.format(
                     NODE,
-                    Deadlock.elementAt(i).id,
-                    "Block id:" + Deadlock.elementAt(i).id + " \nEL:" + Deadlock.elementAt(i).edgeListSting()
+                    deadlock.elementAt(i).id,
+                    "Block id:" + deadlock.elementAt(i).id + " \nEL:" + deadlock.elementAt(i).edgeListSting()
                 )
             )
-            sb.append(MessageFormat.format(EDGE, Deadlock.elementAt(i).id, Deadlock.elementAt(i + 1).id))
+            sb.append(MessageFormat.format(EDGE, deadlock.elementAt(i).id, deadlock.elementAt(i + 1).id))
             i++
         }
         if (genOutput) {
@@ -196,12 +196,12 @@ fun <T : Grafabel> ArrayList<T>.visualize(
     val stringBuilder = StringBuilder()
     val g = Graphviz()
     stringBuilder.append(g.OPEN_GRAPH)
-    var masterList = arrayListOf<String>()
+    val masterList = arrayListOf<String>()
     val haveDoneIt = ArrayList<Int>()
 
     for (item in this) {
-        if (fn.invoke(item)?.size == 0) continue ?: continue
-        var pos = item.pos().div(5).rounded()
+        if (fn.invoke(item)?.size == 0) continue
+        val pos = item.pos().div(5).round()
         if (!haveDoneIt.contains(item.uniqueID())) {
             haveDoneIt.add(item.uniqueID())
             stringBuilder.append(MessageFormat.format(g.NODEXY, item.uniqueID(), item.uniqueID(), pos.x, pos.y * -1))
@@ -218,7 +218,7 @@ fun <T : Grafabel> ArrayList<T>.visualize(
     }
 
     graph.circularDependencies.forEach {dl->
-        val color :Color = Color(nextInt(255),nextInt(255),nextInt(255))
+        val color = Color(nextInt(255), nextInt(255), nextInt(255))
 
         for (i in dl.indices )
             stringBuilder.append(
@@ -245,11 +245,11 @@ fun <T : Grafabel> ArrayList<T>.visualizeWithRef(
     val stringBuilder = StringBuilder()
     val g = Graphviz()
     stringBuilder.append(g.OPEN_GRAPH)
-    var masterList = arrayListOf<String>()
+    val masterList = arrayListOf<String>()
 
-    var relevant = ArrayList<Grafabel>()
+    val relevant = ArrayList<Grafabel>()
     for (item in this) {
-        var node = ref.invoke(item)!!
+        val node = ref.invoke(item)!!
         if (fn.invoke(item) == null) continue
         if (fn.invoke(item)!!.size == 0) continue
         fn.invoke(item)!!.forEach {
@@ -261,7 +261,7 @@ fun <T : Grafabel> ArrayList<T>.visualizeWithRef(
         }
     }
     relevant.forEach { node ->
-        val pos = node.pos().div(5).rounded()
+        val pos = node.pos().div(5).round()
         dbgPrintln("${node.uniqueID()}:$pos")
         stringBuilder.append(MessageFormat.format(g.NODEXY, node.uniqueID(), node.label(), pos.x, pos.y * -1))
     }
@@ -291,7 +291,7 @@ fun svgFromPoints(size: Position, edgeList: ArrayList<Edge>, signalList: List<En
     stringBuilder.append("<rect width=\"${size.x + 10}\" height=\"${size.y + 10}\" x=\"-5\" y=\"-5\" fill=\"#8e8e8e\" />\n")
 
 // schienen
-    var listOfColors: List<Color> = listOf(
+    val listOfColors: List<Color> = listOf(
         Color.black,
         // Color.red,
         Color.pink,
@@ -303,13 +303,13 @@ fun svgFromPoints(size: Position, edgeList: ArrayList<Edge>, signalList: List<En
         Color.blue,
     )
     var bagRandom: MutableList<Color> = listOfColors.toMutableList()
-    var dictionary: MutableMap<Int, Color> = mutableMapOf()
+    val dictionary: MutableMap<Int, Color> = mutableMapOf()
 
     listOfColors[0]
 
     edgeList.forEach { edge ->
         if (edge.collisionShape.size == 0) return@forEach
-        var m = edge.collisionShape.joinToString { pos ->
+        val m = edge.collisionShape.joinToString { pos ->
             pos.x.roundToInt().toString() + "," + pos.y.roundToInt()
         }
         //color
@@ -322,7 +322,7 @@ fun svgFromPoints(size: Position, edgeList: ArrayList<Edge>, signalList: List<En
                 } else {
                     if (bagRandom.isEmpty())
                         bagRandom = listOfColors.toMutableList()
-                    var newC = bagRandom.random()
+                    val newC = bagRandom.random()
                     bagRandom.remove(newC)
                     dictionary[edge.belongsToBlock!!.id] = newC
                     color = newC
@@ -330,10 +330,9 @@ fun svgFromPoints(size: Position, edgeList: ArrayList<Edge>, signalList: List<En
             }
         }
         //endregion
-        if (edge.rarwIchBinGefärlich)
+        if (edge.entryFlag)
             color = Color.RED
-        if (edge.eineWeitereDeutscheVarUff)
-            color = Color.PINK
+
 
         stringBuilder.append("<path fill=\"none\" stroke=\"${color.toHex()}\" d=\"M$m\"/>\n")
         val b = edge.belongsToBlock
@@ -341,7 +340,7 @@ fun svgFromPoints(size: Position, edgeList: ArrayList<Edge>, signalList: List<En
             stringBuilder.append("<text x=\"${b.pos().x}\" y=\"${b.pos().y}\"  font-size=\"5\" fill=\"green\">${b.id} </text>")
     }
     signalList.forEach { sig ->
-        var color = if (sig.entityType == EntityType.Signal) Color.green else Color.cyan
+        val color = if (sig.entityType == EntityType.Signal) Color.green else Color.cyan
 
         stringBuilder.append("<circle r=\"0.5\" cx=\"${sig.position.x}\" cy=\"${sig.position.y}\" fill=\"${color.toHex()}\" />\n")
     }
@@ -360,7 +359,7 @@ fun svgFromPoints(size: Position, edgeList: ArrayList<Edge>, signalList: List<En
 
 private fun Color.toHex(): String {
 
-    return String.format("#%02x%02x%02x", this.red, this.green, this.blue);
+    return String.format("#%02x%02x%02x", this.red, this.green, this.blue)
 }
 
 

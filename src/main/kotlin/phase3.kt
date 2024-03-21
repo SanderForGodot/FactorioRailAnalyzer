@@ -94,7 +94,7 @@ fun determineEnding(edge: Edge, direction: Int): Edge? {
 
     if (endingSig == null)
         return null
-    var validRail = goodSide.contains(endingSig)
+    val validRail = goodSide.contains(endingSig)
     var mes1 = (firstLeft != null).toString() + "\t" + (secondLeft != null).toString() + "\n" + "->->->->->->"
     var mesg2: String = validRail.toString() + "\n" + (firstRight != null).toString() + "\t" + (secondRight != null)
 

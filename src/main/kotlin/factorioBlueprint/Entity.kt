@@ -79,21 +79,13 @@ data class Entity(
         return signalOnTheLeft.size + signalOnTheRight.size > 0
     }
 
-    fun signalCount(): Int {
-        return signalOnTheLeft.size + signalOnTheRight.size
-    }
-
     fun toMannySignals(): Boolean {
-        return signalCount() > 2 && entityType == EntityType.Rail
+        return (signalOnTheLeft.size + signalOnTheRight.size > 2)
+                && (entityType == EntityType.Rail)
     }
 
     fun distanceTo(entity: Entity): Double {
         return this.position.distanceTo(entity.position)
-    }
-
-    fun relevantShit(): String {
-
-        return "Entity(entityNumber=$entityNumber, name='${entityType.name}', position=$position, direction=$direction, leftNextRail=$leftNextRail, rightNextRail=$rightNextRail, signalOnTheLeft=$signalOnTheLeft, signalOnTheRight=$signalOnTheRight)"
     }
 
     override fun toString(): String {

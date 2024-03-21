@@ -28,7 +28,7 @@ class Edge() : Grafabel {
     }
 
     fun nextEdgeListAL(): ArrayList<Edge> {
-        if (nextEdgeList == null) return arrayListOf<Edge>()
+        if (nextEdgeList == null) return arrayListOf()
         return nextEdgeList!! as ArrayList<Edge>
     }
 
@@ -128,32 +128,32 @@ class Edge() : Grafabel {
         return when {
             deltaDelta == 0.0 -> {
                 // generate diagonal points
-                val A1 = end + Position(0.1, 0.1)
-                val A2 = end + Position(-0.1, 0.1)
-                val A3 = end + Position(0.1, -0.1)
-                val A4 = end + Position(-0.1, -0.1)
-                val A12 = closer(second, arrayListOf(A1, A2))
-                val A34 = closer(second, arrayListOf(A3, A4))
-                val R = closer(second, arrayListOf(A12, A34))
-                R
+                val a1 = end + Position(0.1, 0.1)
+                val a2 = end + Position(-0.1, 0.1)
+                val a3 = end + Position(0.1, -0.1)
+                val a4 = end + Position(-0.1, -0.1)
+                val a12 = closer(second, arrayListOf(a1, a2))
+                val a34 = closer(second, arrayListOf(a3, a4))
+                val result = closer(second, arrayListOf(a12, a34))
+                result
             }
 
             deltaDelta < 0.0 -> {
                 // Y is bigger
                 // generate Y points
-                val A1 = end + Position(0.0, 0.1)
-                val A2 = end + Position(0.0, -0.1)
-                val R = closer(second, arrayListOf(A1, A2))
-                R
+                val a1 = end + Position(0.0, 0.1)
+                val a2 = end + Position(0.0, -0.1)
+                val result = closer(second, arrayListOf(a1, a2))
+                result
             }
 
             deltaDelta > 0.0 -> {
                 // X is bigger
                 // generate X points
-                val A1 = end + Position(0.1, 0.0)
-                val A2 = end + Position(-0.1, 0.0)
-                val R = closer(second, arrayListOf(A1, A2))
-                R
+                val a1 = end + Position(0.1, 0.0)
+                val a2 = end + Position(-0.1, 0.0)
+                val result = closer(second, arrayListOf(a1, a2))
+                result
             }
 
             else -> throw Exception("actually impossible")
@@ -207,8 +207,8 @@ class Edge() : Grafabel {
     }
 
     override fun uniqueID(): Int {
-        var start = entityList.first().entityNumber!!
-        var end = last(1).entityNumber!!
+        val start = entityList.first().entityNumber!!
+        val end = last(1).entityNumber!!
         return start * 7 + end * 13 //todo: give edges a bedder unique id
     }
 
@@ -229,44 +229,33 @@ class Edge() : Grafabel {
         return aToB()
     }
 
-    fun oldToString(): String {
-        var str = "EdgeStart--\n"
-
-        entityList.forEach {
-            val int: String = (it.entityNumber ?: 0).toString()
-            str += int + "|" + it.entityType.name + "|" + it.position.toString() + "\n"
-
-        }
-        str += "tile length:$tileLength"
-        return str
-    }
-
     fun aToB(): String {
         return entityList.first().entityNumber.toString() + "->" + entityList.last().entityNumber.toString()
     }
 
+    @Deprecated("only used by deprecated", ReplaceWith("being intelligent"))
     fun debugPrint(): Pair<Boolean, Entity> {
-        return Pair(validRail!!, last(1))
+        return Pair(validRail, last(1))
     }
 
-    var wasIchBeobachte = ArrayList<Edge>()
-    fun setzteBeobachtendeEdges() {
+    var monitoredEdgeList = ArrayList<Edge>()
+    fun monitor() {
         if (nextEdgeList == null) dbgPrintln("nextEdgeList was null")
         val toCheck: MutableList<Edge> = nextEdgeList?.toMutableList() ?: return
 
         val tCI: MutableListIterator<Edge> = toCheck.listIterator()
-        var nextEdge: Edge = Edge()
+        var nextEdge: Edge
         while (tCI.hasNext()) {
             nextEdge = tCI.next()
-            if (nextEdge.belongsToBlock!!.istjemandrarwIchBinGefärlich()) wasIchBeobachte.addUnique(nextEdge)
+            if (nextEdge.belongsToBlock!!.anyEntryFlag()) monitoredEdgeList.addUnique(nextEdge)
             else {
                 when (nextEdge.entityList.first().entityType) {
-                    EntityType.Signal -> wasIchBeobachte.addUnique(nextEdge)
+                    EntityType.Signal -> monitoredEdgeList.addUnique(nextEdge)
 
                     EntityType.ChainSignal -> {
                         if (nextEdge.nextEdgeList == null) {
                             // edge is a final edge
-                            wasIchBeobachte.addUnique(nextEdge)
+                            monitoredEdgeList.addUnique(nextEdge)
                             continue
 
                         }
@@ -284,46 +273,17 @@ class Edge() : Grafabel {
         }
     }
 
-    fun byListIterator(list: MutableList<String>) {
-        val it = list.listIterator()
-        for (e in it) {
-            if (e.length > 1) {
-                it.add("<- a long one")
-            }
-        }
-    }
-    var eineWeitereDeutscheVarUff = false
-    var rarwIchBinGefärlich = false
-    fun setDanger() {
-        rarwIchBinGefärlich = true
+    // makes whether an edge can be reached from an entry point by only traversing Rail Signals
+    var entryFlag = false
+    fun setEntry() {
+        entryFlag = true
         if (last(1).entityType == EntityType.Signal) {
             nextEdgeList?.filter {
-                !it.rarwIchBinGefärlich
+                !it.entryFlag
             }?.forEach {
-                it.setDanger()
+                it.setEntry()
             }
         }
     }
-    /*
-        override fun equals(other: Any?): Boolean {
-            if (this === other) return true
-            if (javaClass != other?.javaClass) return false
-
-            other as Edge
-
-            if (entityList != other.entityList) return false
-
-            return true
-        }
-
-        override fun hashCode(): Int {
-            return entityList.hashCode()
-        }
-        */
-
-    //uncertainty if inline is good /bad / required
-    //https://kotlinlang.org/docs/inline-functions.html
-
-
 }
 
