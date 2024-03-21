@@ -8,6 +8,7 @@ import graph.tiernanWithref
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
+import kotlin.collections.ArrayList
 
 var removed = ArrayList<Edge>()
 fun main(args: Array<String>) {
@@ -267,10 +268,11 @@ private fun ArrayList<Edge>.countDuplicates() {
 private fun Graf<Block>.anylasis(): Graf<Block> {
 
     this.circularDependencies.retainAll {
-        it.analysis()
+        it.analysisDieDrite()
     }
     return this
 }
+
 
 private fun List<Block>.analysisAberAnderAnfang(): Boolean {
     var transEdge = ArrayList<Set<Pair<Edge, Edge>>>()
@@ -353,9 +355,9 @@ private fun List<Block>.analysis(): Boolean {
     Collections.rotate(trans, -1 * pathIndex[0])
     for (i in pathIndex.indices) {
         var lastOfPrevius = trans[
-            (
-                    pathIndex[i] + i - 1
-                    ) % trans.size]
+                (
+                        pathIndex[i] + i - 1
+                        ) % trans.size]
         var curentStart = trans[pathIndex[i] + i]
         var newStart =
             (lastOfPrevius.belongsToBlock!!.edgeList.toSet()
@@ -370,6 +372,51 @@ private fun List<Block>.analysis(): Boolean {
             })
             return false
     return true
+}
+
+private fun <E> List<E>.at(i: Int): E {
+    return this[((i % this.size) + this.size) % this.size]
+}
+
+private fun List<Block>.analysisDieDrite(): Boolean {
+    var transSetList = ArrayList<Set<Edge>>()
+    var indexList = ArrayList<Int>()
+    for (i in this.indices) {
+        var r = this.at(i).getEdge(this.at(i - 1), this.at(i + 1))
+        transSetList.add(r)
+        if (r.size == 2)
+            indexList.add(i)
+    }
+    var transList = transSetList.flatten()
+
+    Collections.rotate(transList, -1 * indexList[0])
+    for (i in indexList.indices)
+        indexList[i] = i + indexList[i] -indexList[0]
+
+    for (i in 0 until  indexList.size-1)
+        if (transList.subList(indexList[i], indexList[i + 1] ).all {
+                it.entityList.first().entityType != EntityType.Signal
+            })
+            return false
+    return true
+}
+
+fun Block.getEdge(form: Block, to: Block): Set<Edge> {
+
+    var firstOptions = this.edgeList.filter { edge ->
+        form.edgeList.mapNotNull { it.nextEdgeList }.flatten()
+            .contains(edge)
+    }
+    var secondOptions = this.edgeList.filter {
+
+        it.nextEdgeList?.mapNotNull { it.belongsToBlock }
+            ?.contains(to) == true
+    }
+    var intersect = firstOptions intersect secondOptions
+    var union = firstOptions union secondOptions
+    if (intersect.size == 1) return intersect
+    if (union.size == 2) return union
+    throw Exception("Not yet implemented: 2 ways to get from block a to block b")
 }
 
 fun intersect(from: Block, to: Block): Set<Edge> {
