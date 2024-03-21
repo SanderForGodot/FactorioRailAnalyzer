@@ -325,6 +325,8 @@ fun svgFromPoints(size: Position, edgeList: ArrayList<Edge>, signalList: List<En
         //endregion
         if (edge.rarwIchBinGefärlich)
             color = Color.RED
+        if (edge.eineWeitereDeutscheVarUff)
+            color = Color.PINK
 
         stringBuilder.append("<path fill=\"none\" stroke=\"${color.toHex()}\" d=\"M$m\"/>\n")
         val b = edge.belongsToBlock

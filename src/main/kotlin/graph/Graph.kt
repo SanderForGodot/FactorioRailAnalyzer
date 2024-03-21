@@ -2,7 +2,6 @@ package graph
 
 import Grafabel
 import java.util.*
-import kotlin.collections.ArrayList
 
 
 fun <T : Grafabel> ArrayList<T>.tiernan(fn: (T) -> ArrayList<T>?): Graf<T> {
@@ -41,7 +40,7 @@ fun <T : Grafabel> T.expandPath(graf: Graf<T>, fn: (T) -> ArrayList<T>?) {
     graf.path.removeLast()
 }
 
-class Graf<T> {
+class Graf<T : Grafabel> {
     val path: MutableList<T> = ArrayList()
     var visited: MutableMap<T, MutableList<T>> = mutableMapOf()
     var circularDependencies: MutableList<List<T>> = mutableListOf()

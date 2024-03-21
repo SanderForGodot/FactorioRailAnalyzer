@@ -24,7 +24,6 @@ class Edge() : Grafabel {
     private fun clone(edge: Edge) {
         entityList = edge.entityList.clone() as ArrayList<Entity>
         collisionShape = edge.collisionShape.clone() as ArrayList<Position>
-        belongsToBlock = edge.belongsToBlock
         validRail = edge.validRail
     }
 
@@ -293,7 +292,7 @@ class Edge() : Grafabel {
             }
         }
     }
-
+    var eineWeitereDeutscheVarUff = false
     var rarwIchBinGefärlich = false
     fun setDanger() {
         rarwIchBinGefärlich = true
@@ -303,21 +302,22 @@ class Edge() : Grafabel {
             }
         }
     }
+    /*
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+            other as Edge
 
-        other as Edge
+            if (entityList != other.entityList) return false
 
-        if (entityList != other.entityList) return false
+            return true
+        }
 
-        return true
-    }
-
-    override fun hashCode(): Int {
-        return entityList.hashCode()
-    }
+        override fun hashCode(): Int {
+            return entityList.hashCode()
+        }
+        */
 
     //uncertainty if inline is good /bad / required
     //https://kotlinlang.org/docs/inline-functions.html

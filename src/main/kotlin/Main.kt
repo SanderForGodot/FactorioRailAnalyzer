@@ -4,12 +4,12 @@ import factorioBlueprint.Position
 import factorioBlueprint.ResultBP
 import graph.Graf
 import graph.tiernan
+import graph.tiernanWithref
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
-import kotlin.collections.ArrayList
 
-
+var removed = ArrayList<Edge>()
 fun main(args: Array<String>) {
 
     val options = args.filter { it.startsWith("-") }
@@ -94,6 +94,8 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
         val resultEdges = arrayListOf<Edge>()
         if (startPoint.rightNextRail.size > 0) resultEdges.addAll(buildEdge(Edge(startPoint), 1, false))
         if (startPoint.leftNextRail.size > 0) resultEdges.addAll(buildEdge(Edge(startPoint), -1, false))
+        listOfEdges.addAll(resultEdges)
+        relation[startPoint.entityNumber!!] = resultEdges
     }
 
 // get all start signals
@@ -122,13 +124,37 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
     }
     listOfEdges.addAll(backwardsEdges)
     listOfEdges.forEach { it.cleanAndCalc() }
-    listOfEdges = listOfEdges.distinct() as ArrayList<Edge>
+    var distict = ArrayList<Edge>()
+    println(listOfEdges.size)
+    for (i in listOfEdges) {
+        var s = distict.firstOrNull {
+            i.toString() == it.toString()
+        }
+        if (s == null) distict.add(i)
+        else {
+            println(i)
+            removed.add(i)
+            // solution we are not removing it in the references
+        }
+    }
+    //relation
+    relation.forEach { t, u ->
+        u.retainAll {
+            distict.contains(it)
+        }
+    }
+    println(distict.size)
+    listOfEdges = distict
+    listOfEdges.retainAll {
+        distict.contains(it)
+    }
 
-    // guard check point
+
+// guard check point
     if (listOfEdges.size == 0) {
         throw Exception("No Edges Found, but there are some signals ")  //todo: unexpected  error
     }
-    //set next posible edges per edge
+//set next posible edges per edge
     listOfEdges.filter { edge ->
         edge.last(1).entityType != EntityType.VirtualSignal && edge.validRail
     }.forEach { edge ->
@@ -138,16 +164,17 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
     backwardsEdges.forEach { it.setDanger() }
 
 
-    //endregion
+//endregion
 
-    //region Phase4: creating the blocks that are defined by the signals in factorio
+//region Phase4: creating the blocks that are defined by the signals in factorio
 
     val blockList = connectEdgesToBlocks(listOfEdges)
+    listOfEdges
     var pos = simpleCheck(listOfEdges)
-    //pos = entityList.find { it.entityNumber ==20 }?.position ?: Position(0.0,0.0)
+//pos = entityList.find { it.entityNumber ==20 }?.position ?: Position(0.0,0.0)
     svgFromPoints(max, listOfEdges, signalList, pos)
 
-    // creating the Graph out of the Blocks and edges
+// creating the Graph out of the Blocks and edges
 
 
     listOfEdges.filter { edge ->
@@ -163,10 +190,10 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
             edge.belongsToBlock!!.dependingOn.addUnique(it.belongsToBlock!!)
         }
     }
-    // Graphviz().printBlocksFromEdgeRelations(listOfEdges)
+// Graphviz().printBlocksFromEdgeRelations(listOfEdges)
 
 
-    //debug output
+//debug output
     var i = 0
     listOfEdges.forEach {
         dbgPrintln(it)
@@ -186,11 +213,11 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
         }
     }
 
-    //endregion
+//endregion
 
 
     println("tmTm:")
- //blockList.visualize("neighbourBlocks"){it.neighbourBlocks()}
+//blockList.visualize("neighbourBlocks"){it.neighbourBlocks()}
     val a = listOfEdges.tiernanWithref({
         it.wasIchBeobachte
     }, {
@@ -216,9 +243,9 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
     blockList.visualize("neighborBlocks", c) { it.directNeighbours() }
     blockList.visualize("blockDependency", d) { it.dependingOn }
     listOfEdges.visualizeWithRef("wasIchBeobachte", { it.wasIchBeobachte }) { it.belongsToBlock }
-    //listOfEdges.visualizeWithRef("nextEdgeListAL"){it.nextEdgeListAL()}
-    //blockList.visualizeWithRef("neighbourBlocks"){it.neighbourBlocks()}
-    // Edit here to Test different systems
+//listOfEdges.visualizeWithRef("nextEdgeListAL"){it.nextEdgeListAL()}
+//blockList.visualizeWithRef("neighbourBlocks"){it.neighbourBlocks()}
+// Edit here to Test different systems
     return /*a.hasCircutes() || b.hasCircutes()  ||*/ c.hasCircutes()
 }
 
@@ -228,10 +255,10 @@ private fun ArrayList<Edge>.countDuplicates() {
         for (j in i + 1 until this.size)
             if (this[i].toString() == this[j].toString()) {
                 println("index $i und $j sind gleich: ${this[i]}")
-                if(this[i] != this[j]) {
+                if (this[i] != this[j]) {
                     println(this[i].entityList)
                     println(this[j].entityList)
-                    println("dif${this[i].entityList.toSet() subtract  this[j].entityList.toSet()}")
+                    println("dif${this[i].entityList.toSet() subtract this[j].entityList.toSet()}")
                 }
             }
 
@@ -245,19 +272,72 @@ private fun Graf<Block>.anylasis(): Graf<Block> {
     return this
 }
 
+private fun List<Block>.analysisAberAnderAnfang(): Boolean {
+    var transEdge = ArrayList<Set<Pair<Edge, Edge>>>()
+    for (i in this.indices) {
+
+        var a: Set<Edge> = intersect(this[i], this[(i + 1) % this.size])
+        var b: List<Edge> = this[i].edgeList.mapNotNull { it.nextEdgeList }.flatten()
+        var newSet = mutableListOf<Pair<Edge, Edge>>()
+        for (ii in a)
+            for (j in b)
+                newSet.add(Pair(ii, j))
+        transEdge.add(newSet.toSet())
+    }
+    var trans = mutableListOf<Edge>()
+
+    for (i in transEdge.indices) {
+        val plusOne = transEdge[(i + 1) % transEdge.size]
+        var overlap =
+            transEdge[i].map { it.second } intersect
+                    plusOne.map { it.first }
+        if (overlap.size == 1
+        ) {
+            trans.add(overlap.first())
+        } else if (overlap.size == 0) {
+            if (transEdge[i].size == 1
+                && plusOne.size == 1
+            ) {
+                trans.add(transEdge[i].first().second)
+                trans.add(plusOne.first().first)
+            }
+        }
+    }
+    trans.forEach {
+        it.eineWeitereDeutscheVarUff = true
+    }
+    return true
+
+}
+
 private fun List<Block>.analysis(): Boolean {
 
     var transEdge = ArrayList<Set<Edge>>()
     for (i in this.indices) {
-        transEdge.add(intersect(this[i], this[(i + 1) % this.size]))
+
+
+        var a = intersect(this[i], this[(i + 1) % this.size]).toMutableList()
+
+        a.retainAll {
+            it.nextEdgeList!!.map { it.belongsToBlock!! }
+                .contains(
+                    this[(i + 2) % this.size]
+                )
+        }
+
+        transEdge.add(a.toSet())
     }
+    transEdge.filter { it.size > 1 }
+
     if (!transEdge.all {
-            it.size == 1
+            it.size <= 1
         }) {
         transEdge.forEach {
             println(it.size)
         }
         throw Exception("unexpeected")
+    } else {
+        println("wow")
     }
     //Collections.rotate(transEdge, 1) // this alinges the block list wih th edge lsit
     var trans: MutableList<Edge> = transEdge.flatten().toMutableList()
@@ -272,7 +352,10 @@ private fun List<Block>.analysis(): Boolean {
     // this is a konequense that priusely all dls without any rail signals where filterd
     Collections.rotate(trans, -1 * pathIndex[0])
     for (i in pathIndex.indices) {
-        var lastOfPrevius = trans[(pathIndex[i] + i - 1) % trans.size]
+        var lastOfPrevius = trans[
+            (
+                    pathIndex[i] + i - 1
+                    ) % trans.size]
         var curentStart = trans[pathIndex[i] + i]
         var newStart =
             (lastOfPrevius.belongsToBlock!!.edgeList.toSet()
@@ -290,12 +373,19 @@ private fun List<Block>.analysis(): Boolean {
 }
 
 fun intersect(from: Block, to: Block): Set<Edge> {
-    var von: Set<Edge> = from.edgeList.flatMap {
-        it.nextEdgeList!! // todo: this is not save
-    }.toSet()
-    var nach: Set<Edge> = to.edgeList.toSet()
 
-    return von intersect nach
+
+    try {
+        var von: Set<Edge> = from.edgeList.flatMap {
+            it.nextEdgeList!!
+        }.toSet()
+        var nach: Set<Edge> = to.edgeList.toSet()
+
+        return von intersect nach
+    } catch (e: Exception) {
+        return setOf()
+    }
+
 }
 
 
