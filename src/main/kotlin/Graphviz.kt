@@ -221,7 +221,14 @@ fun <T : Grafabel> ArrayList<T>.visualize(
         val color :Color = Color(nextInt(255),nextInt(255),nextInt(255))
 
         for (i in dl.indices )
-            stringBuilder.append(MessageFormat.format(g.EDGECOLOR,dl[i],dl[(i+1)%dl.size],color))
+            stringBuilder.append(
+                MessageFormat.format(
+                    g.EDGECOLOR,
+                    dl[i].uniqueID(),
+                    dl[(i + 1) % dl.size].uniqueID(),
+                    color.toHex()
+                )
+            )
     }
     stringBuilder.append(g.CLOSE_GRAPH)
     buildFile(stringBuilder, fileName)

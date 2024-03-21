@@ -8,7 +8,6 @@ import graph.tiernanWithref
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
-import kotlin.collections.ArrayList
 
 var removed = ArrayList<Edge>()
 fun main(args: Array<String>) {
@@ -274,106 +273,6 @@ private fun Graf<Block>.anylasis(): Graf<Block> {
 }
 
 
-private fun List<Block>.analysisAberAnderAnfang(): Boolean {
-    var transEdge = ArrayList<Set<Pair<Edge, Edge>>>()
-    for (i in this.indices) {
-
-        var a: Set<Edge> = intersect(this[i], this[(i + 1) % this.size])
-        var b: List<Edge> = this[i].edgeList.mapNotNull { it.nextEdgeList }.flatten()
-        var newSet = mutableListOf<Pair<Edge, Edge>>()
-        for (ii in a)
-            for (j in b)
-                newSet.add(Pair(ii, j))
-        transEdge.add(newSet.toSet())
-    }
-    var trans = mutableListOf<Edge>()
-
-    for (i in transEdge.indices) {
-        val plusOne = transEdge[(i + 1) % transEdge.size]
-        var overlap =
-            transEdge[i].map { it.second } intersect
-                    plusOne.map { it.first }
-        if (overlap.size == 1
-        ) {
-            trans.add(overlap.first())
-        } else if (overlap.size == 0) {
-            if (transEdge[i].size == 1
-                && plusOne.size == 1
-            ) {
-                trans.add(transEdge[i].first().second)
-                trans.add(plusOne.first().first)
-            }
-        }
-    }
-    trans.forEach {
-        it.eineWeitereDeutscheVarUff = true
-    }
-    return true
-
-}
-
-private fun List<Block>.analysis(): Boolean {
-
-    var transEdge = ArrayList<Set<Edge>>()
-    for (i in this.indices) {
-
-
-        var a = intersect(this[i], this[(i + 1) % this.size]).toMutableList()
-
-        a.retainAll {
-            it.nextEdgeList!!.map { it.belongsToBlock!! }
-                .contains(
-                    this[(i + 2) % this.size]
-                )
-        }
-
-        transEdge.add(a.toSet())
-    }
-    transEdge.filter { it.size > 1 }
-
-    if (!transEdge.all {
-            it.size <= 1
-        }) {
-        transEdge.forEach {
-            println(it.size)
-        }
-        throw Exception("unexpeected")
-    } else {
-        println("wow")
-    }
-    //Collections.rotate(transEdge, 1) // this alinges the block list wih th edge lsit
-    var trans: MutableList<Edge> = transEdge.flatten().toMutableList()
-
-    var pathIndex = ArrayList<Int>()
-    for (i in trans.indices) {
-        if (trans[i].nextEdgeList!!.contains(trans[(i + 1) % trans.size])) {
-            pathIndex.add(i)
-        }
-    }
-    if (pathIndex.size == 0) return true // if everything is one continues path then this is conlusive
-    // this is a konequense that priusely all dls without any rail signals where filterd
-    Collections.rotate(trans, -1 * pathIndex[0])
-    for (i in pathIndex.indices) {
-        var lastOfPrevius = trans[
-                (
-                        pathIndex[i] + i - 1
-                        ) % trans.size]
-        var curentStart = trans[pathIndex[i] + i]
-        var newStart =
-            (lastOfPrevius.belongsToBlock!!.edgeList.toSet()
-                    subtract setOf(lastOfPrevius)).toList().first {
-                it.nextEdgeList?.contains(curentStart) == true
-            }
-        trans.add(pathIndex[i] + i, newStart)
-    }
-    for (i in pathIndex.indices)
-        if (trans.subList(pathIndex[i] + i, pathIndex[i + 1] + i + 1).all {
-                it.entityList.first().entityType != EntityType.Signal
-            })
-            return false
-    return true
-}
-
 private fun <E> List<E>.at(i: Int): E {
     return this[((i % this.size) + this.size) % this.size]
 }
@@ -388,13 +287,14 @@ private fun List<Block>.analysisDieDrite(): Boolean {
             indexList.add(i)
     }
     var transList = transSetList.flatten()
-
+    if (indexList.size == 0)
+        return true
     Collections.rotate(transList, -1 * indexList[0])
     for (i in indexList.indices)
-        indexList[i] = i + indexList[i] -indexList[0]
+        indexList[i] = i + indexList[i] - indexList[0]
 
-    for (i in 0 until  indexList.size-1)
-        if (transList.subList(indexList[i], indexList[i + 1] ).all {
+    for (i in 0 until indexList.size - 1)
+        if (transList.subList(indexList[i], indexList[i + 1]).all {
                 it.entityList.first().entityType != EntityType.Signal
             })
             return false
@@ -416,23 +316,21 @@ fun Block.getEdge(form: Block, to: Block): Set<Edge> {
     var union = firstOptions union secondOptions
     if (intersect.size == 1) return intersect
     if (union.size == 2) return union
-    throw Exception("Not yet implemented: 2 ways to get from block a to block b")
-}
-
-fun intersect(from: Block, to: Block): Set<Edge> {
-
-
-    try {
-        var von: Set<Edge> = from.edgeList.flatMap {
-            it.nextEdgeList!!
-        }.toSet()
-        var nach: Set<Edge> = to.edgeList.toSet()
-
-        return von intersect nach
-    } catch (e: Exception) {
-        return setOf()
+    var a = firstOptions.toMutableList()
+    a.retainAll { edge ->
+        secondOptions.any {
+            edge.doesCollide(it)
+        }
     }
-
+    var b = secondOptions.toMutableList()
+    b.retainAll { edge ->
+        firstOptions.any {
+            edge.doesCollide(it)
+        }
+    }
+    union = a union b
+    if (union.size == 2) return union
+    throw Exception("Not yet implemented: 2 ways to get from block a to block b")
 }
 
 
