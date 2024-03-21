@@ -6,7 +6,8 @@ import java.util.zip.Inflater
 
 //Made by @marcouberti on github
 //Source: https://gist.github.com/marcouberti/40dbbd836562b35ace7fb2c627b0f34f
-//some idea what this funtion does, but we didn't write it
+//somee ideea what this function does, but we didn't write it
+//
 fun ByteArray.zlibDecompress(): String {
     val inflater = Inflater()
     val outputStream = ByteArrayOutputStream()
@@ -35,8 +36,8 @@ fun decodeBpStringFromFilename(filename: String): String {
     return str
 }
 
-fun decodeBpString(Blueprint: String): String {
-    val base64String: String = Blueprint
+fun decodeBpString(blueprint: String): String {
+    val base64String: String = blueprint
     val decoded = Base64.getDecoder().decode(base64String.substring(1))//TODO: Check for Empty String/File
     val str: String = decoded.zlibDecompress()
     dbgPrintln(str)
@@ -44,9 +45,8 @@ fun decodeBpString(Blueprint: String): String {
 }
 
 
-// addes an ellement to a list only if that item isn`t altreddy in the list
-// true == added
-// false == failed
+// adds an element to a list only if that item isn`t already in the list
+// returns true if item was added
 fun <E> ArrayList<E>.addUnique(element: E): Boolean {
     if (!this.contains(element)) {
         this.add(element)
@@ -56,14 +56,14 @@ fun <E> ArrayList<E>.addUnique(element: E): Boolean {
 }
 
 
-//refence from https://bryceboe.com/2006/10/23/line-segment-intersection-algorithm/
-fun intersect(A: Position, B: Position, C: Position, D: Position): Boolean {
-    if (A == C || A == D || B == C || B == D)
+//reference from https://bryceboe.com/2006/10/23/line-segment-intersection-algorithm/
+fun intersect(a: Position, b: Position, c: Position, d: Position): Boolean {
+    if (a == c || a == d || b == c || b == d)
         return true
-    return ccw(A, C, D) != ccw(B, C, D) && ccw(A, B, C) != ccw(A, B, D)
+    return ccw(a, c, d) != ccw(b, c, d) && ccw(a, b, c) != ccw(a, b, d)
 }
 
-fun ccw(A: Position, B: Position, C: Position): Boolean {
-    return (C.y - A.y) * (B.x - A.x) > (B.y - A.y) * (C.x - A.x)
+fun ccw(a: Position, b: Position, c: Position): Boolean {
+    return (c.y - a.y) * (b.x - a.x) > (b.y - a.y) * (c.x - a.x)
 
 }

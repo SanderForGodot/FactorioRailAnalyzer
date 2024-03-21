@@ -71,12 +71,11 @@ fun determineEnding(edge: Edge, direction: Int): Edge? {
     val goodSide = edge.last(1).getSignalList(direction)            // in drive direction on the right site
     val wrongSide = edge.last(1).getSignalList(-direction)          // in drive direction on the left  site
 
-    // signal name viewed it in drive direction                        // equivalent if you view a Curved Rail of direction 2
-    val firstRight: Entity? =
-        retrieveSignal(goodSide, false)       // untenLinks  (this is how we first thought about the problem)
-    val secondRight: Entity? = retrieveSignal(goodSide, true)       // untenRechts
-    val firstLeft: Entity? = retrieveSignal(wrongSide, true)        // obenLinks
-    val secondLeft: Entity? = retrieveSignal(wrongSide, false)      // obenRechts
+    // signal name is viewed in the direction of travel
+    val firstRight: Entity? = retrieveSignal(goodSide, false)
+    val secondRight: Entity? = retrieveSignal(goodSide, true)
+    val firstLeft: Entity? = retrieveSignal(wrongSide, true)
+    val secondLeft: Entity? = retrieveSignal(wrongSide, false)
     val startSignal = edge.entityList.first()
 
     val endingSig: Entity? = if (goodSide.contains(startSignal)) {
@@ -95,10 +94,6 @@ fun determineEnding(edge: Edge, direction: Int): Edge? {
     if (endingSig == null)
         return null
     val validRail = goodSide.contains(endingSig)
-    var mes1 = (firstLeft != null).toString() + "\t" + (secondLeft != null).toString() + "\n" + "->->->->->->"
-    var mesg2: String = validRail.toString() + "\n" + (firstRight != null).toString() + "\t" + (secondRight != null)
-
-    //println(mes1 + mesg2)
     return edge.finishUpEdge(endingSig, validRail)
 }
 

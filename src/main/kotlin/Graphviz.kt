@@ -1,6 +1,6 @@
 import factorioBlueprint.Entity
 import factorioBlueprint.Position
-import graph.Graf
+import graph.Graph
 import java.awt.Color
 import java.awt.Desktop
 import java.io.File
@@ -30,8 +30,8 @@ class Graphviz {
     val CLOSE_GRAPH = "} \n"
 
 
-    //StringBuilder and genOutput are optional, so that this function can be used for printing the edge independently and
-    //it can be used for printBlocks
+    //StringBuilder and genOutput are optional, so that this function can be used for printing the edge independently,
+    //and it can be used for printBlocks
     @Throws(IOException::class)
     fun printEdge(edge: Edge, j: Int, sb: StringBuilder = StringBuilder(), genOutput: Boolean = true) {
         if (genOutput) {
@@ -190,7 +190,7 @@ class Graphviz {
 
 fun <T : Grafabel> ArrayList<T>.visualize(
     fileName: String,
-    graph: Graf<T>,
+    graph: Graph<T>,
     fn: (T) -> ArrayList<T>?,
 ): ArrayList<T> {
     val stringBuilder = StringBuilder()

@@ -23,17 +23,6 @@ class Block(edge: Edge, var id: Int) : Grafabel {
         }
     }
 
-    fun hasMixedSignals(): Boolean {
-        val signalExists = edgeList.any { edge ->
-            (edge.hasRailSignal())
-        }
-        val chainSignalExists = edgeList.any { edge ->
-            (edge.entityList.first().entityType == EntityType.ChainSignal)
-        }
-        return signalExists and chainSignalExists
-    }
-
-
     fun calculateCenter(): Position {
         var result = Position(0.0, 0.0)
         var count = 0
@@ -48,41 +37,12 @@ class Block(edge: Edge, var id: Int) : Grafabel {
         return result / count
     }
 
-    /*
-        fun calculateCenter(): Position {
-            val posList = edgeList.map {
-                it.pos()
-            }
-            return posList.fold(Position(0.0,0.0),Position::plus) /posList.size
-        }*/
-    /*
-    fun neighbourBlocks(): ArrayList<Block> {
-        val neighbours = arrayListOf<Block>()
-        edgeList.forEach { edge ->
-            edge.wasIchBeobachte.forEach { nextEdge ->
-                neighbours.add(nextEdge.belongsToBlock!!)
-            }
-        }
-        return neighbours
-    }
-    */
-
     fun directNeighbours(): ArrayList<Block> {
-        val result = ArrayList<Block>()
-        // bruh des ist dumm und geht way besser
-        //  todo rework this code
-        edgeList.map { edge ->
-            edge.nextEdgeList?.map {
+        return edgeList.mapNotNull { edge ->
+            edge.nextEdgeList?.mapNotNull {
                 it.belongsToBlock
             }
-        }.forEach outer@{ outer ->
-            if (outer == null) return@outer
-            outer.forEach inner@{ inneer ->
-                if (inneer == null) return@inner
-                result.addUnique(inneer)
-            }
-        }
-        return result
+        }.flatten().distinct().toMutableList() as ArrayList<Block>
     }
 
     @Deprecated("todo rework")

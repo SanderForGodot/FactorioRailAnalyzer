@@ -19,8 +19,7 @@ data class Entity(
     lateinit var leftNextRail: ArrayList<Entity>  // also reused for signals to reference a connected rail
     lateinit var rightNextRail: ArrayList<Entity>
 
-    //todo untersuchen ob es möglich ist die signal liste zu mergen oder ob es möglich ist die linke und rechte seite zu mergen
-    // bc honestly this is not good
+    //todo: figure out how to refactor this chaos as its not a good architecture
     lateinit var signalOnTheLeft: ArrayList<Entity>
     lateinit var signalOnTheRight: ArrayList<Entity>
     fun ini() {
@@ -41,24 +40,6 @@ data class Entity(
         return position == other.position && isSameEntityType && direction == other.direction
     }
 
-
-    /*
-    // probalbyl not a good idea but we will try save it
-        fun getRailList(direction: Int): ArrayList<Entity> {
-        return when {
-            entityType.isSignal() -> (leftNextRail + rightNextRail) as ArrayList<Entity>
-            entityType.isRail() -> {
-                when (direction) {
-                    -1 -> leftNextRail
-                    1 -> rightNextRail
-                    else -> throw Exception("getRailList expects -1 or 1 ")
-                }
-            }
-            else -> throw Exception("thought to be impossible")
-        }
-    }
-
-    * */
     fun getRailList(direction: Int): ArrayList<Entity> {
         return when (direction) {
             -1 -> leftNextRail

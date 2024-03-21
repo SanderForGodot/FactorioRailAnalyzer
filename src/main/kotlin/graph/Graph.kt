@@ -4,10 +4,10 @@ import Grafabel
 import java.util.*
 
 
-fun <T : Grafabel> ArrayList<T>.tiernan(fn: (T) -> ArrayList<T>?): Graf<T> {
+fun <T : Grafabel> ArrayList<T>.tiernan(fn: (T) -> Iterable<T>): Graph<T> {
 
 
-    val g = Graf<T>()
+    val g = Graph<T>()
     this.sorted()
     this.forEach {
         it.expandPath(g, fn)
@@ -16,31 +16,31 @@ fun <T : Grafabel> ArrayList<T>.tiernan(fn: (T) -> ArrayList<T>?): Graf<T> {
 
 }
 
-fun <T : Grafabel> T.expandPath(graf: Graf<T>, fn: (T) -> ArrayList<T>?) {
-    graf.path.add(this)
+fun <T : Grafabel> T.expandPath(graph: Graph<T>, fn: (T) -> Iterable<T>?) {
+    graph.path.add(this)
 
     fn.invoke(this)?.forEach { neighbor ->
         /*1. The extension vertex cannot be in P.*/
-        if (!graf.path.contains(neighbor)
+        if (!graph.path.contains(neighbor)
             /*2. The extension vertex value must be larger than that of the first vertex of P.*/
-            && (neighbor.uniqueID() > graf.path.first().uniqueID())
+            && (neighbor.uniqueID() > graph.path.first().uniqueID())
             /*3. The extension vertex cannot be closed to the last vertex in P.
                  H contains the list of vertices closed to each vertex*/
-            && graf.visited[this]?.contains(neighbor) != true
+            && graph.visited[this]?.contains(neighbor) != true
         ) {
-            neighbor.expandPath(graf, fn)
-            graf.visited(this, neighbor)
+            neighbor.expandPath(graph, fn)
+            graph.visited(this, neighbor)
         } else {
-            if (graf.path.first() == neighbor) {
-                graf.addPath()
+            if (graph.path.first() == neighbor) {
+                graph.addPath()
             }
         }
     }
-    graf.visited.remove(this)
-    graf.path.removeLast()
+    graph.visited.remove(this)
+    graph.path.removeLast()
 }
 
-class Graf<T : Grafabel> {
+class Graph<T : Grafabel> {
     val path: MutableList<T> = ArrayList()
     var visited: MutableMap<T, MutableList<T>> = mutableMapOf()
     var circularDependencies: MutableList<List<T>> = mutableListOf()
@@ -56,7 +56,7 @@ class Graf<T : Grafabel> {
         circularDependencies.add(path.toSet().toList())
     }
 
-    fun unionCircuits(): Graf<T> {
+    fun unionCircuits(): Graph<T> {
         val dl = circularDependencies
         for (x in 0 until dl.size) {
             for (y in (x + 1) until (dl.size)) {
@@ -74,15 +74,15 @@ class Graf<T : Grafabel> {
         return this
     }
 
-    fun hasCircutes(): Boolean {
+    fun hasDeadlocks(): Boolean {
         return circularDependencies.size != 0 //NO SIR NO
     }
 
     override fun toString(): String {
-        return "Graf(hasCD:${hasCircutes()} DL:$circularDependencies)"
+        return "Graph(hasDL:${hasDeadlocks()} DL:$circularDependencies)"
     }
 
-    fun reduceBasic(): Graf<T> {
+    fun reduceBasic(): Graph<T> {
         circularDependencies.retainAll { dl ->
             dl.any {
                 it.hasRailSignal()
@@ -93,8 +93,8 @@ class Graf<T : Grafabel> {
 }
 
 
-fun <T : Grafabel> ArrayList<T>.tiernanWithref(fn: (T) -> ArrayList<T>?, ref: (T) -> Grafabel): Graf<Grafabel> {
-    val g = Graf<Grafabel>()
+fun <T : Grafabel> ArrayList<T>.tiernanWithref(fn: (T) -> ArrayList<T>?, ref: (T) -> Grafabel): Graph<Grafabel> {
+    val g = Graph<Grafabel>()
     this.sorted()
     this.forEach {
         it.expandPathWithRef(g, fn, ref)
@@ -102,23 +102,23 @@ fun <T : Grafabel> ArrayList<T>.tiernanWithref(fn: (T) -> ArrayList<T>?, ref: (T
     return g
 }
 
-fun <T : Grafabel> T.expandPathWithRef(graf: Graf<Grafabel>, fn: (T) -> ArrayList<T>?, ref: (T) -> Grafabel) {
-    graf.path.add(ref.invoke(this))
+fun <T : Grafabel> T.expandPathWithRef(graph: Graph<Grafabel>, fn: (T) -> ArrayList<T>?, ref: (T) -> Grafabel) {
+    graph.path.add(ref.invoke(this))
     fn.invoke(this)?.forEach { neighbor ->
-        if (!graf.path.contains(ref.invoke(neighbor))
+        if (!graph.path.contains(ref.invoke(neighbor))
             && (ref.invoke(neighbor).uniqueID() > ref.invoke(this).uniqueID())
-            && graf.visited[ref.invoke(this)]?.contains(ref.invoke(neighbor)) != true
+            && graph.visited[ref.invoke(this)]?.contains(ref.invoke(neighbor)) != true
         ) {
-            neighbor.expandPathWithRef(graf, fn, ref)
-            graf.visited(ref.invoke(this), ref.invoke(neighbor))
+            neighbor.expandPathWithRef(graph, fn, ref)
+            graph.visited(ref.invoke(this), ref.invoke(neighbor))
         } else {
-            if (graf.path.first() == ref.invoke(neighbor)) {
-                graf.addPath()
+            if (graph.path.first() == ref.invoke(neighbor)) {
+                graph.addPath()
             }
         }
     }
-    graf.visited.remove(ref.invoke(this))
-    graf.path.removeLast()
+    graph.visited.remove(ref.invoke(this))
+    graph.path.removeLast()
 }
 
 
