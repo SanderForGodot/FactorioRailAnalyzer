@@ -125,17 +125,13 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
     listOfEdges.addAll(backwardsEdges)
     listOfEdges.forEach { it.cleanAndCalc() }
     var distict = ArrayList<Edge>()
-    println(listOfEdges.size)
+
     for (i in listOfEdges) {
         var s = distict.firstOrNull {
             i.toString() == it.toString()
         }
         if (s == null) distict.add(i)
-        else {
-            println(i)
-            removed.add(i)
-            // solution we are not removing it in the references
-        }
+        else removed.add(i)
     }
     //relation
     relation.forEach { t, u ->
@@ -143,7 +139,7 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
             distict.contains(it)
         }
     }
-    println(distict.size)
+
     listOfEdges = distict
     listOfEdges.retainAll {
         distict.contains(it)
@@ -170,9 +166,9 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
 
     val blockList = connectEdgesToBlocks(listOfEdges)
     listOfEdges
-    var pos = simpleCheck(listOfEdges)
+    //var pos = simpleCheck(listOfEdges)
 //pos = entityList.find { it.entityNumber ==20 }?.position ?: Position(0.0,0.0)
-    svgFromPoints(max, listOfEdges, signalList, pos)
+    svgFromPoints(max, listOfEdges, signalList, Position(-10.0, -10.0))
 
 // creating the Graph out of the Blocks and edges
 
@@ -216,7 +212,6 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
 //endregion
 
 
-    println("tmTm:")
 //blockList.visualize("neighbourBlocks"){it.neighbourBlocks()}
     val a = listOfEdges.tiernanWithref({
         it.wasIchBeobachte
@@ -225,11 +220,10 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
     })
 
 
-    println(a)
     val b = listOfEdges.tiernan {
         it.nextEdgeListAL()
     }
-    println(b)
+
     val c = blockList.tiernan {
         it.directNeighbours()
     }.reduceBasic().anylasis()
@@ -238,7 +232,7 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
     }
 
     println(c)
-    println(d)
+
 
     blockList.visualize("neighborBlocks", c) { it.directNeighbours() }
     blockList.visualize("blockDependency", d) { it.dependingOn }

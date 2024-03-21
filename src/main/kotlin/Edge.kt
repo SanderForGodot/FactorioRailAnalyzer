@@ -297,7 +297,9 @@ class Edge() : Grafabel {
     fun setDanger() {
         rarwIchBinGefärlich = true
         if (last(1).entityType == EntityType.Signal) {
-            nextEdgeList?.forEach {
+            nextEdgeList?.filter {
+                !it.rarwIchBinGefärlich
+            }?.forEach {
                 it.setDanger()
             }
         }
