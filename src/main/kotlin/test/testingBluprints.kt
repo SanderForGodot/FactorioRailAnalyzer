@@ -1,14 +1,14 @@
 package test
 
+import NEWfactorioRailAnalyzer
 import decodeBpStringFromFilename
-import factorioRailAnalyzer
 import setCLIOptions
 
 fun main() {
     toTest.forEach {
         setCLIOptions(listOf("-i"))
         val jsonString = decodeBpStringFromFilename(it.key)
-        val result = factorioRailAnalyzer(jsonString)
+        val result = NEWfactorioRailAnalyzer(jsonString)
         if (result != it.value) {
             println("${it.key} has Wrong output, it should be ${it.value}, but is $result\n")
         } else {

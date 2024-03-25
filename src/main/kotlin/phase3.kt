@@ -1,28 +1,59 @@
 import factorioBlueprint.Entity
 import factorioBlueprint.Position
 
-fun buildEdge(edge: Edge, direction: Int, inverseSearch: Boolean): ArrayList<Edge> {
-    var inverse = inverseSearch
-    if (edge.last(1).hasSignal()) {
-        if (inverse) {
-            inverse = false
+fun buildEdge(entity: Entity): List<Edge> {
+    return buildEdge(Edge(entity), if (entity.direction < 4) -1 else 1)
+}
 
-        } else {
-            if (edge.last(1).toMannySignals()) {
-                throw Exception("toMannySignals on strait rail")// todo: add to InvalidSignalList exception
-            }
-            val end = determineEnding(edge, direction)
-            if (end != null)
-                return arrayListOf(end)
-            //otherwise continue and ignore (happens once at the start of every edg to ignore the starting signal)
-        }
+fun buildEdge(edge: Edge, direction: Int): List<Edge> {
+    if (edge.last(1).hasSignal()) {
+        val end = determineEnding(edge, direction)
+        if (end != null)
+            return arrayListOf(end)
+        //otherwise continue and ignore (happens once at the start of every edg to ignore the starting signal)
     }
+    //  val arr: ArrayList<Edge> = arrayListOf()
+    return buildEdgeInner(edge, direction)
+
+}
+
+private fun buildEdgeInner(edge: Edge, direction: Int): List<Edge> {
+    val nextRails = edge.last(1).getRailList(direction)
+    return if (nextRails.size > 0) {
+
+        nextRails.map { entity ->
+            val modifier = isSpecialCase(edge.last(1), entity)
+            buildEdge(Edge(edge, entity), direction * modifier)
+        }.flatten()
+    } else {
+        val blankSignal = Entity(0, EntityType.VirtualSignal, Position(0.0, 0.0), 123, true)
+        listOf(edge.finishUpEdge(blankSignal, true))
+    }
+}
+
+fun buildEdgeReversed(entity: Entity): List<Edge> {
+    var direction = if (entity.direction < 4) 1 else -1
+    return entity.getRailList(direction * -1).map {
+        // sikping the first self check
+        buildEdgeInner(Edge(Edge(entity), it), direction)
+    }.flatten().filter { it.validRail }.distinctBy { it.uniqueID() }
+        .onEach {
+            it.entityList.reverse()
+            it.entityList.first().entityType = EntityType.Signal
+            it.cleanAndCalc()
+        }
+}
+
+
+fun buildStartingEdge(edge: Edge, direction: Int): ArrayList<Edge> {
+    var inverse = edge.entityList.first().isSignal()
+
     val arr: ArrayList<Edge> = arrayListOf()
     val nextRails = edge.last(1).getRailList(direction * (if (inverse) -1 else 1))
     if (nextRails.size > 0) {
         nextRails.forEach { entity ->
             val modifier = isSpecialCase(edge.last(1), entity)
-            val result = buildEdge(Edge(edge, entity), direction * modifier, inverse)
+            val result = buildStartingEdge(Edge(edge, entity), direction * modifier)
             arr.addAll(result)
         }
     } else {
@@ -32,6 +63,7 @@ fun buildEdge(edge: Edge, direction: Int, inverseSearch: Boolean): ArrayList<Edg
 
     return arr
 }
+
 
 //at specific transitions from rail a to b we need to flip the direction indicator
 
@@ -68,6 +100,9 @@ fun isSpecialCase(current: Entity, next: Entity): Int {
 }
 
 fun determineEnding(edge: Edge, direction: Int): Edge? {
+    if (edge.last(1).toMannySignals()) {
+        throw Exception("toMannySignals on strait rail")// todo: add to InvalidSignalList exception
+    }
     val goodSide = edge.last(1).getSignalList(direction)            // in drive direction on the right site
     val wrongSide = edge.last(1).getSignalList(-direction)          // in drive direction on the left  site
 

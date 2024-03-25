@@ -4,12 +4,13 @@ import kotlin.math.abs
 import kotlin.math.sqrt
 
 class Edge() : Grafabel {
+
     constructor(item: Entity) : this() {
         entityList = arrayListOf(item)
     }
 
     constructor(edge: Edge, entity: Entity) : this() {
-        clone(edge)
+        entityList = edge.entityList.clone() as ArrayList<Entity>
         if (!entityList.addUnique(entity)) throw Exception("an Edge is not expected to have the same rail twice")
 
     }
@@ -21,11 +22,6 @@ class Edge() : Grafabel {
     var nextEdgeList: List<Edge>? = null
     var tileLength: Double = 0.0 // how many tiles the edge is long
 
-    private fun clone(edge: Edge) {
-        entityList = edge.entityList.clone() as ArrayList<Entity>
-        collisionShape = edge.collisionShape.clone() as ArrayList<Position>
-        validRail = edge.validRail
-    }
 
     fun nextEdgeListAL(): ArrayList<Edge> {
         if (nextEdgeList == null) return arrayListOf()
@@ -58,8 +54,7 @@ class Edge() : Grafabel {
         val start = entityList.first().removeRelatedRail
         val end = last(1).removeRelatedRail
         if (start == null || end == null) {
-            println("removeRelatedRail flag has not been set")
-            return
+            throw Exception("removeRelatedRail flag has not been set")
         }
         if (start) {
             entityList.removeAt(1)

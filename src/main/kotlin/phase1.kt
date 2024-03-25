@@ -7,7 +7,6 @@ fun ArrayList<Entity>.determineMinMax(): Pair<Position, Position> {
     val min = this.first().position.copy()
     val max = min.copy()
     this.forEach { entity ->
-
         val current = entity.position
         if (min.x > current.x)
             min.x = current.x

@@ -9,7 +9,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
 
-var removed = ArrayList<Edge>()
 fun main(args: Array<String>) {
 
     val options = args.filter { it.startsWith("-") }
@@ -46,9 +45,10 @@ fun main(args: Array<String>) {
             }
         }
     }
-    factorioRailAnalyzer(jsonString)
+    NEWfactorioRailAnalyzer(jsonString)
 
 }
+
 
 fun factorioRailAnalyzer(blueprint: String): Boolean {
     //region Phase0: data decompression
@@ -76,6 +76,7 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
     //region Phase2: rail Linker: connected rails point to each other with pointer list does the same with signals
     entityList.railLinker(matrix)
     //endregion
+    //todo decide if this can be removed entirely as it was mostly just debug
     if (entityList.size < 100) Graphviz().generateEntityRelations(entityList)
     //region Phase3: create
     //prepare
@@ -83,78 +84,35 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
         entity.isSignal()
     }
 
-
-    if (signalList.isEmpty()) throw Exception("No Edges Found, because there are no signals in the blueprint") //todo: construction error
+    if (signalList.isEmpty()) throw Exception("No Edges Found, because there are no signals in the blueprint")  //todo: create custom construction error
 
     //create forward facing edges
-    var listOfEdges = arrayListOf<Edge>()
-    val relation = mutableMapOf<Int, ArrayList<Edge>>()
-    signalList.forEach { startPoint ->
-        val resultEdges = arrayListOf<Edge>()
-        if (startPoint.rightNextRail.size > 0) resultEdges.addAll(buildEdge(Edge(startPoint), 1, false))
-        if (startPoint.leftNextRail.size > 0) resultEdges.addAll(buildEdge(Edge(startPoint), -1, false))
-        listOfEdges.addAll(resultEdges)
-        relation[startPoint.entityNumber!!] = resultEdges
+
+    var relation = signalList.map {
+        (it.entityNumber!!) to
+                buildEdge(it)
+    }.groupBy({
+        it.first
+    }, {
+        it.second
+    }).mapValues { it ->
+        it.value.flatten().distinctBy { it.uniqueID() }
+            .onEach { it.cleanAndCalc() }
+            .toMutableList()
     }
 
-// get all start signals
-    val notStartSignalList = listOfEdges.map { edge ->
-        edge.last(1)
-    }.toMutableList()
-    notStartSignalList.removeAll {
-        it.entityType == EntityType.VirtualSignal
-    }
-    val startSignals = signalList.toSet() - notStartSignalList.toSet()
-// do a backwards search
-    val backwardsEdges = arrayListOf<Edge>()
-    startSignals.forEach { startPoint ->
-        val resultEdges = arrayListOf<Edge>()
-        if (startPoint.rightNextRail.size > 0) resultEdges.addAll(buildEdge(Edge(startPoint), -1, true))
-        if (startPoint.leftNextRail.size > 0) resultEdges.addAll(buildEdge(Edge(startPoint), 1, true))
-        if (resultEdges.size > 0) {
-            backwardsEdges.addAll(resultEdges)
-        }
-    }
-    backwardsEdges.forEach { edge ->
-
-        edge.entityList.reverse()
-        edge.entityList.first().entityType = EntityType.Signal
-
-    }
+    var listOfEdges = relation.map { it.value }.flatten().toMutableList() as ArrayList<Edge>
+    val backwardsEdges = signalList.map {
+        buildEdgeReversed(it)
+    }.flatten()
     listOfEdges.addAll(backwardsEdges)
-    listOfEdges.forEach { it.cleanAndCalc() }
-    val district = ArrayList<Edge>()
-
-    for (i in listOfEdges) {
-        val s = district.firstOrNull {
-            i.toString() == it.toString()
-        }
-        if (s == null) district.add(i)
-        else removed.add(i)
-    }
-    //relation
-    relation.forEach { (_, u) ->
-        u.retainAll {
-            district.contains(it)
-        }
-    }
-
-    listOfEdges = district
-    listOfEdges.retainAll {
-        district.contains(it)
-    }
 
 
-// guard check point
-    if (listOfEdges.size == 0) {
-        throw Exception("No Edges Found, but there are some signals ")  //todo: unexpected  error
-    }
 //set next possible edges per edge
     listOfEdges.filter { edge ->
         edge.last(1).entityType != EntityType.VirtualSignal && edge.validRail
     }.forEach { edge ->
-        val endingSignal = edge.last(1)
-        edge.nextEdgeList = relation[endingSignal.entityNumber]
+        edge.nextEdgeList = relation[edge.last(1).entityNumber]
     }
     backwardsEdges.forEach { it.setEntry() }
 
@@ -241,7 +199,7 @@ fun factorioRailAnalyzer(blueprint: String): Boolean {
     return c.hasDeadlocks()
 }
 
-private fun Graph<Block>.analysis(): Graph<Block> {
+fun Graph<Block>.analysis(): Graph<Block> {
 
     this.circularDependencies.retainAll {
         it.analysis()
