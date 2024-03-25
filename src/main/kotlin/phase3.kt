@@ -2,7 +2,13 @@ import factorioBlueprint.Entity
 import factorioBlueprint.Position
 
 fun buildEdge(entity: Entity): List<Edge> {
-    return buildEdge(Edge(entity), if (entity.direction < 4) -1 else 1)
+    //var direction = if (entity.direction < 4) -1 else 1
+    var result = mutableListOf<Edge>()
+    if (entity.leftNextRail.size != 0)
+        result.addAll(buildEdge(Edge(entity), -1))
+    if (entity.rightNextRail.size != 0)
+        result.addAll(buildEdge(Edge(entity), 1))
+    return result
 }
 
 fun buildEdge(edge: Edge, direction: Int): List<Edge> {
