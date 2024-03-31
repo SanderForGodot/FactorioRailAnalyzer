@@ -78,38 +78,6 @@ fun isSpecialCase(current: Entity, next: Entity): Int {
     if (!candidates.contains(current.direction) || !candidates.contains(next.direction))
         return 1
 
-    if (current.entityType == EntityType.CurvedRail && current.direction == 0)
-        if (next.entityType == EntityType.Rail && next.direction == 0 ||
-            next.entityType == EntityType.CurvedRail && next.direction == 5
-        )
-            return -1
-    if (current.entityType == EntityType.Rail && current.direction == 0)
-        if (next.entityType == EntityType.CurvedRail && next.direction == 0)
-            return -1
-    if (current.entityType == EntityType.CurvedRail && current.direction == 5)
-        if (next.entityType == EntityType.CurvedRail && next.direction == 0)
-            return -1
-    if (current.entityType == EntityType.CurvedRail && current.direction == 4)
-        if (next.entityType == EntityType.Rail && next.direction == 0 ||
-            next.entityType == EntityType.CurvedRail && next.direction == 1
-        )
-            return -1
-    if (current.entityType == EntityType.Rail && current.direction == 0)
-        if (next.entityType == EntityType.CurvedRail && next.direction == 4)
-            return -1
-    if (current.entityType == EntityType.CurvedRail && current.direction == 1)
-        if (next.entityType == EntityType.CurvedRail && next.direction == 4)
-            return -1
-    return 1
-
-}
-
-fun newisSpecialCase(current: Entity, next: Entity): Int {
-    val candidates = intArrayOf(0, 1, 4, 5)
-    // sorts outs most cases to improve efficiency
-    if (!candidates.contains(current.direction) || !candidates.contains(next.direction))
-        return 1
-
     val edgeCases: Map<Pair<EntityType, Int>, Pair<EntityType, Int>> =
         mapOf(
             Pair(EntityType.CurvedRail, 0) to Pair(EntityType.Rail, 0),
@@ -123,9 +91,6 @@ fun newisSpecialCase(current: Entity, next: Entity): Int {
     ) -1 else 1
 }
 
-private fun Entity.signature(): Pair<EntityType, Int> {
-    return Pair(this.entityType, this.direction)
-}
 
 fun determineEnding(edge: Edge, direction: Int): Edge? {
     if (edge.last(1).toMannySignals()) {

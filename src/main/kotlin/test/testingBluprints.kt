@@ -25,4 +25,5 @@ val toTest: MutableMap<String, Boolean> = mutableMapOf(
     "src/test/resources/testBPs/silpleCrosing.txt" to false,
     "src/test/resources/testBPs/thenotoriusYESdl.txt" to true,
     "src/test/resources/testBPs/keisMitDeadlock.txt" to true,
+    "src/test/resources/testBPs/knoten.txt" to true // very difficult to get a deadlock in game but possible (requires train to reroute in  )
 )

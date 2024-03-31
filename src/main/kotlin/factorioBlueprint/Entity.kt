@@ -80,6 +80,9 @@ data class Entity(
     fun isRail(): Boolean {
         return entityType.isRail()
     }
+    fun signature(): Pair<EntityType, Int> {
+        return Pair(this.entityType, this.direction)
+    }
 
     override fun hashCode(): Int {
         var result = entityType.hashCode()
@@ -87,6 +90,4 @@ data class Entity(
         result = 31 * result + direction
         return result
     }
-
-
 }
