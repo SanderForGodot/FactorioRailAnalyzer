@@ -72,7 +72,6 @@ fun buildStartingEdge(edge: Edge, direction: Int): ArrayList<Edge> {
 
 
 //at specific transitions from rail a to b we need to flip the direction indicator
-
 fun isSpecialCase(current: Entity, next: Entity): Int {
     val candidates = intArrayOf(0, 1, 4, 5)
     // sorts outs most cases to improve efficiency
@@ -103,6 +102,29 @@ fun isSpecialCase(current: Entity, next: Entity): Int {
             return -1
     return 1
 
+}
+
+fun newisSpecialCase(current: Entity, next: Entity): Int {
+    val candidates = intArrayOf(0, 1, 4, 5)
+    // sorts outs most cases to improve efficiency
+    if (!candidates.contains(current.direction) || !candidates.contains(next.direction))
+        return 1
+
+    val edgeCases: Map<Pair<EntityType, Int>, Pair<EntityType, Int>> =
+        mapOf(
+            Pair(EntityType.CurvedRail, 0) to Pair(EntityType.Rail, 0),
+            Pair(EntityType.CurvedRail, 5) to Pair(EntityType.CurvedRail, 0),
+            Pair(EntityType.Rail, 0) to Pair(EntityType.CurvedRail, 4),
+            Pair(EntityType.CurvedRail, 4) to Pair(EntityType.CurvedRail, 1),
+        )
+    Entity()
+    return if ((edgeCases[current.signature()] == next.signature())
+        || (edgeCases[next.signature()] == current.signature())
+    ) -1 else 1
+}
+
+private fun Entity.signature(): Pair<EntityType, Int> {
+    return Pair(this.entityType, this.direction)
 }
 
 fun determineEnding(edge: Edge, direction: Int): Edge? {
