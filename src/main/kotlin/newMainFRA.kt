@@ -1,11 +1,10 @@
 import graph.tiernan
 
 fun NEWfactorioRailAnalyzer(blueprint: String): Boolean {
+
     var cc = CompanionCube(blueprint)
-        .removeNull()
         .normalizePositions()
         .linkRails()
-        .genSignalList()
         .genEdgeList()
         .connectEdgesToBlocks()
     var g = cc.blockList
@@ -15,6 +14,11 @@ fun NEWfactorioRailAnalyzer(blueprint: String): Boolean {
         .analysis()
 
     cc.createVisualization(g)
+
+
+
+
+
 
 
     return g.hasDeadlocks()

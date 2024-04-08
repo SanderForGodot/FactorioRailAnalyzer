@@ -11,6 +11,7 @@ import java.util.*
 
 fun main(args: Array<String>) {
 
+
     val options = args.filter { it.startsWith("-") }
     setCLIOptions(options)
     dbgPrintln("Program arguments: ${args.joinToString()}")

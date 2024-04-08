@@ -36,4 +36,6 @@ enum class EntityType(name: String) {
 
     abstract fun isSignal(): Boolean
     abstract fun isRail(): Boolean
+
 }
+

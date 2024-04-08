@@ -120,9 +120,3 @@ fun <T : Grafabel> T.expandPathWithRef(graph: Graph<Grafabel>, fn: (T) -> ArrayL
     graph.visited.remove(ref.invoke(this))
     graph.path.removeLast()
 }
-
-
-
-
-
-

@@ -8,28 +8,28 @@ import graph.tiernan
 
 class CompanionCube(blueprint: String) {
 
-
-    val entityList: ArrayList<Entity>
+    private val entityList: ArrayList<Entity>
+    private var signalList: List<Entity>
 
     init {
         if (blueprint.contains("blueprint_book")) {
             throw Exception("Sorry, a blueprint book cannot be parsed by this program, please input only Blueprints ")
         }
+        //val gson = GsonBuilder().registerTypeAdapter(EntityType::class.java, EntityType()).create()
+
         val resultBP: ResultBP = Gson().fromJson(blueprint, ResultBP::class.java)
         this.entityList = resultBP.blueprint.entities
+        entityList.removeAll { it.entityType == null } //it can be null the ide is lying (GSON brakes kotlin null safety)
+        signalList = entityList.filter { it.isSignal() }
+        if (entityList.size == 0) throw Exception("No relevant entity's in blueprint")
+        if (signalList.isEmpty()) throw Exception("No signals in blueprint")
     }
 
     // every var nead a good justification
     private lateinit var max: Position  // required for the visualization later on
-    private lateinit var signalList: List<Entity> // todo justify
     private lateinit var edgeList: ArrayList<Edge>
     lateinit var blockList: ArrayList<Block>
-    fun removeNull(): CompanionCube { //todo if this dosent change move to init
-        entityList.removeAll {
-            it.entityType == null //it can be null the ide is lying (GSON brakes kotlin null safety)
-        }
-        return this
-    }
+
 
     fun normalizePositions(): CompanionCube {
         val (min, max) = entityList.determineMinMax()
@@ -46,14 +46,6 @@ class CompanionCube(blueprint: String) {
         val matrix = entityList.filedMatrix(max)
         entityList.railLinker(matrix)
         return this
-    }
-
-    fun genSignalList(): CompanionCube {//todo if this dosent change move to init
-        signalList = entityList.filter { entity -> entity.isSignal() }
-        if (signalList.isEmpty())
-            throw Exception("No Signals in blueprint")
-        //todo: create custom construction error
-        return this;
     }
 
     fun genEdgeList(): CompanionCube {
