@@ -1,7 +1,7 @@
 package FRA
 
-import Edge
-import EntityType
+import Clases.Edge
+import Clases.EntityType
 import factorioBlueprint.Entity
 import factorioBlueprint.Position
 
@@ -22,7 +22,7 @@ fun buildEdge(edge: Edge, direction: Int): List<Edge> {
             return arrayListOf(end)
         //otherwise continue and ignore (happens once at the start of every edg to ignore the starting signal)
     }
-    //  val arr: ArrayList<Edge> = arrayListOf()
+    //  val arr: ArrayList<Clases.Edge> = arrayListOf()
     return buildEdgeInner(edge, direction)
 
 }

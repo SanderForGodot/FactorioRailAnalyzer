@@ -1,3 +1,5 @@
+package Clases
+
 import com.google.gson.annotations.SerializedName
 
 enum class EntityType(name: String) {

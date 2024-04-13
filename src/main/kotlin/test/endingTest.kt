@@ -1,7 +1,7 @@
 package test
 
-import Edge
-import EntityType
+import Clases.Edge
+import Clases.EntityType
 import FRA.determineEnding
 import FRA.determineMinMax
 import FRA.filedMatrix

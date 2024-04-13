@@ -1,5 +1,12 @@
+package Clases
+
+import Grafabel
+import addUnique
+import collisionPoints
+import dbgPrintln
 import factorioBlueprint.Entity
 import factorioBlueprint.Position
+import intersect
 import kotlin.math.abs
 import kotlin.math.sqrt
 
@@ -11,7 +18,7 @@ class Edge() : Grafabel {
 
     constructor(edge: Edge, entity: Entity) : this() {
         entityList = edge.entityList.clone() as ArrayList<Entity>
-        if (!entityList.addUnique(entity)) throw Exception("an Edge is not expected to have the same rail twice")
+        if (!entityList.addUnique(entity)) throw Exception("an Clases.Edge is not expected to have the same rail twice")
 
     }
 

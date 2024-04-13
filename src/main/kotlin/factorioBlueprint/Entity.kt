@@ -1,7 +1,7 @@
 package factorioBlueprint
 
 
-import EntityType
+import Clases.EntityType
 import com.google.gson.annotations.SerializedName
 
 

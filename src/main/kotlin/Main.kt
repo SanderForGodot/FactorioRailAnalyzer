@@ -1,3 +1,6 @@
+import Clases.Block
+import Clases.Edge
+import Clases.EntityType
 import FRA.NEWfactorioRailAnalyzer
 import graph.Graph
 import java.nio.file.Files

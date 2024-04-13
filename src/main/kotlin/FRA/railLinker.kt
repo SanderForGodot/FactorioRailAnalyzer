@@ -1,6 +1,6 @@
 package FRA
 
-import EntityType
+import Clases.EntityType
 import addUnique
 import fact
 import factorioBlueprint.Entity

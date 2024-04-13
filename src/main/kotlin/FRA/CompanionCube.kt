@@ -1,8 +1,9 @@
 package FRA
 
-import Block
-import Edge
-import EntityType
+
+import Clases.Block
+import Clases.Edge
+import Clases.EntityType
 import Graphviz
 import com.google.gson.Gson
 import connectEdgesToBlocks
@@ -25,7 +26,7 @@ class CompanionCube(blueprint: String) {
         if (blueprint.contains("blueprint_book")) {
             throw Exception("Sorry, a blueprint book cannot be parsed by this program, please input only Blueprints ")
         }
-        //val gson = GsonBuilder().registerTypeAdapter(EntityType::class.java, EntityType()).create()
+        //val gson = GsonBuilder().registerTypeAdapter(Clases.EntityType::class.java, Clases.EntityType()).create()
 
         val resultBP: ResultBP = Gson().fromJson(blueprint, ResultBP::class.java)
         this.entityList = resultBP.blueprint.entities
