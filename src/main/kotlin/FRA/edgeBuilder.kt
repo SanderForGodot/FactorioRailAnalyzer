@@ -1,9 +1,13 @@
+package FRA
+
+import Edge
+import EntityType
 import factorioBlueprint.Entity
 import factorioBlueprint.Position
 
 fun buildEdge(entity: Entity): List<Edge> {
     //var direction = if (entity.direction < 4) -1 else 1
-    var result = mutableListOf<Edge>()
+    val result = mutableListOf<Edge>()
     if (entity.leftNextRail.size != 0)
         result.addAll(buildEdge(Edge(entity), -1))
     if (entity.rightNextRail.size != 0)
@@ -38,7 +42,7 @@ private fun buildEdgeInner(edge: Edge, direction: Int): List<Edge> {
 }
 
 fun buildEdgeReversed(entity: Entity): List<Edge> {
-    var direction = if (entity.direction < 4) 1 else -1
+    val direction = if (entity.direction < 4) 1 else -1
     return entity.getRailList(direction * -1).map {
         // sikping the first self check
         buildEdgeInner(Edge(Edge(entity), it), direction)
@@ -48,26 +52,6 @@ fun buildEdgeReversed(entity: Entity): List<Edge> {
             it.entityList.first().entityType = EntityType.Signal
             it.cleanAndCalc()
         }
-}
-
-
-fun buildStartingEdge(edge: Edge, direction: Int): ArrayList<Edge> {
-    var inverse = edge.entityList.first().isSignal()
-
-    val arr: ArrayList<Edge> = arrayListOf()
-    val nextRails = edge.last(1).getRailList(direction * (if (inverse) -1 else 1))
-    if (nextRails.size > 0) {
-        nextRails.forEach { entity ->
-            val modifier = isSpecialCase(edge.last(1), entity)
-            val result = buildStartingEdge(Edge(edge, entity), direction * modifier)
-            arr.addAll(result)
-        }
-    } else {
-        val blankSignal = Entity(0, EntityType.VirtualSignal, Position(0.0, 0.0), 123, true)
-        arr.add(edge.finishUpEdge(blankSignal, true))
-    }
-
-    return arr
 }
 
 

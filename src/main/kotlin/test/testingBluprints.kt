@@ -1,6 +1,6 @@
 package test
 
-import NEWfactorioRailAnalyzer
+import FRA.NEWfactorioRailAnalyzer
 import decodeBpStringFromFilename
 import setCLIOptions
 
