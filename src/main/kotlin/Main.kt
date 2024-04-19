@@ -11,6 +11,9 @@ fun main(args: Array<String>) {
 
 
     val options = args.filter { it.startsWith("-") }
+    if (args.isEmpty()){
+        showCLIHelp()
+    }
     setCLIOptions(options)
     dbgPrintln("Program arguments: ${args.joinToString()}")
     val inputBlueprintString = args.filter { it.startsWith("0") }
