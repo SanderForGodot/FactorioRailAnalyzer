@@ -1,3 +1,5 @@
+import Clases.Block
+import Clases.Edge
 
 fun connectEdgesToBlocks(listOfEdges: ArrayList<Edge>): ArrayList<Block> {
     val blockList: ArrayList<Block> = arrayListOf(Block(listOfEdges[0], 0))

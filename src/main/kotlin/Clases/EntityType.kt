@@ -1,3 +1,5 @@
+package Clases
+
 import com.google.gson.annotations.SerializedName
 
 enum class EntityType(name: String) {
@@ -36,4 +38,6 @@ enum class EntityType(name: String) {
 
     abstract fun isSignal(): Boolean
     abstract fun isRail(): Boolean
+
 }
+

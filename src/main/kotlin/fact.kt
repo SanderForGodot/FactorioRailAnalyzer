@@ -1,3 +1,4 @@
+import Clases.EntityType
 import factorioBlueprint.Entity
 import factorioBlueprint.Position
 

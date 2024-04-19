@@ -1,3 +1,6 @@
+import Clases.Block
+import Clases.Edge
+import Clases.EntityType
 import factorioBlueprint.Entity
 import factorioBlueprint.Position
 import graph.Graph
@@ -53,7 +56,7 @@ class Graphviz {
         }
         if (genOutput) {
             sb.append(CLOSE_GRAPH)
-            buildFile(sb, "Edge$j")
+            buildFile(sb, "Clases.Edge$j")
         }
     }
 

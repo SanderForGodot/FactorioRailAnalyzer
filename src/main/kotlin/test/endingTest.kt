@@ -1,16 +1,16 @@
 package test
 
-import Edge
-import EntityType
+import Clases.Edge
+import Clases.EntityType
+import FRA.determineEnding
+import FRA.determineMinMax
+import FRA.filedMatrix
+import FRA.railLinker
 import com.google.gson.Gson
 import decodeBpStringFromFilename
-import determineEnding
-import determineMinMax
 import fact
 import factorioBlueprint.Entity
 import factorioBlueprint.ResultBP
-import filedMatrix
-import railLinker
 
 fun main() {
     val solutionOben: ArrayList<Any?> =
