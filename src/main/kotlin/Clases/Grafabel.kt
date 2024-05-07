@@ -1,3 +1,5 @@
+package Clases
+
 import factorioBlueprint.Position
 
 interface Grafabel : Comparable<Grafabel> {

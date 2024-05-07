@@ -6,12 +6,9 @@ import Clases.Edge
 import Clases.EntityType
 import Graphviz
 import com.google.gson.Gson
-import connectEdgesToBlocks
 import factorioBlueprint.Entity
 import factorioBlueprint.Position
 import factorioBlueprint.ResultBP
-import graph.Graph
-import graph.tiernan
 import svgFromPoints
 import visualize
 import visualizeWithRef

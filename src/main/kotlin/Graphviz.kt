@@ -1,9 +1,10 @@
 import Clases.Block
 import Clases.Edge
 import Clases.EntityType
+import Clases.Grafabel
 import factorioBlueprint.Entity
 import factorioBlueprint.Position
-import graph.Graph
+import FRA.Graph
 import java.awt.Color
 import java.awt.Desktop
 import java.io.File

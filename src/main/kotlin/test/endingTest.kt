@@ -50,8 +50,8 @@ fun main() {
             Pair(false, getFact(2)),
             Pair(false, getFact(2)),
         )
-    test("oben.txt", solutionOben)
-   test("unten.txt", solutionUnten)
+    test("src/main/kotlin/test/oben.txt", solutionOben)
+   test("src/main/kotlin/test/unten.txt", solutionUnten)
 
 }
 fun test(filename:String, solution:ArrayList<Any?>){

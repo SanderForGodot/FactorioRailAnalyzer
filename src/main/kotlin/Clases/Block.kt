@@ -1,6 +1,5 @@
 package Clases
 
-import Grafabel
 import factorioBlueprint.Position
 
 class Block(edge: Edge, var id: Int) : Grafabel {

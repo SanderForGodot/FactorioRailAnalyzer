@@ -1,8 +1,5 @@
 package FRA
 
-import analysis
-import graph.tiernan
-
 fun NEWfactorioRailAnalyzer(blueprint: String): Boolean {
 
     val cc = CompanionCube(blueprint)

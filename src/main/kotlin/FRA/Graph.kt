@@ -1,6 +1,6 @@
-package graph
+package FRA
 
-import Grafabel
+import Clases.Grafabel
 import java.util.*
 
 
