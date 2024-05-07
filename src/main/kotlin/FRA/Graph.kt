@@ -91,32 +91,3 @@ class Graph<T : Grafabel> {
         return this
     }
 }
-
-
-fun <T : Grafabel> ArrayList<T>.tiernanWithref(fn: (T) -> ArrayList<T>?, ref: (T) -> Grafabel): Graph<Grafabel> {
-    val g = Graph<Grafabel>()
-    this.sorted()
-    this.forEach {
-        it.expandPathWithRef(g, fn, ref)
-    }
-    return g
-}
-
-fun <T : Grafabel> T.expandPathWithRef(graph: Graph<Grafabel>, fn: (T) -> ArrayList<T>?, ref: (T) -> Grafabel) {
-    graph.path.add(ref.invoke(this))
-    fn.invoke(this)?.forEach { neighbor ->
-        if (!graph.path.contains(ref.invoke(neighbor))
-            && (ref.invoke(neighbor).uniqueID() > ref.invoke(this).uniqueID())
-            && graph.visited[ref.invoke(this)]?.contains(ref.invoke(neighbor)) != true
-        ) {
-            neighbor.expandPathWithRef(graph, fn, ref)
-            graph.visited(ref.invoke(this), ref.invoke(neighbor))
-        } else {
-            if (graph.path.first() == ref.invoke(neighbor)) {
-                graph.addPath()
-            }
-        }
-    }
-    graph.visited.remove(ref.invoke(this))
-    graph.path.removeLast()
-}
