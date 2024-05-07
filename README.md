@@ -55,15 +55,6 @@ Every listed file is found in [/src/main/kotlin/](/src/main/kotlin/)\
 ⓘ are Interfaces\
 📜 are kotlin scripts (.kt) unless marked otherwise
 
-
-<div class="vl" style=" border-left: 2px solid grey;
-    height: 875px;
-    display: block;
-    position: absolute;
-    margin-left: 20px;
-    margin-top: 50px;
-    z-index: 100;"></div> 
-
 | Directory / File                                                                                    | Description                                                                                                                                               | Doc.Nr. |
 |-----------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------|:-------:|
 | ┣ 📂[Classes](src/main/kotlin/Clases)                                                               | Contains classes needed for data processing                                                                                                               |         |
