@@ -10,9 +10,9 @@ enum class CLIFlags {
 val CLIOptions: MutableMap<CLIFlags, Boolean> = mutableMapOf(
 //default Values
     CLIFlags.GraphvizOutput to false,
-    CLIFlags.InstantShowOutput to true,
+    CLIFlags.InstantShowOutput to false,
     CLIFlags.ShowDebug to false,
-    CLIFlags.EdgesGetRandomColor to true,
+    CLIFlags.EdgesGetRandomColor to false,
 )
 
 fun setCLIOptions(options:List<String>){
@@ -25,12 +25,12 @@ fun setCLIOptions(options:List<String>){
         CLIOptions[CLIFlags.GraphvizOutput]=true
         i++
     }
-    if (options.contains("-i")) {
-        CLIOptions[CLIFlags.InstantShowOutput] = false
+    if (options.contains("-a")) {
+        CLIOptions[CLIFlags.InstantShowOutput] = true
         i++
     }
-    if (options.contains("-e")) {
-        CLIOptions[CLIFlags.EdgesGetRandomColor] = false
+    if (options.contains("-c")) {
+        CLIOptions[CLIFlags.EdgesGetRandomColor] = true
         i++
     }
     if (options.contains("-h")) {
@@ -60,6 +60,6 @@ fun showCLIHelp(){
             "-h : Show this help\n"+
             "-d : Show Debug Information\n" +
             "-g : Create Graphviz Output\n" +
-            "-i : Don't open the Output automatically\n" +
-            "-e : Don't color in the Blocks in the Output\n")
+            "-a : Open the Output automatically\n" +
+            "-c : Color in the Blocks in the Output\n")
 }

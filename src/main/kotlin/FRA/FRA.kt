@@ -1,6 +1,6 @@
 package FRA
 
-fun NEWfactorioRailAnalyzer(blueprint: String): Boolean {
+fun factorioRailAnalyzer(blueprint: String): Boolean {
 
     val cc = CompanionCube(blueprint)
         .normalizePositions()

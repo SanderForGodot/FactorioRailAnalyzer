@@ -14,8 +14,14 @@ Options:\
 -h : Show CLI help\
 -d : Show Debug Information\
 -g : Create Graphviz Output\
--i : Don't open the Output automatically\
--e : Don't color in the Blocks in the Output
+-a : Open the Output automatically\
+-c : Color in the Blocks in the Output
+
+## Example
+The Program takes the right side as an input and produces an output on the left (with -c flag)\
+The output is currently WIP and will later show bedder information\
+<img src="ExampleInput.png" width="47.8%" alt="Example Input" >
+<img src="ExampleOutput.svg" width="45%" alt="Example Output" >
 
 # Limitations
 The Program is currently limited to mono-directional Rail systems bidirectional systems have not yet been tested. 
@@ -29,13 +35,13 @@ Listed below is the file structure and the relevant part in the text teat talks 
 The beginning 4.1 talks about the general overview of the data processing and the data holding with in the application.
 Also interesting could be [draw.io](https://app.diagrams.net/) file found [here](src/main/kotlin/factorioRailAnalyiserDiagrams.drawio) containing all the diagrams found in the document
 
-Every listed file is found in [/src/main/kotlin/](/src/main/kotlin/)<br>
-© are classes<br>
-ⓘ are Interfaces<br>
+Every listed file is found in [/src/main/kotlin/](/src/main/kotlin/)\
+© are classes\
+ⓘ are Interfaces\
 📜 are kotlin scripts (.kt) unless marked otherwise
 
 | Directory / File                                                                                    | Description                                                                                                                                               | Doc.Nr. |
-|-----------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|:-------:|
+|-----------------------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------|:-------:|
 | ┣ 📂[Classes](src/main/kotlin/Clases)                                                               | Contains classes needed for data processing                                                                                                               |         |
 | ┃ ┗ © [Block](src/main/kotlin/Clases/Block.kt)                                                      | A group of Edges equal to a in game factorio block.                                                                                                       |  2.1.7  |
 | ┃ ┗ © [Edge](src/main/kotlin/Clases/Edge.kt)                                                        | One edge is a list of Factorio objects from one signal to the next                                                                                        |  2.1.6  |
