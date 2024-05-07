@@ -6,7 +6,7 @@ given blueprint is deadlock free or what the maximum save number of train carria
 # Context
 
 This Project was made as part of a Paper for the DHBW Mannheim. The Paper can be found in this Repository under the
-name."FRA Paper&documentation.pdf". The Paper is sadly only available German.
+name "[FRA-Paper&documentation.pdf](FRA-Paper&documentation.pdf)". The Paper is sadly only available German.
 
 # Usage
 
@@ -28,10 +28,14 @@ Options:\
 
 ## Example
 
-The Program takes the left side as an input and produces an output on the righ (with -c flag)\
+The Program takes the left side as an input and produces an output on the right (with -c flag)\
 The output is currently WIP and will later show bedder information.\
 <img src="ExampleInput.png" width="47.8%" alt="Example Input" >
 <img src="ExampleOutput.svg" width="45%" alt="Example Output" >
+
+Currently visible in the output is each block in Bag-Random color. The system does not ensure that adjacent blocks are not the same color. 
+Signals are indicated with a green dot and Chain signals are shown in cyan. At the center of every block is the number of that block. 
+This last information is not that useful to a user.
 
 # Limitations
 

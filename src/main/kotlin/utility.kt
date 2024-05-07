@@ -6,7 +6,7 @@ import java.util.zip.Inflater
 
 //Made by @marcouberti on github
 //Source: https://gist.github.com/marcouberti/40dbbd836562b35ace7fb2c627b0f34f
-//somee ideea what this function does, but we didn't write it
+//some idea what this function does, but we didn't write it
 //
 fun ByteArray.zlibDecompress(): String {
     val inflater = Inflater()
