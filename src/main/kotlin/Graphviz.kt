@@ -2,13 +2,12 @@ import Clases.Block
 import Clases.Edge
 import Clases.EntityType
 import Clases.Grafabel
+import FRA.Graph
 import factorioBlueprint.Entity
 import factorioBlueprint.Position
-import FRA.Graph
 import java.awt.Color
 import java.awt.Desktop
 import java.io.File
-import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.text.MessageFormat
@@ -33,33 +32,6 @@ class Graphviz {
     val EDGECOLOR = "{0} -> {1}[color=\"{2}\"]; \n"
     val CLOSE_GRAPH = "} \n"
 
-
-    //StringBuilder and genOutput are optional, so that this function can be used for printing the edge independently,
-    //and it can be used for printBlocks
-    @Throws(IOException::class)
-    fun printEdge(edge: Edge, j: Int, sb: StringBuilder = StringBuilder(), genOutput: Boolean = true) {
-        if (genOutput) {
-            sb.append(OPEN_GRAPH)
-        }
-        var i = 0
-        while (i < edge.entityList.size - 1) {
-            sb.append(
-                MessageFormat.format(
-                    NODEXY,
-                    edge.entityList[i].entityNumber,
-                    edge.entityList[i].entityType.name + " id:" + edge.entityList[i].entityNumber + " dir:" + edge.entityList[i].direction,
-                    edge.entityList[i].position.x,
-                    edge.entityList[i].position.y
-                )
-            )
-            sb.append(MessageFormat.format(EDGE, edge.entityList[i].entityNumber, edge.entityList[i + 1].entityNumber))
-            i++
-        }
-        if (genOutput) {
-            sb.append(CLOSE_GRAPH)
-            buildFile(sb, "Clases.Edge$j")
-        }
-    }
 
     private fun appendEntity(sb: Appendable, entity: Entity) {
         val name =
@@ -99,96 +71,6 @@ class Graphviz {
         buildFile(stringBuilder, "EntityRelations")
     }
 
-    fun printGraph(graph: MutableMap<Int, MutableList<Int>>) {
-        val stringBuilder = StringBuilder()
-        stringBuilder.append(OPEN_GRAPH)
-        graph.forEach { from ->
-            //point from entry.key to each entry.value
-            stringBuilder.append(MessageFormat.format(NODE, from.key, from.key))
-            from.value.forEach { pointTo ->
-                stringBuilder.append(MessageFormat.format(EDGE, from.key, pointTo))
-            }
-        }
-        stringBuilder.append(CLOSE_GRAPH)
-        buildFile(stringBuilder, "graph")
-    }
-
-    fun printBlocksFromEdgeRelations(edgeList: ArrayList<Edge>) {
-        val stringBuilder = StringBuilder()
-        stringBuilder.append(OPEN_GRAPH)
-        edgeList.forEach { edge ->
-            val from = edge.belongsToBlock!!.id
-            var pos = edge.belongsToBlock!!.calculateCenter()
-
-            edge.monitoredEdgeList.forEach { innerEdge ->
-                val to = innerEdge.belongsToBlock!!.id
-
-                stringBuilder.append(
-                    MessageFormat.format(
-                        EDGE, from, to
-                    )
-                )
-            }
-            if (pos.x.isNaN())
-                pos = edge.entityList[1].position
-            val name = from.toString() + " | " + edge.entityList[1].position
-            stringBuilder.append(
-                MessageFormat.format(
-                    NODE, from, name //, pos.x, pos.y
-                )
-            )
-
-
-        }
-        stringBuilder.append(CLOSE_GRAPH)
-        buildFile(stringBuilder, "SandersEdges")
-
-    }
-
-    fun printBlocks(blockList: ArrayList<Block>) {
-        val stringBuilder = StringBuilder()
-        stringBuilder.append(OPEN_GRAPH)
-
-        blockList.forEach { block ->
-            val pos = block.calculateCenter()
-            stringBuilder.append(
-                MessageFormat.format(
-                    NODE,
-                    block.id,
-                    "Block id:" + block.id + " \nEL:" + block.edgeListSting()
-                )
-            )
-            block.dependingOn.forEach { block2 ->
-                stringBuilder.append(MessageFormat.format(EDGE, block2.id, block.id))
-            }
-        }
-        stringBuilder.append(CLOSE_GRAPH)
-        buildFile(stringBuilder, "Blocks")
-    }
-
-    fun printDeadlocks(deadlock: Set<Block>, j: Int, sb: StringBuilder = StringBuilder(), genOutput: Boolean = true) {
-        if (genOutput) {
-            sb.append(OPEN_GRAPH)
-        }
-        var i = 0
-
-        while (i < deadlock.size - 1) {
-            sb.append(
-                MessageFormat.format(
-                    NODE,
-                    deadlock.elementAt(i).id,
-                    "Block id:" + deadlock.elementAt(i).id + " \nEL:" + deadlock.elementAt(i).edgeListSting()
-                )
-            )
-            sb.append(MessageFormat.format(EDGE, deadlock.elementAt(i).id, deadlock.elementAt(i + 1).id))
-            i++
-        }
-        if (genOutput) {
-            sb.append(CLOSE_GRAPH)
-            buildFile(sb, "Deadlock$j")
-        }
-    }
-
 
 }
 
@@ -221,10 +103,10 @@ fun <T : Grafabel> ArrayList<T>.visualize(
         stringBuilder.append(it)
     }
 
-    graph.circularDependencies.forEach {dl->
-        val color = Color(nextInt(255), nextInt(255), nextInt(255))
+    graph.circularDependencies.forEach { dl ->
+        val color = nextColor()
 
-        for (i in dl.indices )
+        for (i in dl.indices)
             stringBuilder.append(
                 MessageFormat.format(
                     g.EDGECOLOR,
@@ -280,88 +162,8 @@ fun <T : Grafabel> ArrayList<T>.visualizeWithRef(
 }
 
 
-fun svgFromPoints(size: Position, edgeList: ArrayList<Edge>, signalList: List<Entity>, pos: Position) {
-    val stringBuilder = StringBuilder()
-    stringBuilder.append(
-        "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
-                "<!DOCTYPE svg PUBLIC \"-//W3C//DTD SVG 1.1//EN\"\n" +
-                " \"http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd\">\n" +
-                "<!-- Generated by sanders function\n" +
-                " -->\n" +
-                "<!-- Title: G Pages: 1 -->\n" +
-                "<svg width=\"${size.x + 1}\" height=\"${size.y + 1}\" viewBox=\"-5 -5 ${size.x + 5} ${size.y + 5}\" xmlns=\"http://www.w3.org/2000/svg\" xmlns:xlink=\"http://www.w3.org/1999/xlink\">\n" +
-                "<title>blueprinting image</title>\n"
-    )
-    stringBuilder.append("<rect width=\"${size.x + 10}\" height=\"${size.y + 10}\" x=\"-5\" y=\"-5\" fill=\"#8e8e8e\" />\n")
 
-// schienen
-    val listOfColors: List<Color> = listOf(
-        Color.black,
-        // Color.red,
-        Color.pink,
-        Color(255, 125, 0),
-        Color.yellow,
-        // Color.green,
-        Color.magenta,
-        // Color.cyan,
-        Color.blue,
-    )
-    var bagRandom: MutableList<Color> = listOfColors.toMutableList()
-    val dictionary: MutableMap<Int, Color> = mutableMapOf()
-
-    listOfColors[0]
-
-    edgeList.forEach { edge ->
-        if (edge.collisionShape.size == 0) return@forEach
-        val m = edge.collisionShape.joinToString { pos ->
-            pos.x.roundToInt().toString() + "," + pos.y.roundToInt()
-        }
-        //color
-        var color: Color = Color.BLACK
-        //region random color
-        if (CLIOptions[CLIFlags.EdgesGetRandomColor]!!) {
-            if (edge.belongsToBlock != null) {
-                if (dictionary.containsKey(edge.belongsToBlock!!.id)) {
-                    color = dictionary[edge.belongsToBlock!!.id]!!
-                } else {
-                    if (bagRandom.isEmpty())
-                        bagRandom = listOfColors.toMutableList()
-                    val newC = bagRandom.random()
-                    bagRandom.remove(newC)
-                    dictionary[edge.belongsToBlock!!.id] = newC
-                    color = newC
-                }
-            }
-        }
-        //endregion
-        if (edge.entryFlag)
-            color = Color.RED
-
-
-        stringBuilder.append("<path fill=\"none\" stroke=\"${color.toHex()}\" d=\"M$m\"/>\n")
-        val b = edge.belongsToBlock
-        if (b != null)
-            stringBuilder.append("<text x=\"${b.pos().x}\" y=\"${b.pos().y}\"  font-size=\"5\" fill=\"green\">${b.id} </text>")
-    }
-    signalList.forEach { sig ->
-        val color = if (sig.entityType == EntityType.Signal) Color.green else Color.cyan
-
-        stringBuilder.append("<circle r=\"0.5\" cx=\"${sig.position.x}\" cy=\"${sig.position.y}\" fill=\"${color.toHex()}\" />\n")
-    }
-    stringBuilder.append("<circle r=\"2\" cx=\"${pos.x}\" cy=\"${pos.y}\"  fill=\"none\"  stroke=\"${Color.red.toHex()}\" stroke-width=\"0.3\" />\n")
-
-    stringBuilder.append("</svg>")
-    if (!Files.exists(Path.of("GraphvizOutput"))) {
-        Files.createDirectory(Path.of("GraphvizOutput"))
-    }
-    File("GraphvizOutput/sandersSpecial.svg").writeText(stringBuilder.toString())
-    if (CLIOptions[CLIFlags.InstantShowOutput]!!) {
-        val dt = Desktop.getDesktop()
-        dt.open(File("GraphvizOutput/sandersSpecial.svg"))
-    }
-}
-
-private fun Color.toHex(): String {
+fun Color.toHex(): String {
 
     return String.format("#%02x%02x%02x", this.red, this.green, this.blue)
 }
@@ -397,9 +199,8 @@ fun buildFile(stringBuilder: StringBuilder, fileName: String) {
             .start()
             .waitFor()
     } catch (e: Exception) {
-        println(e)
-        //println("Graphviz is not installed, no output pictures generated")
-        //todo: add console output
+        //println(e)
+        println("Graphviz is not installed, no output pictures generated\n Download at: https://graphviz.org/download/")
     }
 
 }

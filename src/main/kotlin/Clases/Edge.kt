@@ -29,11 +29,6 @@ class Edge() : Grafabel {
     var tileLength: Double = 0.0 // how many tiles the edge is long
 
 
-    fun nextEdgeListAL(): ArrayList<Edge> {
-        if (nextEdgeList == null) return arrayListOf()
-        return nextEdgeList!! as ArrayList<Edge>
-    }
-
     fun last(n: Int): Entity {
         // return EntityList.last();
         return if (entityList.size > n - 1) {

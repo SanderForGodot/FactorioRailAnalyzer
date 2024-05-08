@@ -80,7 +80,7 @@ class CompanionCube(blueprint: String) {
     }
 
     fun createVisualization(g: Graph<Block>) {
-        svgFromPoints(max, edgeList, signalList, Position(-10.0, -10.0))
+        svgFromPoints(max, edgeList, signalList, g)
         blockList.visualize("neighborBlocks", g) { it.directNeighbours() }
         val d = blockList.tiernan {
             it.dependingOn
@@ -92,30 +92,6 @@ class CompanionCube(blueprint: String) {
 
 
 }
-
-/*
-old vzualization code
-  val a = listOfEdges.tiernanWithref({
-      it.monitoredEdgeList
-  }, {
-      it.belongsToBlock!!
-  })
-  val b = listOfEdges.tiernan {
-      it.nextEdgeListAL()
-  }
-
-  val c = blockList.tiernan {
-      it.directNeighbours()
-  }.reduceBasic().analysis()
-  val d = blockList.tiernan {
-      it.dependingOn
-  }
-  println(c)
-  blockList.visualize("neighborBlocks", c) { it.directNeighbours() }
-  blockList.visualize("blockDependency", d) { it.dependingOn }
-  listOfEdges.visualizeWithRef("monitoredEdgeList", { it.monitoredEdgeList }) { it.belongsToBlock }
-
-   */
 
 
 private fun List<Entity>.genRelation(): Map<Int, MutableList<Edge>> {

@@ -1,6 +1,7 @@
 package FRA
 
 import Clases.Grafabel
+import factorioBlueprint.Entity
 import java.util.*
 
 
@@ -41,6 +42,7 @@ fun <T : Grafabel> T.expandPath(graph: Graph<T>, fn: (T) -> Iterable<T>?) {
 }
 
 class Graph<T : Grafabel> {
+    val dangerSigs: MutableList<Entity> = mutableListOf()
     val path: MutableList<T> = ArrayList()
     var visited: MutableMap<T, MutableList<T>> = mutableMapOf()
     var circularDependencies: MutableList<List<T>> = mutableListOf()

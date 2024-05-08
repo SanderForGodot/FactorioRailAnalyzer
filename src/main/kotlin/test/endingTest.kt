@@ -76,10 +76,6 @@ fun test(filename:String, solution:ArrayList<Any?>){
     listOben.railLinker(matrix)
     //endregion
 
-
-
-
-
     val edgeListOben = arrayListOf<Edge>()
     listOben.filter { entity ->
         entity.entityType == EntityType.ChainSignal
@@ -128,8 +124,6 @@ fun test(filename:String, solution:ArrayList<Any?>){
         else
             println("Fail case:" + i + " should be " + solution[i] + " but is" + edge.debugPrint())
     }
-
-
 }
 
 fun getFact(nr: Int): Entity {
